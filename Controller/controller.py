@@ -1,15 +1,17 @@
 # Basic wrapper to start process with any game that has proper interface.
 
-import numpy as np
+from __future__ import print_function
+from __future__ import division
+
+import os
 from subprocess import call
-import sys
 
-def start_game(args):
-    call(args)
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+prefix = os.path.join(__location__, "../../")
 
-if (len(sys.argv) != 2):
-    print("Not enough arguments (game file path missing)")
-else:
-    game_exe = sys.argv[1]
-    start_game(game_exe)
-    print("Finished")
+MARIO = "java -cp \"" + prefix + "MarioAI/MarioAI4J/bin;" + prefix + "MarioAI/MarioAI4J-Playground/bin;" + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.GeneralAgent"
+GAME2048 = prefix + "2048/2048/bin/Debug/2048.exe"
+
+call(MARIO)
+call(GAME2048)
+print("Finished")
