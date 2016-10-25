@@ -76,6 +76,7 @@ namespace AlhambraInterface
 
 
             MoveGenerator mg = new MoveGenerator(representedPlayer);
+            //MoveGenerator2 mg = new MoveGenerator2(representedPlayer);
             possible_moves = mg.GenerateMoves().ToArray();
         }
 
@@ -94,9 +95,13 @@ namespace AlhambraInterface
         {
             int index = int.Parse(respond);
 
-            Move result = possible_moves[index];
-            Console.WriteLine(possible_moves.Length);
+            if (possible_moves.Length == 0)
+            {
+                Console.WriteLine("STOP");
+            }
+            //Console.WriteLine(possible_moves.Length);
 
+            Move result = possible_moves[index];
             if (!representedPlayer.game.IsPermissible(result))
             {
                 throw new AlhambraException("Incorrect move has been generated - " + result.ToString());

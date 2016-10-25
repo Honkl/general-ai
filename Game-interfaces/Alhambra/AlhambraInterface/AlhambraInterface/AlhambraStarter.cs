@@ -16,6 +16,21 @@ namespace AlhambraInterface
 
         static void Main(string[] args)
         {
+            int count = 1;
+            int ok = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (RunGame())
+                {
+                    ok++;
+                }
+                Console.WriteLine("Completed: " + (i + 1) + "/" + count);
+                Console.WriteLine("OK: " + ok + "/" + count);
+            }
+        }
+
+        private static bool RunGame()
+        {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = PythonExePath;
             start.Arguments = "\"" + CurrentLocation + PythonScriptPath + "\"";
@@ -63,6 +78,7 @@ namespace AlhambraInterface
                 writer.Write("END");
                 writer.Close();
                 reader.Close();
+                return ok;
             }
         }
 

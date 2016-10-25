@@ -69,8 +69,8 @@ namespace AlhambraInterface
 
             foreach (TypeOfRebuildMove type in Enum.GetValues(typeof(TypeOfRebuildMove)))
             {
-                Building toAlhambra = null;
-                Building toStorage = null;
+                List<Building> toAlhambra = new List<Building>();
+                List<Building> toStorage = new List<Building>();
                 switch (type)
                 {
                     case TypeOfRebuildMove.ToAlhambra:
@@ -92,23 +92,66 @@ namespace AlhambraInterface
                         {
                             continue;
                         }
-                        GetBuildingForSwap(out toAlhambra, out toStorage);
-                        toAlhambra.Position = toStorage.Position;
-                        toAlhambra.IsInStorage = false;
+                        //////
+                        ////// We will NOT use SWAP rebuild move - this move is not necessary for the game.
+                        //////
+                        //GetBuildingForSwap(out toAlhambra, out toStorage);
+                        //toAlhambra.Position = toStorage.Position;
+                        //toAlhambra.IsInStorage = false;
                         break;
                     default:
                         throw new AlhambraException("Unexpected type of Rebuild move.");
                 }
 
                 // Positions of toAlhambra and toStorage buildings are already solved
-                RebuildMove rm = new RebuildMove(RepresentedPlayer.ID, toAlhambra, toStorage);
-                rm.modified = new List<Building>(game.unresolved);
-                result.AddRange(ResolvePositionsForRebuild(rm));
+                foreach (var b in toAlhambra)
+                {
+                    RebuildMove rm = new RebuildMove(RepresentedPlayer.ID, b, null);
+                    rm.modified = new List<Building>(game.unresolved);
+                    result.AddRange(ResolvePositionsForRebuild(rm));
+                }
+                foreach (var b in toStorage)
+                {
+                    RebuildMove rm = new RebuildMove(RepresentedPlayer.ID, null, b);
+                    rm.modified = new List<Building>(game.unresolved);
+                    result.AddRange(ResolvePositionsForRebuild(rm));
+                }
             }
+
+            List<Move> resultChecked = new List<Move>();
+            foreach (Move m in result)
+            {
+                Type moveType = m.GetType();
+                if (moveType == typeof(TakeCardMove))
+                {
+                    if (checker.IsMoveAllowed((TakeCardMove)m))
+                    {
+                        resultChecked.Add(m);
+                    }
+                }
+                if (moveType == typeof(BuyBuildingMove))
+                {
+                    if (checker.IsMoveAllowed((BuyBuildingMove)m))
+                    {
+                        resultChecked.Add(m);
+                    }
+                }
+                if (moveType == typeof(RebuildMove))
+                {
+                    if (checker.IsMoveAllowed((RebuildMove)m))
+                    {
+                        resultChecked.Add(m);
+                    }
+                }
+            }
+
+            result = resultChecked;
+
             if (result.Count == 0)
             {
                 result.Add(null);
             }
+
             return result;
         }
 
@@ -455,30 +498,27 @@ namespace AlhambraInterface
         /// also computes a position for the building.
         /// </summary>
         /// <returns>Instance of Building which will be placed to Alhambra.</returns>
-        private Building GetBuildingToAlhambra()
+        private List<Building> GetBuildingToAlhambra()
         {
+            List<Building> result = new List<Building>();
             for (int i = 0; i < RepresentedPlayer.postponed.Count; i++)
             {
                 Building postponed = RepresentedPlayer.postponed[i];
-
-                // Generating position regardless to buildings from previous move
-                // -- they will be repositioned if necessary
-                Position goodPositionForBuilding = GetPositionForBuilding(postponed, new List<Building>(), alsoGenerPosInStorage: false, alsoGenerPosForImag: false)[0]; // TODO !!!
-                //Position goodPositionForBuilding = GetPositionForBuilding(postponed, game.unresolved, alsoGenerPosInStorage: false);
-                if (goodPositionForBuilding == Position.None)
+                var positions = GetPositionForBuilding(postponed, new List<Building>(), alsoGenerPosInStorage: false, alsoGenerPosForImag: false);
+                foreach (var p in positions)
                 {
-                    // We wanted position in Alhambra (and we got only in storage)
-                    // => there's no available position in Alhambra for this building
-                    continue;
+                    if (p == Position.None)
+                    {
+                        // We wanted position in Alhambra (and we got only in storage)
+                        // => there's no available position in Alhambra for this building
+                        continue;
+                    }
+                    Building copy = (Building)RepresentedPlayer.postponed[i].Clone();
+                    SetBuildingProperties(copy, p);
+                    result.Add(copy);
                 }
-
-                Building result = (Building)RepresentedPlayer.postponed[i].Clone();
-                SetBuildingProperties(result, goodPositionForBuilding);
-
-                // Returning the most valuable building with the most valuable position
-                return result;
             }
-            return null;
+            return result;
         }
 
         /// <summary>
@@ -486,7 +526,7 @@ namespace AlhambraInterface
         /// also computes a position for the building.
         /// </summary>
         /// <returns>Instance of Building which will be placed to Alhambra.</returns>
-        private Building GetBuildingToStorage()
+        private List<Building> GetBuildingToStorage()
         {
             List<Building> result = new List<Building>();
             for (int i = 0; i < RepresentedPlayer.constructed.Count; i++)
@@ -498,7 +538,7 @@ namespace AlhambraInterface
                 }
                 result.Add(RepresentedPlayer.constructed[i]);
             }
-            return result[0]; // TODO
+            return result;
         }
 
         /// <summary>
