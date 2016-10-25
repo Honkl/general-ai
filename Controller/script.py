@@ -15,9 +15,7 @@ while (True):
 
     request_data = json.loads(line)
 
-    moves = request_data['PossibleMoves']
+    moves = request_data['possible_moves']
     index = np.random.randint(len(moves))
 
     print(str(index))
-
-
