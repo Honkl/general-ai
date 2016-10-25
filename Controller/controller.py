@@ -11,7 +11,14 @@ prefix = os.path.join(__location__, "../../")
 
 MARIO = "java -cp \"" + prefix + "MarioAI/MarioAI4J/bin;" + prefix + "MarioAI/MarioAI4J-Playground/bin;" + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.GeneralAgent"
 GAME2048 = prefix + "2048/2048/bin/Debug/2048.exe"
+ALHAMBRA = prefix + "general-ai/Game-interfaces/Alhambra/AlhambraInterface/AlhambraInterface/bin/Debug/AlhambraInterface.exe"
 
-call(MARIO)
-call(GAME2048)
+#call(MARIO)
+#call(GAME2048)
+call(ALHAMBRA)
+
+#print(MARIO)
+#print(GAME2048)
+#print(ALHAMBRA)
+
 print("Finished")
