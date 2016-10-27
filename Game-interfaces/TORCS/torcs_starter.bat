@@ -5,4 +5,4 @@ cd "C:/Program Files (x86)/torcs"
 start /b wtorcs.exe -r %1
 ::timeout 1 /nobreak
 PING 1.1.1.1 -n 1 -w 1000 > NUL
-java -cp %2 scr.Client scr.SimpleDriver port:3002
+java -cp %2 scr.Client scr.GeneralAIDriver port:3002 directory:%3

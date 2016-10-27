@@ -4,6 +4,8 @@ Game-interfaces/Alhambra/AlhambraInterface/lib
 
 *.class
 
+Game-interfaces/TORCS/DriverProject/
+
 # Package Files #
 *.jar
 *.war
@@ -265,3 +267,4 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/Game-interfaces/TORCS/DriverProject/nbproject/private/

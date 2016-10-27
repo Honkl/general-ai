@@ -9,6 +9,7 @@ import scr.Controller.Stage;
 
 /**
  * @author Daniele Loiacono
+ * Modified by Jan Kluj.
  * 
  */
 public class Client {
@@ -22,6 +23,8 @@ public class Client {
 	private static int maxSteps;
 	private static Stage stage;
 	private static String trackName;
+        
+        public static String GeneralAIDirectory;
 
 	/**
 	 * @param args
@@ -133,6 +136,9 @@ public class Client {
 		maxSteps = 0;
 		stage = Stage.UNKNOWN;
 		trackName = "unknown";
+                
+                GeneralAIDirectory = null;
+                
 		
 		for (int i = 1; i < args.length; i++) {
 			StringTokenizer st = new StringTokenizer(args[i], ":");
@@ -183,6 +189,9 @@ public class Client {
 					System.exit(0);
 				}
 			}
+                        if (entity.equals("directory")) {
+                            GeneralAIDirectory = value + ":" + st.nextToken();
+                        }
 		}
 	}
 
