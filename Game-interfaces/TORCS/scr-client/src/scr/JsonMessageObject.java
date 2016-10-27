@@ -9,7 +9,7 @@ import com.google.gson.*;
 public class JsonMessageObject {
 
 
-    SensorModel sensors;
+    //SensorModel sensors;
     
     // Special "property" (must have this name)
     int[] possible_moves;
@@ -20,7 +20,7 @@ public class JsonMessageObject {
      * state of the game.
      */
     public JsonMessageObject(SensorModel sensors) {
-        this.sensors = sensors;
+        //this.sensors = sensors;
         
         possible_moves = new int[1];
         possible_moves[0] = 1;

@@ -19,31 +19,29 @@ import java.util.logging.Logger;
  */
 public class GeneralAIDriver extends Controller {
 
-    private static BufferedWriter writer;
-    private static BufferedReader reader;
+    private BufferedWriter writer;
+    private BufferedReader reader;
+    private Process p;
 
     @Override
     public float[] initAngles() {
 
         // Start python process
+        /*
         String pythonExePath = "C:\\Anaconda2\\envs\\py3k\\python.exe"; // TODO: use general relative path
-        String pythonScriptPath = "..\\..\\..\\..\\Controller\\script.py";
-        String classesDir = Client.GeneralAIDirectory;
 
-        System.out.println(classesDir + "\\" + pythonScriptPath);
-
-        Runtime rt = Runtime.getRuntime();
-        Process p;
         try {
-            p = rt.exec(new String[]{pythonExePath, classesDir + "\\" + pythonScriptPath});
+            ProcessBuilder pb = new ProcessBuilder(new String[]{pythonExePath, Client.PythonScriptFile});
+            pb.redirectErrorStream(true);
+
+            p = pb.start();
             writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            //BufferedReader errReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
         } catch (IOException ex) {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
         }
-
+        */
         float[] angles = new float[19];
 
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -62,20 +60,20 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public Action control(SensorModel sensors) {
-        try {
-            JsonMessageObject jmo = new JsonMessageObject(sensors);
-            String json = jmo.convertToJson() + "\n";
-            System.out.println(json);
-            writer.write(json);
-            writer.flush();
-            String output = reader.readLine();
-            System.out.println(output);
+        //try {
+         //   JsonMessageObject jmo = new JsonMessageObject(sensors);
+        //    String json = jmo.convertToJson() + "\n";
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            //writer.write(json);
+            //writer.flush();
+
+            //String output = reader.readLine();
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
 
         Action a = new Action();
+        a.gear = 1;
         a.accelerate = 0.2;
         return a;
     }
@@ -87,6 +85,12 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public void shutdown() {
+        /*
+        try {
+            writer.write("END");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }*/
         System.out.println("Bye bye!");
     }
 

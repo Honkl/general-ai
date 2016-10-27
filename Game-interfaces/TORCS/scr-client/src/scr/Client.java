@@ -24,7 +24,7 @@ public class Client {
 	private static Stage stage;
 	private static String trackName;
         
-        public static String GeneralAIDirectory;
+        public static String PythonScriptFile;
 
 	/**
 	 * @param args
@@ -137,7 +137,7 @@ public class Client {
 		stage = Stage.UNKNOWN;
 		trackName = "unknown";
                 
-                GeneralAIDirectory = null;
+                PythonScriptFile = null;
                 
 		
 		for (int i = 1; i < args.length; i++) {
@@ -190,7 +190,7 @@ public class Client {
 				}
 			}
                         if (entity.equals("directory")) {
-                            GeneralAIDirectory = value + ":" + st.nextToken();
+                            PythonScriptFile = value + ":" + st.nextToken();
                         }
 		}
 	}

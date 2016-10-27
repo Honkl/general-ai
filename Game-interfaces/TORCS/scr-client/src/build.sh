@@ -1,2 +1,2 @@
-javac -d ../classes scr/*.java
+javac -cp ../lib/* -d ../classes scr/*.java
 
