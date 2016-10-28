@@ -41,7 +41,7 @@
 	</section>
 	
 	<section name="Practice">
-		<attnum name="laps" val="5"/>
+		<attnum name="laps" val="3"/>
 		<attstr name="type" val="practice"/>
 		<attstr name="starting order" val="drivers list"/>
 		<attstr name="restart" val="yes"/>
@@ -74,10 +74,12 @@
 			<attstr name="module" val="scr_server"/>
 		</section>
 
+		<!--
 		<section name="2">
-			<attnum name="idx" val="1"/>
+			<attnum name="idx" val="2"/>
 			<attstr name="module" val="bt"/>
 		</section>
+		-->
 		
 	</section>
 	

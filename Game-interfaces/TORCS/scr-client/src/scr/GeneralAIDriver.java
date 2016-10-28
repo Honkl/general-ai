@@ -22,12 +22,16 @@ public class GeneralAIDriver extends Controller {
     private BufferedWriter writer;
     private BufferedReader reader;
     private Process p;
+    
+    private SimpleDriver sd;
 
     @Override
     public float[] initAngles() {
 
+        sd = new SimpleDriver();
+        
         // Start python process
-        /*
+        
         String pythonExePath = "C:\\Anaconda2\\envs\\py3k\\python.exe"; // TODO: use general relative path
 
         try {
@@ -41,7 +45,7 @@ public class GeneralAIDriver extends Controller {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
         }
-        */
+        
         float[] angles = new float[19];
 
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -60,22 +64,25 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public Action control(SensorModel sensors) {
-        //try {
-         //   JsonMessageObject jmo = new JsonMessageObject(sensors);
-        //    String json = jmo.convertToJson() + "\n";
+        try {
+            JsonMessageObject jmo = new JsonMessageObject(sensors);
+            String json = jmo.convertToJson() + "\n";
 
-            //writer.write(json);
-            //writer.flush();
+            writer.write(json);
+            writer.flush();
 
-            //String output = reader.readLine();
-        //} catch (IOException e) {
-        //    e.printStackTrace();
-        //}
-
+            String output = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return sd.control(sensors);
+        /*
         Action a = new Action();
         a.gear = 1;
         a.accelerate = 0.2;
         return a;
+        */
     }
 
     @Override
