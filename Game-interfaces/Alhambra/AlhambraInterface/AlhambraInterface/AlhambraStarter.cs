@@ -2,6 +2,8 @@
 using System.IO;
 using System.Diagnostics;
 using Alhambra;
+using System.Threading;
+using System.Globalization;
 
 namespace AlhambraInterface
 {
@@ -16,6 +18,8 @@ namespace AlhambraInterface
 
         static void Main(string[] args)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             int count = 1;
             int ok = 0;
             for (int i = 0; i < count; i++)
@@ -42,6 +46,9 @@ namespace AlhambraInterface
             {
                 StreamWriter writer = process.StandardInput;
                 StreamReader reader = process.StandardOutput;
+
+                JsonMessageObject.InitStaticValues();
+
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
@@ -93,7 +100,8 @@ namespace AlhambraInterface
                 IArtificialIntelligence AI = null;
                 if (i == 0)
                 {
-                    AI = new GeneralAI(game, reader, writer);
+                    //AI = new GeneralAI(game, reader, writer);
+                    AI = new AIWeighedMovesV2(game, reader, writer);
                 }
                 else
                 {

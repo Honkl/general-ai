@@ -31,13 +31,15 @@ namespace AlhambraInterface
 
         public Move GetSolution()
         {
+            /*
             JsonMessageObject jmo = new JsonMessageObject(RepresentedPlayer);
-            writer.WriteLine(jmo.Encode());
+            writer.WriteLine(jmo.ConvertToJson());
 
             // Reads python script standard output as a result of AI move
             string output = reader.ReadLine();
             return jmo.Decode(output);
-
+            */
+            return null;
         }
 
         public void Initialize()

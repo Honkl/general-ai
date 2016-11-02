@@ -11,102 +11,160 @@ namespace AlhambraInterface
     /// </summary>
     class JsonMessageObject
     {
+        public double[] state
+        {
+            get;
+            private set;
+        }
 
-        //
-        // SERIALIZED OBJECTS TO JSON (public only)
-        // 
+        public int game_phase
+        {
+            get;
+            private set;
+        }
+
+        private static List<Card> Cards = null;
+        private static List<Building> Buildings = null;
+
+        public static void InitStaticValues()
+        {
+            if (Cards != null || Buildings != null)
+            {
+                throw new AlhambraException("Reinitializing AlhambraInterface storage.");
+            }
+
+            CardType type = CardType.Blue;
+            foreach (CardType t in Enum.GetValues(typeof(CardType)))
+            {
+                for (int value = Card.MinValue; value <= Card.MaxValue; value++)
+                {
+                    Cards.Add(new Card(type, value));
+                }
+            }
+
+            CodeStorage cs = new CodeStorage();
+            cs.InitializeStorage();
+            Buildings = cs.GetBuildingList();
+        }
 
         /// <summary>
-        /// General array of possible moves for AI. Do not change the name of this array.
+        /// Initializes a new instance of JsonMessageObject with the specified paramters.
         /// </summary>
-        public Move[] possible_moves
+        /// <param name="representedPlayer">Currently represented player.</param>
+        /// <param name="gamePhase">Current game phase.</param>
+        public JsonMessageObject(Player representedPlayer, int gamePhase)
         {
-            get;
-            private set;
+            state = EncodeState(representedPlayer);
+            game_phase = gamePhase;
         }
 
-        public List<Card> Cards
+        private double[] EncodeState(Player representedPlayer)
         {
-            get;
-            private set;
+            List<double> state = new List<double>();
 
+            Game game = representedPlayer.game;
+            state.Add(game.NumberOfPlayers);
+
+            int maxNumberOfPlayers = 6;
+            foreach (int p in game.points)
+            {
+                state.Add(p);
+            }
+            for (int i = 0; i < maxNumberOfPlayers - game.points.Length; i++)
+            {
+                state.Add(0);
+            }
+
+            foreach (Card c in Cards)
+            {
+                state.Add((int)c.Type);
+                state.Add(c.Value);
+                state.Add(GetNumberOfCards(c, representedPlayer.cards));
+            }
+
+            foreach (Card c in game.cardsOnMarket)
+            {
+                state.Add((int)c.Type);
+                state.Add(c.Value);
+            }
+
+            // TODO: Karty ostatních hráčů (počty)???
+
+            foreach (Building b in Buildings)
+            {
+                state.Add((int)b.Type);
+                state.Add(b.Value);
+                state.Add(b.IsInStorage ? 1 : 0);
+                foreach (bool value in b.Walls)
+                {
+                    state.Add(value ? 1 : 0);
+                }
+
+                state.Add((representedPlayer.constructed.Contains(b) || representedPlayer.postponed.Contains(b)) ? 1 : 0);
+                
+                if (representedPlayer.constructed.Contains(b))
+                {
+                    state.Add(b.Position.Row);
+                    state.Add(b.Position.Column);
+                }
+                else
+                {
+                    state.Add(0);
+                    state.Add(0);
+                }
+            }
+
+            foreach (Building b in game.buildingsOnMarket)
+            {
+                state.Add((int)b.Type);
+                state.Add(b.Value);
+                foreach (bool value in b.Walls)
+                {
+                    state.Add(value ? 1 : 0);
+                }
+            }
+            return (double[])state.ToArray();
         }
 
-        public List<Building> Constructed
+        /// <summary>
+        /// Determines how many times is the specified card contained in the list.
+        /// </summary>
+        /// <param name="c">Card to count.</param>
+        /// <param name="cards">List where to count.</param>
+        /// <returns></returns>
+        private int GetNumberOfCards(Card card, List<Card> cards)
         {
-            get;
-            private set;
-        }
-
-        public List<Building> Postponed
-        {
-            get;
-            private set;
-        }
-
-        public int[] Points
-        {
-            get;
-            private set;
-        }
-
-        public Building[] BuildingsOnMarket
-        {
-            get;
-            private set;
-        }
-
-        public Card[] CardsOnMarket
-        {
-            get;
-            private set;
-        }
-
-        private Player representedPlayer;
-
-        public JsonMessageObject(Player representedPlayer)
-        {
-            Points = representedPlayer.game.points;
-            Cards = representedPlayer.cards;
-            Postponed = representedPlayer.postponed;
-            BuildingsOnMarket = representedPlayer.game.buildingsOnMarket;
-            CardsOnMarket = representedPlayer.game.cardsOnMarket;
-
-            this.representedPlayer = representedPlayer;
-
-
-            MoveGenerator mg = new MoveGenerator(representedPlayer);
-            //MoveGenerator2 mg = new MoveGenerator2(representedPlayer);
-            possible_moves = mg.GenerateMoves().ToArray();
+            int result = 0;
+            foreach (Card c in cards)
+            {
+                if (c.Equals(card))
+                {
+                    result++;
+                }
+            }
+            return result;
         }
 
         /// <summary>
         /// Converts this object to JSON string.
         /// </summary>
         /// <returns>A string JSON representation of the current object.</returns>
-        public string Encode()
+        public string ConvertToJson()
         {
             string json = JsonConvert.SerializeObject(this);
             //Console.WriteLine(json);
             return json;
         }
 
-        public Move Decode(string respond)
+        public double[] Decode(string respond)
         {
-            int index = int.Parse(respond);
-
-            if (possible_moves.Length == 0)
+            List<double> result = new List<double>();
+            foreach (String part in respond.Split(' '))
             {
-                Console.WriteLine("STOP");
+                result.Add(double.Parse(part));
             }
-            //Console.WriteLine(possible_moves.Length);
 
-            Move result = possible_moves[index];
-            if (!representedPlayer.game.IsPermissible(result))
-            {
-                throw new AlhambraException("Incorrect move has been generated - " + result.ToString());
-            }
-            return result;
+            return (double[])result.ToArray();
         }
     }
 }

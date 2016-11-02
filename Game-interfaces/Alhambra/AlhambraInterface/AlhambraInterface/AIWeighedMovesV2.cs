@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
+using Alhambra;
 
-namespace Alhambra
+namespace AlhambraInterface
 {
     /// <summary>
     /// Implements the weights on which the artificial intelligence decides next move to play.
@@ -76,6 +77,8 @@ namespace Alhambra
             public const int IndexOf_HasComplBoundedMethod = 21;
             public const int IndexOf_HasPostponedMethod = 22;
 
+            public static List<int[]> AllCriteriaArrays;
+
             /// <summary>
             /// Static constructor initializes arrays for criteria (also called when game is deserialized).
             /// </summary>
@@ -142,6 +145,24 @@ namespace Alhambra
                 CriteriaProperties.SwapSelection = new int[count];
                 FillArray(CriteriaProperties.SwapSelection, count, offset);
                 offset += count;
+
+                /////////////////
+
+                AllCriteriaArrays = new List<int[]>();
+                AllCriteriaArrays.Add(CriteriaProperties.TakeCardMoveSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.BuyBuildingMoveSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.RebuildMoveSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.CardsToTakeSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.BuildingToBuyOrToAlhSelect);
+                AllCriteriaArrays.Add(CriteriaProperties.CardsToPurchaseSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.BuildingPositionSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.ToAlhambraRebuildSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.ToStorageRebuildSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.SwapRebuildSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.BuildingToStorageSelection);
+                AllCriteriaArrays.Add(CriteriaProperties.SwapSelection);
+
+                /////////////////
             }
 
             private static void FillArray(int[] array, int count, int offset)
@@ -187,11 +208,13 @@ namespace Alhambra
         internal readonly MoveChecker checker;
 
         private Game game;
+        private StreamReader reader;
+        private StreamWriter writer;
 
         // '_alreadyPositionedDueMove' is used in some
         // of 'CriteriaProperties.BuildingPositionSelection' methods (used for performace boost).
         private List<Building> _alreadyPositionedDueMove;
-    
+
         /// <summary>
         /// Represents a number of Rebuild moves in a row.
         /// </summary>
@@ -201,9 +224,11 @@ namespace Alhambra
         /// Initializes a new instance of Alhambra.AIWeighedMoves. This instance has no weights yet.
         /// </summary>
         /// <param name="game">An instance of 'Alhambra.Game' where the game will be played.</param>
-        public AIWeighedMovesV2(Game game)
+        public AIWeighedMovesV2(Game game, StreamReader reader, StreamWriter writer)
         {
             this.game = game;
+            this.reader = reader;
+            this.writer = writer;
             checker = new MoveChecker(game);
             _alreadyPositionedDueMove = new List<Building>();
             InitializeMethods();
@@ -249,7 +274,7 @@ namespace Alhambra
                 Weights = ParseFile(fullFilePath);
                 InitializedFromFileSuccessfully = true;
             }
-            
+
             // Encapsulating IOExceptions and double.Parse exceptions
             catch (Exception)
             {
@@ -458,13 +483,40 @@ namespace Alhambra
         /// <returns>Evaluated sum of appropriate weights.</returns>
         private double GetSumOfWeights(int[] criteriaArray, object argumentForMethod)
         {
+            int gamePhase = -1;
+
+            // Determine game phase based on passed array
+            for (int i = 0; i < CriteriaProperties.AllCriteriaArrays.Count; i++)
+            {
+                if (criteriaArray.Equals(CriteriaProperties.AllCriteriaArrays[i]))
+                {
+                    gamePhase = i;
+                }
+            }
+
+            JsonMessageObject jmo = new JsonMessageObject(RepresentedPlayer, gamePhase);
+            writer.WriteLine(jmo.ConvertToJson());
+
+            // Reads python script standard output as a result of AI move
+            string output = reader.ReadLine();
+            double[] results = jmo.Decode(output);
+            int resultIndex = 0;
             double sum = 0;
+
+            if (criteriaArray.Length != results.Length)
+            {
+                throw new AlhambraException("Wrong number of results from general AI");
+            }
+
             foreach (int index in criteriaArray)
             {
                 if (methods[index](argumentForMethod))
                 {
+                    sum += results[resultIndex];
+                    /**
                     switch (game.Controller.scoreCountingRound)
                     {
+
                         case ScoreRound.First:
                             sum += Weights[index];
                             break;
@@ -475,7 +527,9 @@ namespace Alhambra
                             sum += Weights[index + (2 * NumberOfMethods)];
                             break;
                     }
+                    /**/
                 }
+                resultIndex++;
             }
             return sum;
         }

@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AIWeighedMovesV2.cs" />
     <Compile Include="AlhambraStarter.cs" />
     <Compile Include="GeneralAI.cs" />
     <Compile Include="JsonMessageObject.cs" />
