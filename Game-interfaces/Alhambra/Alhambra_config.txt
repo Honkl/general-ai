@@ -1,0 +1,3 @@
+game_phases=5
+input_sizes=100
+output_sizes=24
