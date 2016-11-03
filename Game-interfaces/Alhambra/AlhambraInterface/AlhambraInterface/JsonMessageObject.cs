@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json;
 using Alhambra;
 
@@ -17,7 +16,7 @@ namespace AlhambraInterface
             private set;
         }
 
-        public int game_phase
+        public int current_phase
         {
             get;
             private set;
@@ -32,6 +31,9 @@ namespace AlhambraInterface
             {
                 throw new AlhambraException("Reinitializing AlhambraInterface storage.");
             }
+
+            Cards = new List<Card>();
+            Buildings = new List<Building>();
 
             CardType type = CardType.Blue;
             foreach (CardType t in Enum.GetValues(typeof(CardType)))
@@ -55,7 +57,7 @@ namespace AlhambraInterface
         public JsonMessageObject(Player representedPlayer, int gamePhase)
         {
             state = EncodeState(representedPlayer);
-            game_phase = gamePhase;
+            current_phase = gamePhase;
         }
 
         private double[] EncodeState(Player representedPlayer)
@@ -101,7 +103,7 @@ namespace AlhambraInterface
                 }
 
                 state.Add((representedPlayer.constructed.Contains(b) || representedPlayer.postponed.Contains(b)) ? 1 : 0);
-                
+
                 if (representedPlayer.constructed.Contains(b))
                 {
                     state.Add(b.Position.Row);
@@ -116,6 +118,11 @@ namespace AlhambraInterface
 
             foreach (Building b in game.buildingsOnMarket)
             {
+                if (b == null)
+                {
+                    state.AddRange(new double[] { 0, 0, 0, 0, 0, 0 });
+                    continue;
+                }
                 state.Add((int)b.Type);
                 state.Add(b.Value);
                 foreach (bool value in b.Walls)
@@ -123,7 +130,7 @@ namespace AlhambraInterface
                     state.Add(value ? 1 : 0);
                 }
             }
-            return (double[])state.ToArray();
+            return state.ToArray();
         }
 
         /// <summary>
@@ -159,12 +166,12 @@ namespace AlhambraInterface
         public double[] Decode(string respond)
         {
             List<double> result = new List<double>();
-            foreach (String part in respond.Split(' '))
+            foreach (string part in respond.Split(' '))
             {
                 result.Add(double.Parse(part));
             }
 
-            return (double[])result.ToArray();
+            return result.ToArray();
         }
     }
 }

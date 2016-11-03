@@ -460,6 +460,17 @@ namespace AlhambraInterface
                 }
             }
 
+
+            if (move.GetType() == typeof(BuyBuildingMove))
+            {
+                if (((BuyBuildingMove)move).purchased == null)
+                {
+                    throw new Exception("BREAK HERE"); // TODO
+                }
+            }
+
+
+
             return move;
         }
 
@@ -491,6 +502,7 @@ namespace AlhambraInterface
                 if (criteriaArray.Equals(CriteriaProperties.AllCriteriaArrays[i]))
                 {
                     gamePhase = i;
+                    break;
                 }
             }
 
@@ -505,6 +517,7 @@ namespace AlhambraInterface
 
             if (criteriaArray.Length != results.Length)
             {
+                Console.WriteLine(output);
                 throw new AlhambraException("Wrong number of results from general AI");
             }
 

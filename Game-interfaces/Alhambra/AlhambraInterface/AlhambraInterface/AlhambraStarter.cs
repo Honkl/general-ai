@@ -47,6 +47,7 @@ namespace AlhambraInterface
                 StreamWriter writer = process.StandardInput;
                 StreamReader reader = process.StandardOutput;
 
+                writer.WriteLine("Alhambra");
                 JsonMessageObject.InitStaticValues();
 
                 Stopwatch sw = new Stopwatch();
@@ -69,6 +70,7 @@ namespace AlhambraInterface
                     else
                     {
                         Console.WriteLine("An exception occured in the game (" + e.Message + ")");
+                        Console.WriteLine(e.StackTrace);
                     }
                     ok = false;
                 }

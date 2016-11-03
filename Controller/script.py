@@ -42,7 +42,7 @@ while (True):
     curr_phase = int(request_data["current_phase"])
 
     if (input_sizes[curr_phase] != len(request_data["state"])):
-        raise RuntimeError("Wrong number of inputs")
+        raise RuntimeError("Wrong number of inputs", input_sizes[curr_phase], len(request_data["state"]))
 
     result = ""
     for i in range(output_sizes[curr_phase]):

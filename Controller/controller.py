@@ -6,7 +6,6 @@ from __future__ import division
 import os
 from subprocess import call
 
-
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 # prefix = Master directory
 prefix = os.path.dirname(os.path.dirname(__location__)) + "\\" # cut two last directories
@@ -35,9 +34,10 @@ def start_2048():
 def start_alhambra():
     call(ALHAMBRA)
 
+
 #start_mario()
 #start_2048()
-#start_alhambra()
-start_torcs()
+start_alhambra()
+#start_torcs()
 
 print("Finished")
