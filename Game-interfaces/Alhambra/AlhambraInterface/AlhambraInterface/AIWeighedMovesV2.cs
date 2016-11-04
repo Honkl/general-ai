@@ -507,7 +507,8 @@ namespace AlhambraInterface
             }
 
             JsonMessageObject jmo = new JsonMessageObject(RepresentedPlayer, gamePhase);
-            writer.WriteLine(jmo.ConvertToJson());
+            string json = jmo.ConvertToJson();
+            writer.WriteLine(json);
 
             // Reads python script standard output as a result of AI move
             string output = reader.ReadLine();
@@ -838,7 +839,7 @@ namespace AlhambraInterface
                 }
             }
 
-            if (alsoGenerPosForImag)
+            if (alsoGenerPosForImag && game.NumberOfPlayers == 2)
             {
                 availablePositions.Add(Position.Imaginary);
                 _toBePlaced = temporaryCopy;

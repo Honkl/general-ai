@@ -84,10 +84,19 @@ namespace AlhambraInterface
                 state.Add(GetNumberOfCards(c, representedPlayer.cards));
             }
 
-            foreach (Card c in game.cardsOnMarket)
-            {
-                state.Add((int)c.Type);
-                state.Add(c.Value);
+            for (int i = 0; i < Game.MarketSize; i++)
+			{
+                if (!game.nonAvailableCardsOnMarket[i])
+                {
+                    Card c = game.cardsOnMarket[i];
+                    state.Add((int)c.Type);
+                    state.Add(c.Value);
+                }
+                else
+                {
+                    state.Add(0);
+                    state.Add(0);
+                }
             }
 
             // TODO: Karty ostatních hráčů (počty)???
