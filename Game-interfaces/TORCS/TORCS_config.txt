@@ -1,0 +1,3 @@
+game_phases=1
+input_sizes=79
+output_sizes=6

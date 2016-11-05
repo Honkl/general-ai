@@ -10,8 +10,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -22,16 +20,29 @@ public class GeneralAIDriver extends Controller {
     private BufferedWriter writer;
     private BufferedReader reader;
     private Process p;
-    
+    private GearInterval[] intervals;
     private SimpleDriver sd;
+    
+    private SensorModel lastSensor;
+
+    private class GearInterval {
+
+        public double lowerBound;
+        public double upperBound;
+
+        public GearInterval(double lowerbound, double upperBound) {
+            this.lowerBound = lowerbound;
+            this.upperBound = upperBound;
+        }
+    }
 
     @Override
     public float[] initAngles() {
 
         sd = new SimpleDriver();
-        
+        initIntervals();
+
         // Start python process
-        
         String pythonExePath = "C:\\Anaconda2\\envs\\py3k\\python.exe"; // TODO: use general relative path
 
         try {
@@ -41,11 +52,16 @@ public class GeneralAIDriver extends Controller {
             p = pb.start();
             writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            Thread.sleep(100);
+            writer.write("TORCS\n");
         } catch (IOException ex) {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
         }
-        
+
         float[] angles = new float[19];
 
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -62,6 +78,16 @@ public class GeneralAIDriver extends Controller {
         return angles;
     }
 
+    private void initIntervals() {
+        int numberOfIntervals = 8;
+        double bias = 1.0 / 8.0;
+
+        intervals = new GearInterval[numberOfIntervals];
+        for (int i = 0; i < intervals.length; i++) {
+            intervals[i] = new GearInterval(bias * i, bias * (i + 1));
+        }
+    }
+
     @Override
     public Action control(SensorModel sensors) {
         try {
@@ -71,18 +97,55 @@ public class GeneralAIDriver extends Controller {
             writer.write(json);
             writer.flush();
 
-            String output = reader.readLine();
+            String[] output = reader.readLine().split(" ");
+            double[] values = new double[output.length];
+            for (int i = 0; i < output.length; i++) {
+                values[i] = Double.parseDouble(output[i]);
+            }
+
+            Action act = new Action();
+            act.accelerate = values[0];
+            act.brake = values[1];
+            act.clutch = values[2];
+            act.focus = getFocus(values[3]);
+            act.gear = getGear(values[4]);
+            act.steering = getSteer(values[5]);
+
+            act.restartRace = false;
+            lastSensor = sensors;
+            
+            return act;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
+        //System.out.println("Distance from start line: " + sensors.getDistanceFromStartLine());
+        System.out.println("Distance raced: " + sensors.getDistanceRaced());
         return sd.control(sensors);
+        /**
+         * Action a = new Action(); a.gear = 1; a.accelerate = 0.2; return a;
         /*
-        Action a = new Action();
-        a.gear = 1;
-        a.accelerate = 0.2;
-        return a;
-        */
+         */
+    }
+
+    private double getSteer(double outputFromAi) {
+        // Steer must be in [-1, 1] interval
+        return (2 * outputFromAi) - 1;
+    }
+
+    private int getGear(double outputFromAi) {
+        // Gear is in {-1, 0, ..., 6}
+        for (int i = 0; i < intervals.length; i++) {
+            if (outputFromAi >= intervals[i].lowerBound && outputFromAi <= intervals[i].upperBound) {
+                return i - 1;
+            }
+        }
+        return 0;
+    }
+
+    private int getFocus(double outputFromAi) {
+        // Focus must be in interval [-90, 90]
+        return (int)((outputFromAi * 180) - 90);
     }
 
     @Override
@@ -92,12 +155,13 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public void shutdown() {
-        /*
+        System.out.println("RACED DISTANCE: " + lastSensor.getDistanceRaced());
         try {
             writer.write("END");
+            writer.close();
         } catch (IOException ex) {
             ex.printStackTrace();
-        }*/
+        }
         System.out.println("Bye bye!");
     }
 
