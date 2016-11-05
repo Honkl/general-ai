@@ -25,6 +25,9 @@ public class GeneralAIDriver extends Controller {
     
     private SensorModel lastSensor;
 
+    /**
+     * Represents an interval to discretise values for gear integer.
+     */
     private class GearInterval {
 
         public double lowerBound;
@@ -78,6 +81,9 @@ public class GeneralAIDriver extends Controller {
         return angles;
     }
 
+    /**
+     * Initializes intervals for discretization of gear.
+     */
     private void initIntervals() {
         int numberOfIntervals = 8;
         double bias = 1.0 / 8.0;
@@ -128,11 +134,19 @@ public class GeneralAIDriver extends Controller {
          */
     }
 
+    /**
+     * Transforms AI's output in interval [0, 1] to proper interval for the steer.
+     * @param outputFromAi Output of the AI.
+     */
     private double getSteer(double outputFromAi) {
         // Steer must be in [-1, 1] interval
         return (2 * outputFromAi) - 1;
     }
 
+    /**
+     * Transforms AI's output in interval [0, 1] to proper gear integer.
+     * @param outputFromAi Ouput of the AI.
+     */
     private int getGear(double outputFromAi) {
         // Gear is in {-1, 0, ..., 6}
         for (int i = 0; i < intervals.length; i++) {
@@ -143,6 +157,10 @@ public class GeneralAIDriver extends Controller {
         return 0;
     }
 
+    /**
+     * Transforms AI's output in interval [0, 1] to proper focus integer.
+     * @param outputFromAi Ouput of the AI.
+     */
     private int getFocus(double outputFromAi) {
         // Focus must be in interval [-90, 90]
         return (int)((outputFromAi * 180) - 90);
