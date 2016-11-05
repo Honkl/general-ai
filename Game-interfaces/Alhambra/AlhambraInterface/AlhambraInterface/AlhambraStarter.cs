@@ -9,10 +9,6 @@ namespace AlhambraInterface
 {
     class AlhambraStarter
     {
-        private static string CurrentLocation = AppDomain.CurrentDomain.BaseDirectory;
-        private const string PythonExePath = "C:\\Anaconda2\\envs\\py3k\\python.exe"; // TODO: use general relative path
-        private const string PythonScriptPath = "..\\..\\..\\..\\..\\..\\Controller\\script.py";
-
         private const int NumberOfPlayers = 3;
         private static Random rng = new Random(42);
 
@@ -20,11 +16,14 @@ namespace AlhambraInterface
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
+            string pythonScript = args[0];
+            string pythonExe = args[1];
+
             int count = 1;
             int ok = 0;
             for (int i = 0; i < count; i++)
             {
-                if (RunGame())
+                if (RunGame(pythonScript, pythonExe))
                 {
                     ok++;
                 }
@@ -33,11 +32,11 @@ namespace AlhambraInterface
             }
         }
 
-        private static bool RunGame()
+        private static bool RunGame(string pythonScript, string pythonExe)
         {
             ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = PythonExePath;
-            start.Arguments = "\"" + CurrentLocation + PythonScriptPath + "\"";
+            start.FileName = pythonExe;
+            start.Arguments = pythonScript;
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardInput = true;

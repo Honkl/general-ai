@@ -25,6 +25,7 @@ public class Client {
 	private static String trackName;
         
         public static String PythonScriptFile;
+        public static String PythonExe;
 
 	/**
 	 * @param args
@@ -138,6 +139,7 @@ public class Client {
 		trackName = "unknown";
                 
                 PythonScriptFile = null;
+                PythonExe = null;
                 
 		
 		for (int i = 1; i < args.length; i++) {
@@ -189,8 +191,11 @@ public class Client {
 					System.exit(0);
 				}
 			}
-                        if (entity.equals("directory")) {
+                        if (entity.equals("torcs")) {
                             PythonScriptFile = value + ":" + st.nextToken();
+                        }
+                        if (entity.equals("python")) {
+                            PythonExe = value + ":" + st.nextToken();
                         }
 		}
 	}

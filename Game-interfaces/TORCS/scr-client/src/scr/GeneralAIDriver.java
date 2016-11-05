@@ -45,11 +45,8 @@ public class GeneralAIDriver extends Controller {
         sd = new SimpleDriver();
         initIntervals();
 
-        // Start python process
-        String pythonExePath = "C:\\Anaconda2\\envs\\py3k\\python.exe"; // TODO: use general relative path
-
         try {
-            ProcessBuilder pb = new ProcessBuilder(new String[]{pythonExePath, Client.PythonScriptFile});
+            ProcessBuilder pb = new ProcessBuilder(new String[]{Client.PythonExe, Client.PythonScriptFile});
             pb.redirectErrorStream(true);
 
             p = pb.start();
