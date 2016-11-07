@@ -4,7 +4,8 @@ from __future__ import print_function
 from __future__ import division
 
 import os
-from subprocess import call
+import subprocess
+import re
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 # prefix = Master directory
@@ -15,30 +16,78 @@ PYTHON_SCRIPT = " \"" + prefix + "general-ai\\Controller\\script.py\""
 
 MARIO = "java -cp \"" + prefix + "MarioAI\\MarioAI4J\\bin;" + prefix + "MarioAI\\MarioAI4J-Playground\\bin;" + prefix + "MarioAI\\MarioAI4J-Playground\\lib\\*\" mario.GeneralAgent"
 GAME2048 = prefix + "2048\\2048\\bin\\Debug\\2048.exe"
-ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\AlhambraInterface\\bin\\Debug\\AlhambraInterface.exe"
+ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\AlhambraInterface\\bin\\Release\\AlhambraInterface.exe"
 
 TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\""
 TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
-TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\"" # TODO: Relative path via cmd parameter
+#TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\"" # TODO: Relative path via cmd parameter
+TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
+
+def run_game(command):
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
+    result = p.communicate()[0].decode('ascii')
+    return re.split("\\r\\n|\\n", result)
 
 def start_torcs():
     command = TORCS + TORCS_XML + TORCS_JAVA_CP + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-    call(command)
+    result = run_game(command)
+    for line in result:
+        if "RACED DISTANCE:" in line:
+            return line.split(":")[1]
+    return []
+
 
 def start_mario():
-    call(MARIO + PYTHON_SCRIPT + PYTHON_EXE)
+    desired_results = ["Mario Status",
+                       "Mario Mode",
+                       "Collisions with creatures",
+                       "Passed (Cells, Phys)",
+                       "Time Spent(marioseconds)",
+                       "Time Left(marioseconds)",
+                       "Coins Gained",
+                       "Hidden Blocks Found",
+                       "Mushrooms Devoured",
+                       "Flowers Devoured",
+                       "kills Total",
+                       "kills By Fire",
+                       "kills By Shell",
+                       "kills By Stomp"]
+
+    command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
+    result = run_game(command)
+    scores = []
+    for line in result:
+        name, value = line.partition(":")[::2]
+        name = name.strip()
+        value = value.strip()
+        if name in desired_results:
+            scores.append((name, value))
+    return scores
 
 def start_2048():
-    call(GAME2048 + PYTHON_SCRIPT + PYTHON_EXE)
+    command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
+    result = run_game(command)
+    return result[0].split(":")[1]
 
 def start_alhambra():
-    call(ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE)
+    number_of_players = 3 # TODO:
+    command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
+    result = run_game(command)
+    status = result[0].split("=")
+    if not status:
+        print("Game has ended with error")
+        return []
+
+    scores = []
+    index = 2
+    for i in range(number_of_players):
+        scores.append((result[index].split('=')[1], result[index + 1]))
+        index += 2
+    return scores
 
 
-start_mario()
-start_2048()
-start_alhambra()
-#start_torcs()
-
-print("Finished")
+print(start_mario())
+print(start_2048())
+print(start_alhambra())
+print(start_torcs())

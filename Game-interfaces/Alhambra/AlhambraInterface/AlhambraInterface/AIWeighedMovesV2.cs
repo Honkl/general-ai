@@ -2307,7 +2307,7 @@ namespace AlhambraInterface
         /// <returns>A string that represents the current object.</returns>
         public override string ToString()
         {
-            return "Artificial Intelligence with weighed moves.";
+            return "GeneralAI";
         }
     }
 }

@@ -19,20 +19,15 @@ namespace AlhambraInterface
             string pythonScript = "\"" + args[0] + "\"";
             string pythonExe = "\"" + args[1] + "\"";
 
-            int count = 1;
-            int ok = 0;
-            for (int i = 0; i < count; i++)
-            {
-                if (RunGame(pythonScript, pythonExe))
-                {
-                    ok++;
-                }
-                Console.WriteLine("Completed: " + (i + 1) + "/" + count);
-                Console.WriteLine("OK: " + ok + "/" + count);
-            }
+            RunGame(pythonScript, pythonExe);
         }
 
-        private static bool RunGame(string pythonScript, string pythonExe)
+        /// <summary>
+        /// Starts a single Alhambra game.
+        /// </summary>
+        /// <param name="pythonScript">Python script to evaluate AI's move.</param>
+        /// <param name="pythonExe">Python EXE file to execute .py script.</param>
+        private static void RunGame(string pythonScript, string pythonExe)
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonExe;
@@ -75,18 +70,18 @@ namespace AlhambraInterface
                 }
 
                 sw.Stop();
-                Console.WriteLine("Ok: " + ok);
-                Console.WriteLine("Time: " + sw.Elapsed);
+                Console.WriteLine("OK=" + ok);
+                Console.WriteLine("Time=" + sw.Elapsed);
 
                 for (int ID = 0; ID < NumberOfPlayers; ID++)
                 {
-                    Console.WriteLine("AI: " + c.players[ID].AI.ToString() + " SCORE: " + c.game.points[ID]);
+                    Console.WriteLine("AI=" + c.players[ID].AI.ToString());
+                    Console.WriteLine(c.game.points[ID]);
                 }
 
                 writer.Write("END");
                 writer.Close();
                 reader.Close();
-                return ok;
             }
         }
 
