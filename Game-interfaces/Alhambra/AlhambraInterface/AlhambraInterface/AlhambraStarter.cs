@@ -16,8 +16,8 @@ namespace AlhambraInterface
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-            string pythonScript = args[0];
-            string pythonExe = args[1];
+            string pythonScript = "\"" + args[0] + "\"";
+            string pythonExe = "\"" + args[1] + "\"";
 
             int count = 1;
             int ok = 0;
