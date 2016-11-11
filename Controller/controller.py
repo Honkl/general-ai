@@ -21,8 +21,8 @@ ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\A
 TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\""
 TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
-#TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\"" # TODO: Relative path via cmd parameter
-TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
+TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\"" # TODO: Relative path via cmd parameter
+#TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
 
 def run_game(command):
     p = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -37,32 +37,16 @@ def start_torcs():
             return line.split(":")[1]
     return []
 
-
 def start_mario():
-    desired_results = ["Mario Status",
-                       "Mario Mode",
-                       "Collisions with creatures",
-                       "Passed (Cells, Phys)",
-                       "Time Spent(marioseconds)",
-                       "Time Left(marioseconds)",
-                       "Coins Gained",
-                       "Hidden Blocks Found",
-                       "Mushrooms Devoured",
-                       "Flowers Devoured",
-                       "kills Total",
-                       "kills By Fire",
-                       "kills By Shell",
-                       "kills By Stomp"]
-
     command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
     result = run_game(command)
     scores = []
     for line in result:
-        name, value = line.partition(":")[::2]
-        name = name.strip()
-        value = value.strip()
-        if name in desired_results:
-            scores.append((name, value))
+        if line.startswith("status"):
+            for item in line.split(";"):
+                name, value = item.partition("=")[::2]
+                scores.append((name, value))
+            break
     return scores
 
 def start_2048():
