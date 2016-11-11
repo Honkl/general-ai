@@ -1,11 +1,20 @@
 import numpy as np
 import os
 import json
+import sys
 
 np.random.seed(42)
 
-def load_config(config_file):
-    with open (config_file, "r") as file:
+
+def load_config(path):
+    loc = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    config_file = os.path.dirname(loc) + "\\" + path
+
+    game_phases = -1
+    input_sizes = -1
+    output_sizes = -1
+    with open(config_file, "r") as file:
+
         for line in file.readlines():
             line_parts = line.strip().split("=")
             name = line_parts[0]
@@ -16,26 +25,25 @@ def load_config(config_file):
                 input_sizes = list(map(int, value.split(",")))
             elif name == "output_sizes":
                 output_sizes = list(map(int, value.split(",")))
+
+    if (game_phases == -1 or input_sizes == -1 or output_sizes == -1):
+        print("Invalid configuration file.")
+        exit()
+
     return game_phases, input_sizes, output_sizes
 
-###################################
 
-__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-prefix = os.path.dirname(__location__) + "\\Game-interfaces\\"
-game_phases = -1
-input_sizes = -1
-output_sizes = -1
+if (len(sys.argv) != 2):
+    print("Wrong number of parameters. Insert config file.")
+    exit()
+
+game_phases, input_sizes, output_sizes = load_config(sys.argv[1])
 
 while (True):
     line = input()
 
     if (line == "END"):
         break
-
-    if not line.startswith("{"):
-        f = prefix + line + "\\" + line + "_config.txt"
-        game_phases, input_sizes, output_sizes = load_config(f)
-        continue
 
     # Already in game; received game information, next move is expected from AI
     request_data = json.loads(line)

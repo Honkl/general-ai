@@ -29,9 +29,12 @@ namespace AlhambraInterface
         /// <param name="pythonExe">Python EXE file to execute .py script.</param>
         private static void RunGame(string pythonScript, string pythonExe)
         {
+            //Config file for AI (relative path to master "general-ai/Game-interfaces" directory
+            string configFile = " Game-interfaces\\Alhambra\\Alhambra_config.txt"; 
+
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonExe;
-            start.Arguments = pythonScript;
+            start.Arguments = pythonScript + configFile;
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardInput = true;
@@ -41,7 +44,6 @@ namespace AlhambraInterface
                 StreamWriter writer = process.StandardInput;
                 StreamReader reader = process.StandardOutput;
 
-                writer.WriteLine("Alhambra");
                 JsonMessageObject.InitStaticValues();
 
                 Stopwatch sw = new Stopwatch();

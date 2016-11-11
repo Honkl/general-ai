@@ -23,6 +23,9 @@ public class GeneralAIDriver extends Controller {
     private GearInterval[] intervals;
     private SimpleDriver sd;
     
+    //Config file for AI (relative path to master "general-ai/Game-interfaces" directory
+    private final String configFile = "Game-interfaces\\TORCS\\TORCS_config.txt"; 
+    
     private SensorModel lastSensor;
 
     /**
@@ -46,7 +49,7 @@ public class GeneralAIDriver extends Controller {
         initIntervals();
 
         try {
-            ProcessBuilder pb = new ProcessBuilder(new String[]{Client.PythonExe, Client.PythonScriptFile});
+            ProcessBuilder pb = new ProcessBuilder(new String[]{Client.PythonExe, Client.PythonScriptFile, configFile});
             pb.redirectErrorStream(true);
 
             p = pb.start();
@@ -54,7 +57,6 @@ public class GeneralAIDriver extends Controller {
             reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
             Thread.sleep(100);
-            writer.write("TORCS\n");
         } catch (IOException ex) {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
