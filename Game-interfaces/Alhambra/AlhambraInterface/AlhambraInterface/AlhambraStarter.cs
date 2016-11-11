@@ -98,7 +98,6 @@ namespace AlhambraInterface
                 IArtificialIntelligence AI = null;
                 if (i == 0)
                 {
-                    //AI = new GeneralAI(game, reader, writer);
                     AI = new AIWeighedMovesV2(game, reader, writer);
                 }
                 else

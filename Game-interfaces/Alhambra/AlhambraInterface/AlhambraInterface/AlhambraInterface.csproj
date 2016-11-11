@@ -53,9 +53,7 @@
   <ItemGroup>
     <Compile Include="AIWeighedMovesV2.cs" />
     <Compile Include="AlhambraStarter.cs" />
-    <Compile Include="GeneralAI.cs" />
     <Compile Include="JsonMessageObject.cs" />
-    <Compile Include="MoveGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
