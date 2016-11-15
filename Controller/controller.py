@@ -4,8 +4,12 @@ from __future__ import print_function
 from __future__ import division
 
 import os
-import subprocess
-import re
+import time
+
+from alhambra import Alhambra
+from torcs import Torcs
+from mario import Mario
+from game2048 import Game2048
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 # prefix = Master directory
@@ -21,61 +25,23 @@ ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\A
 TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\""
 TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
-TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
-# TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
+#TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
+TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
 
-def run_game(command):
-    p = subprocess.Popen(command, stdout=subprocess.PIPE)
-    result = p.communicate()[0].decode('ascii')
-    return re.split("\\r\\n|\\n", result)
-
-
-def start_torcs():
-    command = TORCS + TORCS_XML + TORCS_JAVA_CP + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-    result = run_game(command)
-    for line in result:
-        if "RACED DISTANCE:" in line:
-            return line.split(":")[1]
-    return []
+torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
+alhambra_command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
+game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
+mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 
-def start_mario():
-    command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
-    result = run_game(command)
-    scores = []
-    for line in result:
-        if line.startswith("status"):
-            for item in line.split(";"):
-                name, value = item.partition("=")[::2]
-                scores.append((name, value))
-            break
-    return scores
+if __name__ == '__main__':
 
+    start = time.time()
+    game = Torcs(torcs_command)
+    #game = Alhambra(alhambra_command)
+    #game = Mario(mario_command)
+    #game = Game2048(game2048_command)
 
-def start_2048():
-    command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
-    result = run_game(command)
-    return result[0].split(":")[1]
-
-
-def start_alhambra():
-    number_of_players = 3  # TODO:
-    command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
-    result = run_game(command)
-    status = result[0].split("=")
-    if not status:
-        print("Game has ended with error")
-        return []
-
-    scores = []
-    index = 2
-    for i in range(number_of_players):
-        scores.append((result[index].split('=')[1], result[index + 1]))
-        index += 2
-    return scores
-
-
-print(start_mario())
-print(start_2048())
-print(start_alhambra())
-print(start_torcs())
+    print(game.run())
+    end = time.time()
+    print(end - start)

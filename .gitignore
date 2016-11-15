@@ -2,6 +2,7 @@ Controller/answer.txt
 Controller/request.json
 
 *.class
+*.pyc
 
 Game-interfaces/TORCS/DriverProject/
 
