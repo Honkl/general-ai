@@ -6,10 +6,10 @@ from __future__ import division
 import os
 import time
 
-from alhambra import Alhambra
-from torcs import Torcs
-from mario import Mario
-from game2048 import Game2048
+from games.alhambra import Alhambra
+from games.torcs import Torcs
+from games.mario import Mario
+from games.game2048 import Game2048
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 # prefix = Master directory
@@ -37,8 +37,8 @@ mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 if __name__ == '__main__':
 
     start = time.time()
-    game = Torcs(torcs_command)
-    #game = Alhambra(alhambra_command)
+    game = Alhambra(alhambra_command)
+    #game = Torcs(torcs_command)
     #game = Mario(mario_command)
     #game = Game2048(game2048_command)
 

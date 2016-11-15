@@ -1,4 +1,4 @@
-from game import Game
+from games.game import Game
 import subprocess
 import re
 

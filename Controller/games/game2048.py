@@ -1,8 +1,8 @@
-from game import Game
+from games.game import Game
 import subprocess
 import re
 
-class Torcs(Game):
+class Game2048(Game):
     def __init__(self, command):
         self.command = command
 
@@ -10,8 +10,4 @@ class Torcs(Game):
         p = subprocess.Popen(self.command, stdout=subprocess.PIPE)
         result = p.communicate()[0].decode('ascii')
         result = re.split("\\r\\n|\\n", result)
-
-        for line in result:
-            if "RACED DISTANCE:" in line:
-                return line.split(":")[1]
-        raise SyntaxError("Unknown result from the game (torcs).")
+        return result[0].split(":")[1]
