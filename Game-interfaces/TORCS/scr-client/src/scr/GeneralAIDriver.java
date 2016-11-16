@@ -22,10 +22,10 @@ public class GeneralAIDriver extends Controller {
     private Process p;
     private GearInterval[] intervals;
     private SimpleDriver sd;
-    
+
     //Config file for AI (relative path to master "general-ai/Game-interfaces" directory
-    private final String configFile = "Game-interfaces\\TORCS\\TORCS_config.txt"; 
-    
+    private final String gameConfigFile = "Game-interfaces\\TORCS\\TORCS_config.json";
+
     private SensorModel lastSensor;
 
     /**
@@ -49,7 +49,8 @@ public class GeneralAIDriver extends Controller {
         initIntervals();
 
         try {
-            ProcessBuilder pb = new ProcessBuilder(new String[]{Client.PythonExe, Client.PythonScriptFile, configFile});
+            String[] params = new String[]{Client.pythonExe, Client.pythonScriptFile, gameConfigFile, Client.modelConfigFile};
+            ProcessBuilder pb = new ProcessBuilder(params);
             pb.redirectErrorStream(true);
 
             p = pb.start();
@@ -107,7 +108,7 @@ public class GeneralAIDriver extends Controller {
             for (int i = 0; i < output.length; i++) {
                 values[i] = Double.parseDouble(output[i]);
             }
-
+            
             Action act = new Action();
             act.accelerate = values[0];
             act.brake = values[1];
@@ -118,7 +119,7 @@ public class GeneralAIDriver extends Controller {
 
             act.restartRace = false;
             lastSensor = sensors;
-            
+
             return act;
         } catch (IOException e) {
             e.printStackTrace();
@@ -128,13 +129,14 @@ public class GeneralAIDriver extends Controller {
         System.out.println("Distance raced: " + sensors.getDistanceRaced());
         return sd.control(sensors);
         /**
-         * Action a = new Action(); a.gear = 1; a.accelerate = 0.2; return a;
-        /*
+         * Action a = new Action(); a.gear = 1; a.accelerate = 0.2; return a; /*
          */
     }
 
     /**
-     * Transforms AI's output in interval [0, 1] to proper interval for the steer.
+     * Transforms AI's output in interval [0, 1] to proper interval for the
+     * steer.
+     *
      * @param outputFromAi Output of the AI.
      */
     private double getSteer(double outputFromAi) {
@@ -144,6 +146,7 @@ public class GeneralAIDriver extends Controller {
 
     /**
      * Transforms AI's output in interval [0, 1] to proper gear integer.
+     *
      * @param outputFromAi Ouput of the AI.
      */
     private int getGear(double outputFromAi) {
@@ -158,11 +161,12 @@ public class GeneralAIDriver extends Controller {
 
     /**
      * Transforms AI's output in interval [0, 1] to proper focus integer.
+     *
      * @param outputFromAi Ouput of the AI.
      */
     private int getFocus(double outputFromAi) {
         // Focus must be in interval [-90, 90]
-        return (int)((outputFromAi * 180) - 90);
+        return (int) ((outputFromAi * 180) - 90);
     }
 
     @Override

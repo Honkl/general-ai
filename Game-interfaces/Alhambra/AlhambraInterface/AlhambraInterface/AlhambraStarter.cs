@@ -18,8 +18,10 @@ namespace AlhambraInterface
 
             string pythonScript = "\"" + args[0] + "\"";
             string pythonExe = "\"" + args[1] + "\"";
+            string modelConfigFile = " \"" + args[2] + "\"";
+            string gameConfigFile = " \"Game-interfaces\\Alhambra\\Alhambra_config.json\"";
 
-            RunGame(pythonScript, pythonExe);
+            RunGame(pythonScript, pythonExe, gameConfigFile, modelConfigFile);
         }
 
         /// <summary>
@@ -27,14 +29,13 @@ namespace AlhambraInterface
         /// </summary>
         /// <param name="pythonScript">Python script to evaluate AI's move.</param>
         /// <param name="pythonExe">Python EXE file to execute .py script.</param>
-        private static void RunGame(string pythonScript, string pythonExe)
+        /// <param name="gameConfigFile">Game configuration file (number of inputs / outputs for AI.</param>
+        /// <param name="modelConfigFile">Model configuration file for AI.</param>
+        private static void RunGame(string pythonScript, string pythonExe, string gameConfigFile, string modelConfigFile)
         {
-            //Config file for AI (relative path to master "general-ai/Game-interfaces" directory
-            string configFile = " Game-interfaces\\Alhambra\\Alhambra_config.txt"; 
-
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonExe;
-            start.Arguments = pythonScript + configFile;
+            start.Arguments = pythonScript + gameConfigFile + modelConfigFile;
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardInput = true;

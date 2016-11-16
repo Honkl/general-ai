@@ -24,8 +24,9 @@ public class Client {
 	private static Stage stage;
 	private static String trackName;
         
-        public static String PythonScriptFile;
-        public static String PythonExe;
+        public static String pythonScriptFile;
+        public static String pythonExe;
+        public static String modelConfigFile;
 
 	/**
 	 * @param args
@@ -138,8 +139,9 @@ public class Client {
 		stage = Stage.UNKNOWN;
 		trackName = "unknown";
                 
-                PythonScriptFile = null;
-                PythonExe = null;
+                pythonScriptFile = null;
+                pythonExe = null;
+                modelConfigFile = null;
                 
 		
 		for (int i = 1; i < args.length; i++) {
@@ -191,11 +193,14 @@ public class Client {
 					System.exit(0);
 				}
 			}
-                        if (entity.equals("torcs")) {
-                            PythonScriptFile = value + ":" + st.nextToken();
+                        if (entity.equals("ai_script")) {
+                            pythonScriptFile = value + ":" + st.nextToken();
                         }
                         if (entity.equals("python")) {
-                            PythonExe = value + ":" + st.nextToken();
+                            pythonExe = value + ":" + st.nextToken();
+                        }
+                        if (entity.equals("model_config")) {
+                            modelConfigFile = value + ":" + st.nextToken();
                         }
 		}
 	}

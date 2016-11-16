@@ -11,9 +11,9 @@ from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
 
-__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+loc = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 # prefix = Master directory
-prefix = os.path.dirname(os.path.dirname(__location__)) + "\\"  # cut two last directories
+prefix = os.path.dirname(os.path.dirname(loc)) + "\\"  # cut two last directories
 
 PYTHON_EXE = " \"C:\\Anaconda2\\envs\\py3k\\python.exe\""
 PYTHON_SCRIPT = " \"" + prefix + "general-ai\\Controller\\script.py\""
@@ -36,11 +36,12 @@ mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 if __name__ == '__main__':
 
+    model_config = " \"" + loc + "\\config\\test.json\""
     start = time.time()
-    game = Alhambra(alhambra_command)
-    #game = Torcs(torcs_command)
+    #game = Game2048(game2048_command + model_config)
+    #game = Alhambra(alhambra_command + model_config)
+    game = Torcs(torcs_command + model_config)
     #game = Mario(mario_command)
-    #game = Game2048(game2048_command)
 
     print(game.run())
     end = time.time()
