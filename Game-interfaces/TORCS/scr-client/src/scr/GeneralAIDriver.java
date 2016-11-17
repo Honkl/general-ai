@@ -27,6 +27,7 @@ public class GeneralAIDriver extends Controller {
     private final String gameConfigFile = "Game-interfaces\\TORCS\\TORCS_config.json";
 
     private SensorModel lastSensor;
+    private double last = 0;
 
     /**
      * Represents an interval to discretise values for gear integer.
@@ -57,14 +58,11 @@ public class GeneralAIDriver extends Controller {
             writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-            Thread.sleep(100);
         } catch (IOException ex) {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
         }
-
+        
         float[] angles = new float[19];
 
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -96,6 +94,7 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public Action control(SensorModel sensors) {
+        Action act = null;
         try {
             JsonMessageObject jmo = new JsonMessageObject(sensors);
             String json = jmo.convertToJson() + "\n";
@@ -109,28 +108,32 @@ public class GeneralAIDriver extends Controller {
                 values[i] = Double.parseDouble(output[i]);
             }
             
-            Action act = new Action();
+            act = new Action();
             act.accelerate = values[0];
             act.brake = values[1];
             act.clutch = values[2];
             act.focus = getFocus(values[3]);
             act.gear = getGear(values[4]);
             act.steering = getSteer(values[5]);
-
             act.restartRace = false;
+
+            if (last == 0) {
+                last = System.currentTimeMillis();
+            } else {
+                long current = System.currentTimeMillis();
+                if (current - last >= 1000) {
+                    last = current;
+                    act.restartRace = true;
+                }
+            }
+            
             lastSensor = sensors;
 
             return act;
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //System.out.println("Distance from start line: " + sensors.getDistanceFromStartLine());
-        System.out.println("Distance raced: " + sensors.getDistanceRaced());
-        return sd.control(sensors);
-        /**
-         * Action a = new Action(); a.gear = 1; a.accelerate = 0.2; return a; /*
-         */
+        return act;
     }
 
     /**

@@ -22,8 +22,8 @@ def load_config(path):
     return game_phases, input_sizes, output_sizes
 
 
-#if (len(sys.argv) != 2):
-#    raise Exception("Wrong number of parameters. Insert config file.")
+if (len(sys.argv) != 3):
+    raise Exception("Wrong number of parameters. Insert config file.")
 
 game_info_file = sys.argv[1]
 model_info_file = sys.argv[2]
