@@ -9,9 +9,9 @@ games in this project:
 * Mario (a well known arcade game)
 
 For each game there must be specific interface implemented (in term of communication with AI). There are three layers (levels) of abstraction.
-1. Higher layer - a controller that is available to "call the game" a get its result.
-2. Mid layer - a game itself
-3. Lower layer - an AI script that answers game's requests.
+* Higher layer - a controller that is available to "call the game" a get its result.
+* Mid layer - a game itself
+* Lower layer - an AI script that answers game's requests.
 
 The communication between layers is via redirected standard I/O, using information encoded into JSON strings.
 
