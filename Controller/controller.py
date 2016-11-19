@@ -25,10 +25,11 @@ ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\A
 TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\""
 TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
+PORT = " \"3002\""
 TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
 #TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
 
-torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
+torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PORT + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
 alhambra_command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
 game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
 mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
@@ -36,12 +37,38 @@ mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 if __name__ == '__main__':
 
-    model_config = " \"" + loc + "\\config\\test.json\""
+    model_config = " \"" + loc + "\\config\\random.json\""
     start = time.time()
     #game = Game2048(game2048_command + model_config)
     #game = Alhambra(alhambra_command + model_config)
     game = Torcs(torcs_command + model_config)
     #game = Mario(mario_command + model_config)
+
+
+
+    """ SOME PARALLEL TESTING
+    xml1 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_0.xml\""
+    xml2 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_1.xml\""
+    port1 = " \"3001\""
+    port2 = " \"3002\""
+
+    data = [(xml1, port1), (xml2, port2)]
+    import concurrent.futures
+    results = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        for (xml, port) in data:
+            torcs_command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
+            print(torcs_command)
+            game = Torcs(torcs_command + model_config)
+            future = executor.submit(game.run)
+            results.append(future)
+
+
+    for i in range(len(results)):
+        while not results[i].done():
+            time.sleep(50)
+        print(results[i].result())
+    """
 
     print(game.run())
     end = time.time()

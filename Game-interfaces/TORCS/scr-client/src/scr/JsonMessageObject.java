@@ -12,26 +12,28 @@ public class JsonMessageObject {
 
     Double[] state;
     int current_phase = 0;
+    
+    private transient double piRadians = 0.05483;
 
 
     /**
      * Initializes a new instance of JsonMessageObject. Represents the current
-     * state of the game.
+     * state of the game. All game sensor values are scaled for the AI.
      * @param sensors Information about a game state.
      */
     public JsonMessageObject(SensorModel sensors) {
         List<Double> result = new ArrayList<>();
         
-        result.add(sensors.getAngleToTrackAxis());
-        result.add(sensors.getCurrentLapTime());
-        result.add(sensors.getDamage());
-        result.add(sensors.getDistanceFromStartLine());
-        result.add(sensors.getDistanceRaced());
-        result.add(sensors.getFuelLevel());
-        result.add((double)sensors.getGear());
-        result.add(sensors.getLastLapTime());
-        result.add(sensors.getLateralSpeed());
-        result.add(sensors.getRPM());
+        result.add((sensors.getAngleToTrackAxis() + piRadians) / (2 * piRadians));
+        result.add(Math.log(sensors.getCurrentLapTime() + 1));
+        result.add(Math.log(sensors.getDamage() + 1));
+        result.add(Math.log(sensors.getDistanceFromStartLine() + 1));
+        result.add(Math.log(sensors.getDistanceRaced() + 1));
+        result.add(Math.log(sensors.getFuelLevel() + 1));
+        result.add((double)sensors.getGear() / 8.0);
+        result.add(Math.log(sensors.getLastLapTime() + 1));
+        result.add(Math.log(sensors.getLateralSpeed() + 1));
+        result.add(Math.log(sensors.getRPM() + 1));
         result.add((double)sensors.getRacePosition());
         result.add(sensors.getSpeed());
         result.add(sensors.getTrackPosition());
