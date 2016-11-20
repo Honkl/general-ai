@@ -9,14 +9,14 @@ if (len(sys.argv) != 3):
     raise Exception("Wrong number of parameters. Insert config file.")
 
 loc = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-game_info_file = os.path.dirname(loc) + "\\" + sys.argv[1]
+game_config_file = os.path.dirname(loc) + "\\" + sys.argv[1]
 
-model_info_file = sys.argv[2]
+model_config_file = sys.argv[2]
 
-with open(game_info_file, "r") as f:
+with open(game_config_file, "r") as f:
     game_config = json.load(f)
 
-with open(model_info_file) as f:
+with open(model_config_file) as f:
     model_config = json.load(f)
     name = model_config["model_name"]
     class_name = model_config["class_name"]

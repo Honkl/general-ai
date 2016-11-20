@@ -65,17 +65,17 @@ def get_init_weights(game_config_file, hidden_sizes):
 
 if __name__ == '__main__':
 
-    #game_config_file = GAME2048_CONFIG_FILE
+    game_config_file = GAME2048_CONFIG_FILE
     #game_config_file = ALHAMBRA_CONFIG_FILE
     #game_config_file = TORCS_CONFIG_FILE
-    game_config_file = MARIO_CONFIG_FILE
+    #game_config_file = MARIO_CONFIG_FILE
 
-    model_config_file = loc + "\\config\\simplenn.json"
+    model_config_file = loc + "\\config\\feedforward.json"
     with open(model_config_file, "w") as f:
-        hidden_sizes = [64,64]
+        hidden_sizes = [32,32]
         data = {}
-        data["model_name"] = "simplenn"
-        data["class_name"] = "SimpleNN"
+        data["model_name"] = "feedforward"
+        data["class_name"] = "FeedForward"
         data["hidden_sizes"] = hidden_sizes
         data["weights"] = get_init_weights(game_config_file, hidden_sizes)
         f.write(json.dumps(data))
@@ -85,10 +85,10 @@ if __name__ == '__main__':
     #game = Game2048(game2048_command + " \"" + model_config_file + "\"")
     #game = Alhambra(alhambra_command + " \"" + model_config_file + "\"")
     #game = Torcs(torcs_command + " \"" + model_config_file + "\"")
-    game = Mario(mario_command + " \"" + model_config_file + "\"")
+    #game = Mario(mario_command + " \"" + model_config_file + "\"")
 
 
-    """ SOME PARALLEL TESTING
+    """ SOME PARALLEL ATTEMPTS """
     xml1 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_0.xml\""
     xml2 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_1.xml\""
     port1 = " \"3001\""
@@ -97,21 +97,27 @@ if __name__ == '__main__':
     data = [(xml1, port1), (xml2, port2)]
     import concurrent.futures
     results = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        for (xml, port) in data:
-            torcs_command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-            print(torcs_command)
-            game = Torcs(torcs_command + model_config)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+        for i in range(100):
+            game = Game2048(game2048_command + " \"" + model_config_file + "\"")
             future = executor.submit(game.run)
             results.append(future)
 
+        """
+        for (xml, port) in data:
+            torcs_command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
+            print(torcs_command)
+            game = Torcs(torcs_command + " \"" + model_config_file + "\"")
+            future = executor.submit(game.run)
+            results.append(future)
+        """
 
     for i in range(len(results)):
         while not results[i].done():
-            time.sleep(50)
+            time.sleep(100)
         print(results[i].result())
-    """
+    """"""
 
-    print(game.run())
+    #print(game.run())
     end = time.time()
     print(end - start)
