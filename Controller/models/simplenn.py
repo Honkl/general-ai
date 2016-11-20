@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from models.model import Model
 
 class Network():
@@ -6,17 +7,30 @@ class Network():
         self.layer_sizes = layer_sizes
         self.model_config = model_config
 
+        weights = np.array(list(map(float, self.model_config["weights"])))
+        l_bound = 0
+        r_bound = 0
+        self.matrices = []
+        for i in range(len(self.layer_sizes) - 1):
+            m = self.layer_sizes[i]
+            n = self.layer_sizes[i + 1]
+            r_bound += m * n
+            self.matrices.append(weights[l_bound:r_bound:1].reshape(m, n))
+            l_bound = r_bound
+
     def predict(self, input):
         """
         Performs forward pass in the current network instance.
         :param input: Input to the neural network.
         :return: Output of the neural network.
         """
-        state = np.array(list(map(float, input["state"])))
-        weights = np.array(list(map(float, self.model_config["weights"])))
+        x = np.array(list(map(float, input["state"])))
+        for W in self.matrices:
+            x = np.dot(x, W)
         result = ""
-        for i in range(self.layer_sizes[-1]):
-            result += str(np.random.random())
+        assert(self.layer_sizes[-1] == len(x))
+        for i in range(len(x)):
+            result += str(x[i])
             if (i < self.layer_sizes[-1] - 1):
                 result += " "
         return result
