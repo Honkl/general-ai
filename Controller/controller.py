@@ -5,6 +5,7 @@ from __future__ import division
 
 import os
 import time
+import json
 
 from games.alhambra import Alhambra
 from games.torcs import Torcs
@@ -29,19 +30,44 @@ PORT = " \"3002\""
 TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
 #TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\"" # TODO: Relative path via cmd parameter
 
+# config files for each game (contains I/O sizes)
+GAME2048_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\2048\\2048_config.json"
+ALHAMBRA_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Alhambra\\Alhambra_config.json"
+TORCS_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\TORCS\\TORCS_config.json"
+MARIO_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Mario\\Mario_config.json"
+
+# commands used to run games
 torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PORT + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
 alhambra_command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
 game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
 mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 
+def get_init_weights(layer_sizes):
+    # TODO
+    pass
+
 if __name__ == '__main__':
 
-    model_config = " \"" + loc + "\\config\\random.json\""
+    file = GAME2048_CONFIG_FILE
+    #file = ALHAMBRA_CONFIG_FILE
+    #file = TORCS_CONFIG_FILE
+    #file = MARIO_CONFIG_FILE
+
+    with open(file, "r") as f:
+        game_config = json.load(f)
+        for phase in range(game_config["game_phases"]):
+            input_size = game_config["input_sizes"][phase]
+            output_size = game_config["output_sizes"][phase]
+            hidden_sizes = [8]
+            layer_sizes = [input_size] + hidden_sizes + [output_size]
+
+    # model_config = " \"" + loc + "\\config\\random.json\""
+    model_config = " \"" + loc + "\\config\\simplenn.json\""
     start = time.time()
-    #game = Game2048(game2048_command + model_config)
+    game = Game2048(game2048_command + model_config)
     #game = Alhambra(alhambra_command + model_config)
-    game = Torcs(torcs_command + model_config)
+    #game = Torcs(torcs_command + model_config)
     #game = Mario(mario_command + model_config)
 
 

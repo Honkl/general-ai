@@ -1,0 +1,6 @@
+{
+  "model_name": "simplenn",
+  "class_name": "SimpleNN",
+  "hidden_sizes": [8],
+  "weights": []
+}
