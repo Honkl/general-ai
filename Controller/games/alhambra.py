@@ -19,6 +19,10 @@ class Alhambra(Game):
         scores = []
         index = 2
         for i in range(number_of_players):
-            scores.append((result[index].split('=')[1], result[index + 1]))
+            name = result[index].split('=')[1]
+            value = result[index + 1]
+            scores.append(float(value))
             index += 2
-        return scores
+
+        print(scores)
+        return scores[0]
