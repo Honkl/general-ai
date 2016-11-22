@@ -17,5 +17,8 @@ class Mario(Game):
                 for item in line.split(";"):
                     name, value = item.partition("=")[::2]
                     scores.append((name, value))
+                    if (name == "passedDistance"):
+                        print(value)
+                        return float(value)
                 break
         return scores

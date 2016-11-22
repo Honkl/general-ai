@@ -75,10 +75,18 @@ def eval_fitness(individual):
         data["weights"] = individual
         f.write(json.dumps(data))
 
-    game = Game2048(game2048_command + " \"" + model_config_file + "\"")
+    # game = Game2048(game2048_command + " \"" + model_config_file + "\"")
     # game = Alhambra(alhambra_command + " \"" + model_config_file + "\"")
+    game = Torcs(torcs_command + " \"" + model_config_file + "\"")
+    # game = Mario(mario_command + " \"" + model_config_file + "\"")
     result = game.run()
     return result,
+
+def mutRandom(individual, mutpb):
+    for i in range(len(individual)):
+        if (np.random.random() < mutpb):
+            individual[i] = np.random.random()
+    return individual,
 
 
 def evolution_init(individual_len):
@@ -91,33 +99,36 @@ def evolution_init(individual_len):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     toolbox.register("evaluate", eval_fitness)
-    toolbox.register("mate", tools.cxTwoPoint)
-    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+    toolbox.register("mate", tools.cxUniform, indpb=0.5)
+    #toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
+    toolbox.register("mutate", mutRandom, mutpb=0.05)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
     return toolbox
 
 
 if __name__ == '__main__':
-    game_config_file = GAME2048_CONFIG_FILE
+    # game_config_file = GAME2048_CONFIG_FILE
     # game_config_file = ALHAMBRA_CONFIG_FILE
-    # game_config_file = TORCS_CONFIG_FILE
+    game_config_file = TORCS_CONFIG_FILE
     # game_config_file = MARIO_CONFIG_FILE
 
-    hidden_sizes = [64,64]
+    hidden_sizes = [16,16]
     individual_len = get_number_of_weights(game_config_file, hidden_sizes)
     toolbox = evolution_init(individual_len)
 
     pop = toolbox.population(n=10)
-    hof = tools.HallOfFame(2)
+    hof = tools.HallOfFame(4)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
     stats.register("max", np.max)
 
     start = time.time()
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.3, ngen=20, stats=stats, halloffame=hof,
-                                   verbose=True)
+
+    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof, verbose=True)
+    #pop, log = algorithms.varAnd(pop, toolbox, cxpb=0.5, mutpb=0.1)
+
     end = time.time()
     print("Time: ", end - start)
     print("Best individual fitness: {}".format(hof[0].fitness.getValues()[0]))

@@ -14,4 +14,4 @@ class Torcs(Game):
         for line in result:
             if "RACED DISTANCE:" in line:
                 distances.append(line.split(":")[1].strip())
-        return distances
+        return float(distances[0])
