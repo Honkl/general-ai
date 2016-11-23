@@ -8,9 +8,10 @@ import time
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import concurrent.futures
 
+from threading import Lock
 from deap import creator, base, tools, algorithms
-from pygments.lexer import include
 
 from games.alhambra import Alhambra
 from games.torcs import Torcs
@@ -49,6 +50,19 @@ game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
 mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 
+class IdGenerator():
+    id = -1
+    lock = Lock()
+
+    @staticmethod
+    def next_id():
+        IdGenerator.lock.acquire()
+        IdGenerator.id += 1
+        to_return = IdGenerator.id
+        IdGenerator.lock.release()
+        return to_return
+
+
 def get_number_of_weights(game_config_file, hidden_sizes):
     with open(game_config_file) as f:
         game_config = json.load(f)
@@ -66,7 +80,9 @@ def get_number_of_weights(game_config_file, hidden_sizes):
 
 
 def eval_fitness(individual):
-    model_config_file = loc + "\\config\\feedforward.json"
+    id = IdGenerator.next_id()
+    model_config_file = loc + "\\config\\feedforward" + str(id) + ".json"
+
     with open(model_config_file, "w") as f:
         data = {}
         data["model_name"] = "feedforward"
@@ -77,10 +93,12 @@ def eval_fitness(individual):
 
     # game = Game2048(game2048_command + " \"" + model_config_file + "\"")
     # game = Alhambra(alhambra_command + " \"" + model_config_file + "\"")
-    game = Torcs(torcs_command + " \"" + model_config_file + "\"")
-    # game = Mario(mario_command + " \"" + model_config_file + "\"")
+    # game = Torcs(torcs_command + " \"" + model_config_file + "\"")
+    game = Mario(mario_command + " \"" + model_config_file + "\"")
     result = game.run()
+    os.remove(model_config_file)
     return result,
+
 
 def mutRandom(individual, mutpb):
     for i in range(len(individual)):
@@ -94,26 +112,29 @@ def evolution_init(individual_len):
     creator.create("Individual", list, fitness=creator.FitnessMax)
 
     toolbox = base.Toolbox()
+
     toolbox.register("attr_float", np.random.random)
     toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     toolbox.register("evaluate", eval_fitness)
     toolbox.register("mate", tools.cxUniform, indpb=0.5)
-    #toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-    toolbox.register("mutate", mutRandom, mutpb=0.05)
+    toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
+    # toolbox.register("mutate", mutRandom, mutpb=0.05)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+    toolbox.register("map", executor.map)
     return toolbox
 
 
 if __name__ == '__main__':
     # game_config_file = GAME2048_CONFIG_FILE
     # game_config_file = ALHAMBRA_CONFIG_FILE
-    game_config_file = TORCS_CONFIG_FILE
-    # game_config_file = MARIO_CONFIG_FILE
+    # game_config_file = TORCS_CONFIG_FILE
+    game_config_file = MARIO_CONFIG_FILE
 
-    hidden_sizes = [16,16]
+    hidden_sizes = [16, 16]
     individual_len = get_number_of_weights(game_config_file, hidden_sizes)
     toolbox = evolution_init(individual_len)
 
@@ -126,8 +147,8 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof, verbose=True)
-    #pop, log = algorithms.varAnd(pop, toolbox, cxpb=0.5, mutpb=0.1)
+    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof,
+                                   verbose=True)
 
     end = time.time()
     print("Time: ", end - start)
@@ -142,30 +163,30 @@ if __name__ == '__main__':
     plt.legend(loc="lower right")
     plt.show()
 
-    """ SOME PARALLEL ATTEMPTS
-    xml1 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_0.xml\""
-    xml2 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_1.xml\""
-    port1 = " \"3001\""
-    port2 = " \"3002\""
+"""
+xml1 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_0.xml\""
+xml2 = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_1.xml\""
+port1 = " \"3001\""
+port2 = " \"3002\""
 
-    data = [(xml1, port1), (xml2, port2)]
-    import concurrent.futures
-    results = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
-        for i in range(100):
-            game = Game2048(game2048_command + " \"" + model_config_file + "\"")
-            future = executor.submit(game.run)
-            results.append(future)
+data = [(xml1, port1), (xml2, port2)]
+import concurrent.futures
+results = []
+with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+    for i in range(100):
+        game = Game2048(game2048_command + " \"" + model_config_file + "\"")
+        future = executor.submit(game.run)
+        results.append(future)
 
-        for (xml, port) in data:
-            torcs_command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-            print(torcs_command)
-            game = Torcs(torcs_command + " \"" + model_config_file + "\"")
-            future = executor.submit(game.run)
-            results.append(future)
+    for (xml, port) in data:
+        torcs_command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
+        print(torcs_command)
+        game = Torcs(torcs_command + " \"" + model_config_file + "\"")
+        future = executor.submit(game.run)
+        results.append(future)
 
-    for i in range(len(results)):
-        while not results[i].done():
-            time.sleep(100)
-        print(results[i].result())
-    """
+for i in range(len(results)):
+    while not results[i].done():
+        time.sleep(100)
+    print(results[i].result())
+"""

@@ -1,5 +1,4 @@
-Controller/answer.txt
-Controller/request.json
+Controller/config/
 
 *.class
 *.pyc
