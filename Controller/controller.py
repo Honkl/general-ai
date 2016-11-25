@@ -1,14 +1,15 @@
 # Basic wrapper to start process with any game that has proper interface.
-
 from __future__ import print_function
 from __future__ import division
 
 import os
 import time
 import json
+
 import numpy as np
 import matplotlib.pyplot as plt
 import concurrent.futures
+import constants
 
 from threading import Lock
 from deap import creator, base, tools, algorithms
@@ -19,35 +20,6 @@ from games.mario import Mario
 from games.game2048 import Game2048
 
 np.random.seed(42)
-loc = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-# prefix = Master directory
-prefix = os.path.dirname(os.path.dirname(loc)) + "\\"  # cut two last directories
-
-PYTHON_EXE = " \"C:\\Anaconda2\\envs\\py3k\\python.exe\""
-PYTHON_SCRIPT = " \"" + prefix + "general-ai\\Controller\\script.py\""
-
-MARIO = "java -cp \"" + prefix + "MarioAI\\MarioAI4J\\bin;" + prefix + "MarioAI\\MarioAI4J-Playground\\bin;" + prefix + "MarioAI\\MarioAI4J-Playground\\lib\\*\" mario.GeneralAgent"
-GAME2048 = prefix + "2048\\2048\\bin\\Release\\2048.exe"
-ALHAMBRA = prefix + "general-ai\\Game-interfaces\\Alhambra\\AlhambraInterface\\AlhambraInterface\\bin\\Release\\AlhambraInterface.exe"
-
-TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\""
-TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
-TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
-PORT = " \"3002\""
-# TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
-TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\""  # TODO: Relative path via cmd parameter
-
-# config files for each game (contains I/O sizes)
-GAME2048_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\2048\\2048_config.json"
-ALHAMBRA_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Alhambra\\Alhambra_config.json"
-TORCS_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\TORCS\\TORCS_config.json"
-MARIO_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Mario\\Mario_config.json"
-
-# commands used to run games
-torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PORT + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-alhambra_command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
-game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
-mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE
 
 
 class IdGenerator():
@@ -63,91 +35,131 @@ class IdGenerator():
         return to_return
 
 
-def get_number_of_weights(game_config_file, hidden_sizes):
-    with open(game_config_file) as f:
-        game_config = json.load(f)
-        total_weights = 0
-        for phase in range(game_config["game_phases"]):
-            input_size = game_config["input_sizes"][phase]
-            output_size = game_config["output_sizes"][phase]
+class Evolution():
+    current_game = ""
+    hidden_sizes = ""
+    toolbox = ""
 
-            total_weights += input_size * hidden_sizes[0]
-            if (len(hidden_sizes) > 1):
-                for i in range(len(hidden_sizes) - 1):
-                    total_weights += hidden_sizes[i] * hidden_sizes[i + 1]
-            total_weights += hidden_sizes[-1] * output_size
-    return total_weights
+    def __init__(self, game, hidden_sizes):
+        self.current_game = game
+        self.hidden_sizes = hidden_sizes
+        self.toolbox = self.evolution_init()
 
+    def get_number_of_weights(self):
+        """
+        Evaluates number of parameters of neural networks (e.q. weights of network).
+        :param hidden_sizes: Sizes of hidden fully-connected layers.
+        :return: Numbre of parameters of neural network.
+        """
+        game_config_file = ""
+        if self.current_game == "alhambra":
+            game_config_file = constants.ALHAMBRA_CONFIG_FILE
+        if self.current_game == "2048":
+            game_config_file = constants.GAME2048_CONFIG_FILE
+        if self.current_game == "mario":
+            game_config_file = constants.MARIO_CONFIG_FILE
+        if self.current_game == "torcs":
+            game_config_file = constants.TORCS_CONFIG_FILE
 
-def eval_fitness(individual):
-    id = IdGenerator.next_id()
-    model_config_file = loc + "\\config\\feedforward" + str(id) + ".json"
+        with open(game_config_file) as f:
+            game_config = json.load(f)
+            total_weights = 0
+            for phase in range(game_config["game_phases"]):
+                input_size = game_config["input_sizes"][phase]
+                output_size = game_config["output_sizes"][phase]
+                total_weights += input_size * self.hidden_sizes[0]
+                if (len(self.hidden_sizes) > 1):
+                    for i in range(len(self.hidden_sizes) - 1):
+                        total_weights += self.hidden_sizes[i] * self.hidden_sizes[i + 1]
+                total_weights += self.hidden_sizes[-1] * output_size
+        return total_weights
 
-    with open(model_config_file, "w") as f:
-        data = {}
-        data["model_name"] = "feedforward"
-        data["class_name"] = "FeedForward"
-        data["hidden_sizes"] = hidden_sizes
-        data["weights"] = individual
-        f.write(json.dumps(data))
+    def eval_fitness(self, individual):
+        """
+        Evaluates a fitness of the specified individual.
+        :param individual: Individual whose fitness will be evaluated.
+        :return: Fitness of the individual (must be tuple for Deap library).
+        """
+        id = IdGenerator.next_id()
+        model_config_file = constants.loc + "\\config\\feedforward" + str(id) + ".json"
 
-    # game = Game2048(game2048_command + " \"" + model_config_file + "\"")
-    # game = Alhambra(alhambra_command + " \"" + model_config_file + "\"")
-    # game = Torcs(torcs_command + " \"" + model_config_file + "\"")
-    game = Mario(mario_command + " \"" + model_config_file + "\"")
-    result = game.run()
-    os.remove(model_config_file)
-    return result,
+        with open(model_config_file, "w") as f:
+            data = {}
+            data["model_name"] = "feedforward"
+            data["class_name"] = "FeedForward"
+            data["hidden_sizes"] = self.hidden_sizes
+            data["weights"] = individual
+            f.write(json.dumps(data))
 
+        game = ""
+        if self.current_game == "alhambra":
+            game = Alhambra(constants.alhambra_command + " \"" + model_config_file + "\"")
+        if self.current_game == "2048":
+            game = Game2048(constants.game2048_command + " \"" + model_config_file + "\"")
+        if self.current_game == "mario":
+            game = Mario(constants.mario_command + " \"" + model_config_file + "\"")
+        if self.current_game == "torcs":
+            # TODO: Torcs command (ports)
+            game = Torcs(constants.torcs_command + " \"" + model_config_file + "\"")
 
-def mutRandom(individual, mutpb):
-    for i in range(len(individual)):
-        if (np.random.random() < mutpb):
-            individual[i] = np.random.random()
-    return individual,
+        result = game.run()
+        os.remove(model_config_file)
+        return result,
 
+    def mut_random(self, individual, mutpb):
+        for i in range(len(individual)):
+            if (np.random.random() < mutpb):
+                individual[i] = np.random.random()
+        return individual,
 
-def evolution_init(individual_len):
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+    def evolution_init(self):
+        """
+        Initializes the current instance of evolution.
+        :returns: Deap toolbox.
+        """
+        individual_len = self.get_number_of_weights()
 
-    toolbox = base.Toolbox()
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMax)
 
-    toolbox.register("attr_float", np.random.random)
-    toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox = base.Toolbox()
 
-    toolbox.register("evaluate", eval_fitness)
-    toolbox.register("mate", tools.cxUniform, indpb=0.5)
-    toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-    # toolbox.register("mutate", mutRandom, mutpb=0.05)
-    toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("attr_float", np.random.random)
+        toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
+        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
-    toolbox.register("map", executor.map)
-    return toolbox
+        toolbox.register("evaluate", self.eval_fitness)
+        toolbox.register("mate", tools.cxUniform, indpb=0.5)
+        # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
+        toolbox.register("mutate", self.mut_random, mutpb=0.05)
+        toolbox.register("select", tools.selTournament, tournsize=3)
+
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+        toolbox.register("map", executor.map)
+        return toolbox
 
 
 if __name__ == '__main__':
-    # game_config_file = GAME2048_CONFIG_FILE
-    # game_config_file = ALHAMBRA_CONFIG_FILE
-    # game_config_file = TORCS_CONFIG_FILE
-    game_config_file = MARIO_CONFIG_FILE
+    start = time.time()
 
-    hidden_sizes = [16, 16]
-    individual_len = get_number_of_weights(game_config_file, hidden_sizes)
-    toolbox = evolution_init(individual_len)
+    # game = "alhambra"
+    game = "2048"
+    # game = "mario"
+    # game = "torcs"
 
-    pop = toolbox.population(n=10)
+    hidden_sizes = [32, 32]
+    evolution = Evolution(game=game, hidden_sizes=hidden_sizes)
+
     hof = tools.HallOfFame(4)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    start = time.time()
+    t = evolution.toolbox
 
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof,
+    pop = t.population(n=10)
+    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof,
                                    verbose=True)
 
     end = time.time()
