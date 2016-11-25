@@ -12,11 +12,17 @@ class Network():
         r_bound = 0
         self.matrices = []
         for i in range(len(self.layer_sizes) - 1):
-            m = self.layer_sizes[i]
+            m = self.layer_sizes[i] + 1
             n = self.layer_sizes[i + 1]
             r_bound += m * n
             self.matrices.append(weights[l_bound:r_bound:1].reshape(m, n))
             l_bound = r_bound
+
+    def relu(self, x):
+        return np.array([max(0, y) for y in x])
+
+    def tanh(self, x):
+        return np.array([np.tanh(y) for y in x])
 
     def predict(self, input):
         """
@@ -26,7 +32,8 @@ class Network():
         """
         x = np.array(list(map(float, input["state"])))
         for W in self.matrices:
-            x = np.dot(x, W)
+            x = np.concatenate((x, [1]), axis=0)
+            x = self.relu(np.dot(x, W))
         result = ""
         assert(self.layer_sizes[-1] == len(x))
         for i in range(len(x)):

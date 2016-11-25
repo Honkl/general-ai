@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import concurrent.futures
 import constants
+import uuid
 
 from threading import Lock
 from deap import creator, base, tools, algorithms
@@ -20,19 +21,6 @@ from games.mario import Mario
 from games.game2048 import Game2048
 
 np.random.seed(42)
-
-
-class IdGenerator():
-    id = -1
-    lock = Lock()
-
-    @staticmethod
-    def next_id():
-        IdGenerator.lock.acquire()
-        IdGenerator.id += 1
-        to_return = IdGenerator.id
-        IdGenerator.lock.release()
-        return to_return
 
 
 class Evolution():
@@ -65,13 +53,13 @@ class Evolution():
             game_config = json.load(f)
             total_weights = 0
             for phase in range(game_config["game_phases"]):
-                input_size = game_config["input_sizes"][phase]
+                input_size = game_config["input_sizes"][phase] + 1
                 output_size = game_config["output_sizes"][phase]
                 total_weights += input_size * self.hidden_sizes[0]
                 if (len(self.hidden_sizes) > 1):
                     for i in range(len(self.hidden_sizes) - 1):
-                        total_weights += self.hidden_sizes[i] * self.hidden_sizes[i + 1]
-                total_weights += self.hidden_sizes[-1] * output_size
+                        total_weights += (self.hidden_sizes[i] + 1) * self.hidden_sizes[i + 1]
+                total_weights += (self.hidden_sizes[-1] + 1) * output_size
         return total_weights
 
     def eval_fitness(self, individual):
@@ -80,7 +68,7 @@ class Evolution():
         :param individual: Individual whose fitness will be evaluated.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
-        id = IdGenerator.next_id()
+        id = uuid.uuid4()
         model_config_file = constants.loc + "\\config\\feedforward" + str(id) + ".json"
 
         with open(model_config_file, "w") as f:
@@ -89,6 +77,7 @@ class Evolution():
             data["class_name"] = "FeedForward"
             data["hidden_sizes"] = self.hidden_sizes
             data["weights"] = individual
+            data["activation"] = "relu"
             f.write(json.dumps(data))
 
         game = ""
@@ -147,10 +136,10 @@ if __name__ == '__main__':
     # game = "mario"
     # game = "torcs"
 
-    hidden_sizes = [32, 32]
+    hidden_sizes = [16, 16]
     evolution = Evolution(game=game, hidden_sizes=hidden_sizes)
 
-    hof = tools.HallOfFame(4)
+    hof = tools.HallOfFame(5)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
@@ -158,9 +147,10 @@ if __name__ == '__main__':
 
     t = evolution.toolbox
 
-    pop = t.population(n=10)
-    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.3, ngen=150, stats=stats, halloffame=hof,
+    pop = t.population(n=50)
+    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.1, ngen=100, stats=stats, halloffame=hof,
                                    verbose=True)
+    # TODO: save best fitness in middle of evaluation
 
     end = time.time()
     print("Time: ", end - start)
