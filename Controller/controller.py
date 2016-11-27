@@ -69,7 +69,7 @@ class Evolution():
         :return: Fitness of the individual (must be tuple for Deap library).
         """
         id = uuid.uuid4()
-        model_config_file = constants.loc + "\\config\\feedforward" + str(id) + ".json"
+        model_config_file = constants.loc + "\\config\\feedforward_" + str(id) + ".json"
 
         with open(model_config_file, "w") as f:
             data = {}
@@ -92,7 +92,11 @@ class Evolution():
             game = Torcs(constants.torcs_command + " \"" + model_config_file + "\"")
 
         result = game.run()
-        os.remove(model_config_file)
+        try:
+            os.remove(model_config_file)
+        except IOError:
+            print("Failed attempt to delete config file (leaving file non-deleted).")
+
         return result,
 
     def mut_random(self, individual, mutpb):
@@ -119,11 +123,11 @@ class Evolution():
 
         toolbox.register("evaluate", self.eval_fitness)
         toolbox.register("mate", tools.cxUniform, indpb=0.5)
-        # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-        toolbox.register("mutate", self.mut_random, mutpb=0.05)
+        toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
+        #toolbox.register("mutate", self.mut_random, mutpb=0.05)
         toolbox.register("select", tools.selTournament, tournsize=3)
 
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=8)
         toolbox.register("map", executor.map)
         return toolbox
 
@@ -131,12 +135,12 @@ class Evolution():
 if __name__ == '__main__':
     start = time.time()
 
-    # game = "alhambra"
-    game = "2048"
+    game = "alhambra"
+    # game = "2048"
     # game = "mario"
     # game = "torcs"
 
-    hidden_sizes = [16, 16]
+    hidden_sizes = [32,32]
     evolution = Evolution(game=game, hidden_sizes=hidden_sizes)
 
     hof = tools.HallOfFame(5)
@@ -148,7 +152,7 @@ if __name__ == '__main__':
     t = evolution.toolbox
 
     pop = t.population(n=50)
-    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.1, ngen=100, stats=stats, halloffame=hof,
+    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.2, ngen=25, stats=stats, halloffame=hof,
                                    verbose=True)
     # TODO: save best fitness in middle of evaluation
 
