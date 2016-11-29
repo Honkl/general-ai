@@ -2,158 +2,44 @@
 from __future__ import print_function
 from __future__ import division
 
-import os
 import time
-import json
-
 import numpy as np
 import matplotlib.pyplot as plt
-import concurrent.futures
-import constants
-import uuid
 
-from threading import Lock
-from deap import creator, base, tools, algorithms
-
-from games.alhambra import Alhambra
-from games.torcs import Torcs
-from games.mario import Mario
-from games.game2048 import Game2048
+from deap import tools
+from evolution import Evolution
 
 np.random.seed(42)
 
+# Parameters of evolution (and neural network)
 
-class Evolution():
-    current_game = ""
-    hidden_sizes = ""
-    toolbox = ""
-
-    def __init__(self, game, hidden_sizes):
-        self.current_game = game
-        self.hidden_sizes = hidden_sizes
-        self.toolbox = self.evolution_init()
-
-    def get_number_of_weights(self):
-        """
-        Evaluates number of parameters of neural networks (e.q. weights of network).
-        :param hidden_sizes: Sizes of hidden fully-connected layers.
-        :return: Numbre of parameters of neural network.
-        """
-        game_config_file = ""
-        if self.current_game == "alhambra":
-            game_config_file = constants.ALHAMBRA_CONFIG_FILE
-        if self.current_game == "2048":
-            game_config_file = constants.GAME2048_CONFIG_FILE
-        if self.current_game == "mario":
-            game_config_file = constants.MARIO_CONFIG_FILE
-        if self.current_game == "torcs":
-            game_config_file = constants.TORCS_CONFIG_FILE
-
-        with open(game_config_file) as f:
-            game_config = json.load(f)
-            total_weights = 0
-            for phase in range(game_config["game_phases"]):
-                input_size = game_config["input_sizes"][phase] + 1
-                output_size = game_config["output_sizes"][phase]
-                total_weights += input_size * self.hidden_sizes[0]
-                if (len(self.hidden_sizes) > 1):
-                    for i in range(len(self.hidden_sizes) - 1):
-                        total_weights += (self.hidden_sizes[i] + 1) * self.hidden_sizes[i + 1]
-                total_weights += (self.hidden_sizes[-1] + 1) * output_size
-        return total_weights
-
-    def eval_fitness(self, individual):
-        """
-        Evaluates a fitness of the specified individual.
-        :param individual: Individual whose fitness will be evaluated.
-        :return: Fitness of the individual (must be tuple for Deap library).
-        """
-        id = uuid.uuid4()
-        model_config_file = constants.loc + "\\config\\feedforward_" + str(id) + ".json"
-
-        with open(model_config_file, "w") as f:
-            data = {}
-            data["model_name"] = "feedforward"
-            data["class_name"] = "FeedForward"
-            data["hidden_sizes"] = self.hidden_sizes
-            data["weights"] = individual
-            data["activation"] = "relu"
-            f.write(json.dumps(data))
-
-        game = ""
-        if self.current_game == "alhambra":
-            game = Alhambra(constants.alhambra_command + " \"" + model_config_file + "\"")
-        if self.current_game == "2048":
-            game = Game2048(constants.game2048_command + " \"" + model_config_file + "\"")
-        if self.current_game == "mario":
-            game = Mario(constants.mario_command + " \"" + model_config_file + "\"")
-        if self.current_game == "torcs":
-            # TODO: Torcs command (ports)
-            game = Torcs(constants.torcs_command + " \"" + model_config_file + "\"")
-
-        result = game.run()
-        try:
-            os.remove(model_config_file)
-        except IOError:
-            print("Failed attempt to delete config file (leaving file non-deleted).")
-
-        return result,
-
-    def mut_random(self, individual, mutpb):
-        for i in range(len(individual)):
-            if (np.random.random() < mutpb):
-                individual[i] = np.random.random()
-        return individual,
-
-    def evolution_init(self):
-        """
-        Initializes the current instance of evolution.
-        :returns: Deap toolbox.
-        """
-        individual_len = self.get_number_of_weights()
-
-        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-        creator.create("Individual", list, fitness=creator.FitnessMax)
-
-        toolbox = base.Toolbox()
-
-        toolbox.register("attr_float", np.random.random)
-        toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
-        toolbox.register("evaluate", self.eval_fitness)
-        toolbox.register("mate", tools.cxUniform, indpb=0.5)
-        toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-        #toolbox.register("mutate", self.mut_random, mutpb=0.05)
-        toolbox.register("select", tools.selTournament, tournsize=3)
-
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=8)
-        toolbox.register("map", executor.map)
-        return toolbox
-
+HIDDEN_SIZES = [32, 32]
+POP_SIZE = 50
+HOF_SIZE = 5
+CXPB = 0.1
+MUTPB = 0.2
+NGEN = 25
 
 if __name__ == '__main__':
     start = time.time()
 
-    game = "alhambra"
-    # game = "2048"
+    # game = "alhambra"
+    game = "2048"
     # game = "mario"
     # game = "torcs"
 
-    hidden_sizes = [32,32]
-    evolution = Evolution(game=game, hidden_sizes=hidden_sizes)
+    evolution = Evolution(game=game, hidden_sizes=HIDDEN_SIZES)
 
-    hof = tools.HallOfFame(5)
+    hof = tools.HallOfFame(HOF_SIZE)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
     stats.register("max", np.max)
 
     t = evolution.toolbox
-
     pop = t.population(n=50)
-    pop, log = algorithms.eaSimple(pop, t, cxpb=0.1, mutpb=0.2, ngen=25, stats=stats, halloffame=hof,
-                                   verbose=True)
+    pop, log = evolution.start(pop, t, cxpb=CXPB, mutpb=MUTPB, ngen=NGEN, stats=stats, halloffame=hof,
+                               verbose=True)
     # TODO: save best fitness in middle of evaluation
 
     end = time.time()

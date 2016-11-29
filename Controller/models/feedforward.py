@@ -31,9 +31,16 @@ class Network():
         :return: Output of the neural network.
         """
         x = np.array(list(map(float, input["state"])))
+        activation_str = self.model_config["activation"]
+        activation = ""
+        if (activation_str == "relu"):
+            activation = self.relu
+        if (activation_str == "tanh"):
+            activation = self.tanh
+
         for W in self.matrices:
             x = np.concatenate((x, [1]), axis=0)
-            x = self.relu(np.dot(x, W))
+            x = activation(np.dot(x, W))
         result = ""
         assert(self.layer_sizes[-1] == len(x))
         for i in range(len(x)):
