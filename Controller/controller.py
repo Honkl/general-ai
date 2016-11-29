@@ -7,18 +7,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from deap import tools
-from evolution import Evolution
+from evolution import Evolution, EvolutionParams
+from models.feedforward import ModelParams
 
 np.random.seed(42)
 
-# Parameters of evolution (and neural network)
+evolution_params = EvolutionParams(
+    pop_size=50,
+    cxpb=0.1,
+    mutpb=0.2,
+    ngen=25,
+    cxindpb=0.5,
+    mutindpb=0.2,
+    hof_size=0,
+    elite=5,
+    tournsize=3,
+    verbose=True,
+    max_workers=16)
 
-HIDDEN_SIZES = [32, 32]
-POP_SIZE = 50
-HOF_SIZE = 5
-CXPB = 0.1
-MUTPB = 0.2
-NGEN = 25
+model_params = ModelParams(
+    hidden_layers=[32, 32],
+    activation="relu")
 
 if __name__ == '__main__':
     start = time.time()
@@ -28,23 +37,21 @@ if __name__ == '__main__':
     # game = "mario"
     # game = "torcs"
 
-    evolution = Evolution(game=game, hidden_sizes=HIDDEN_SIZES)
+    evolution = Evolution(game, evolution_params, model_params)
 
-    hof = tools.HallOfFame(HOF_SIZE)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
     stats.register("max", np.max)
 
-    t = evolution.toolbox
-    pop = t.population(n=50)
-    pop, log = evolution.start(pop, t, cxpb=CXPB, mutpb=MUTPB, ngen=NGEN, stats=stats, halloffame=hof,
-                               verbose=True)
+    pop, log = evolution.start()
+
     # TODO: save best fitness in middle of evaluation
 
     end = time.time()
     print("Time: ", end - start)
-    print("Best individual fitness: {}".format(hof[0].fitness.getValues()[0]))
+    # print("Best individual fitness: {}".format(hof[0].fitness.getValues()[0]))
+    # print("Best individual fitness: {}".format(evolution.eval_fitness(hof[0])))
 
     gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
     plt.plot(gen, avg, label="average")

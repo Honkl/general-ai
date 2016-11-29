@@ -2,6 +2,25 @@ import numpy as np
 import sys
 from models.model import Model
 
+
+class ModelParams():
+    """
+    Encapsulates parameters of a model.
+    """
+
+    def __init__(self, hidden_layers, activation):
+        self._hidden_layers = hidden_layers
+        self._activation = activation
+
+    @property
+    def hidden_layers(self):
+        return self._hidden_layers
+
+    @property
+    def activation(self):
+        return self._activation
+
+
 class Network():
     def __init__(self, layer_sizes, model_config):
         self.layer_sizes = layer_sizes
@@ -42,18 +61,20 @@ class Network():
             x = np.concatenate((x, [1]), axis=0)
             x = activation(np.dot(x, W))
         result = ""
-        assert(self.layer_sizes[-1] == len(x))
+        assert (self.layer_sizes[-1] == len(x))
         for i in range(len(x)):
             result += str(x[i])
             if (i < self.layer_sizes[-1] - 1):
                 result += " "
         return result
 
+
 class FeedForward(Model):
     """
     Represents a simple feedforward neural network model.
     Can contain multiple networks (for each game phase).
     """
+
     def __init__(self, game_config, model_config):
         """
         Initializes a new instance of SimpleNN.

@@ -3,6 +3,7 @@ from __future__ import division
 
 import os
 import json
+from builtins import property
 
 import numpy as np
 import concurrent.futures
@@ -18,15 +19,85 @@ from games.game2048 import Game2048
 from deap import algorithms
 
 
-class Evolution():
-    current_game = ""
-    hidden_sizes = ""
-    toolbox = ""
+class EvolutionParams():
+    """
+    Encapsulates parameters of the evolution algorithm.
+    """
 
-    def __init__(self, game, hidden_sizes):
+    def __init__(self,
+                 pop_size,
+                 cxpb,
+                 mutpb,
+                 ngen,
+                 cxindpb,
+                 mutindpb,
+                 hof_size,
+                 elite,
+                 tournsize,
+                 verbose,
+                 max_workers):
+        self._pop_size = pop_size
+        self._cxpb = cxpb
+        self._mutpb = mutpb
+        self._ngen = ngen
+        self._cxindpb = cxindpb
+        self._mutindpb = mutindpb
+        self._hof_size = hof_size
+        self._elite = elite
+        self._tournsize = tournsize
+        self._verbose = verbose
+        self._max_workers = max_workers
+
+    @property
+    def pop_size(self):
+        return self._pop_size
+
+    @property
+    def cxpb(self):
+        return self._cxpb
+
+    @property
+    def mutpb(self):
+        return self._mutpb
+
+    @property
+    def ngen(self):
+        return self._ngen
+
+    @property
+    def cxindpb(self):
+        return self._cxindpb
+
+    @property
+    def mutindpb(self):
+        return self._mutindpb
+
+    @property
+    def hof_size(self):
+        return self._hof_size
+
+    @property
+    def elite(self):
+        return self._elite
+
+    @property
+    def tournsize(self):
+        return self._tournsize
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @property
+    def max_workers(self):
+        return self._max_workers
+
+
+class Evolution():
+    def __init__(self, game, evolution_params, model_params):
         self.current_game = game
-        self.hidden_sizes = hidden_sizes
-        self.toolbox = self.evolution_init()
+        self.evolution_params = evolution_params
+        self.model_params = model_params
 
     def get_number_of_weights(self):
         """
@@ -47,35 +118,36 @@ class Evolution():
         with open(game_config_file) as f:
             game_config = json.load(f)
             total_weights = 0
+            h_sizes = self.model_params.hidden_layers
             for phase in range(game_config["game_phases"]):
                 input_size = game_config["input_sizes"][phase] + 1
                 output_size = game_config["output_sizes"][phase]
-                total_weights += input_size * self.hidden_sizes[0]
-                if (len(self.hidden_sizes) > 1):
-                    for i in range(len(self.hidden_sizes) - 1):
-                        total_weights += (self.hidden_sizes[i] + 1) * self.hidden_sizes[i + 1]
-                total_weights += (self.hidden_sizes[-1] + 1) * output_size
+                total_weights += input_size * h_sizes[0]
+                if (len(h_sizes) > 1):
+                    for i in range(len(h_sizes) - 1):
+                        total_weights += (h_sizes[i] + 1) * h_sizes[i + 1]
+                total_weights += (h_sizes[-1] + 1) * output_size
         return total_weights
 
-    def eval_fitness(self, individual, model_config_file=None):
+    def write_to_file(self, individual, filename):
+        with open(filename, "w") as f:
+            data = {}
+            data["model_name"] = "feedforward"
+            data["class_name"] = "FeedForward"
+            data["hidden_sizes"] = self.model_params.hidden_layers
+            data["weights"] = individual
+            data["activation"] = self.model_params.activation
+            f.write(json.dumps(data))
+
+    def eval_fitness(self, individual):
         """
         Evaluates a fitness of the specified individual.
         :param individual: Individual whose fitness will be evaluated.
-        :param model_config_file: Model config file. This is used when we want to measure individual that
-        already has config file.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
-        if (model_config_file == None):
-            id = uuid.uuid4()
-            model_config_file = constants.loc + "\\config\\feedforward_" + str(id) + ".json"
-            with open(model_config_file, "w") as f:
-                data = {}
-                data["model_name"] = "feedforward"
-                data["class_name"] = "FeedForward"
-                data["hidden_sizes"] = self.hidden_sizes
-                data["weights"] = individual
-                data["activation"] = "relu"
-                f.write(json.dumps(data))
+        id = uuid.uuid4()
+        model_config_file = constants.loc + "\\config\\feedforward_" + str(id) + ".json"
+        self.write_to_file(individual, model_config_file)
 
         game = ""
         if self.current_game == "alhambra":
@@ -102,7 +174,7 @@ class Evolution():
                 individual[i] = np.random.random()
         return individual,
 
-    def evolution_init(self):
+    def deap_toolbox_init(self):
         """
         Initializes the current instance of evolution.
         :returns: Deap toolbox.
@@ -119,18 +191,31 @@ class Evolution():
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
         toolbox.register("evaluate", self.eval_fitness)
-        toolbox.register("mate", tools.cxUniform, indpb=0.5)
-        toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-        # toolbox.register("mutate", self.mut_random, mutpb=0.05)
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
+        # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
+        toolbox.register("mutate", self.mut_random, mutpb=self.evolution_params.mutindpb)
+        toolbox.register("select", tools.selTournament, tournsize=self.evolution_params.tournsize)
 
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.evolution_params.max_workers)
         toolbox.register("map", executor.map)
         return toolbox
 
-    def start(self, population, toolbox, cxpb, mutpb, ngen, stats, halloffame, verbose=True):
+    def start(self):
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("avg", np.mean)
+        stats.register("min", np.min)
+        stats.register("max", np.max)
+
+        toolbox = self.deap_toolbox_init()
+        population = toolbox.population(n=self.evolution_params.pop_size)
+
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+        if (self.evolution_params.hof_size > 0):
+            halloffame = tools.HallOfFame(self.evolution_params.hof_size)
+        else:
+            halloffame = None
 
         # Evaluate all individuals
         # invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -145,16 +230,16 @@ class Evolution():
 
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
-        if verbose:
+        if self.evolution_params.verbose:
             print(logbook.stream)
 
         # Begin the generational process
-        for gen in range(1, ngen + 1):
+        for gen in range(1, self.evolution_params.ngen + 1):
             # Select the next generation individuals
             offspring = toolbox.select(population, len(population))
 
             # Vary the pool of individuals
-            offspring = algorithms.varAnd(offspring, toolbox, cxpb, mutpb)
+            offspring = algorithms.varAnd(offspring, toolbox, self.evolution_params.cxpb, self.evolution_params.mutpb)
 
             # Evaluate all individuals
             # invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -173,7 +258,13 @@ class Evolution():
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
             logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-            if verbose:
+            if self.evolution_params.verbose:
                 print(logbook.stream)
+
+            # Logging hall of fame
+            if halloffame is not None:
+                for i in range(len(halloffame)):
+                    model_config_file = constants.loc + "\\config\\feedforward_hof_" + str(i) + ".json"
+                    self.write_to_file(halloffame[i], model_config_file)
 
         return population, logbook
