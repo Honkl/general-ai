@@ -11,6 +11,6 @@ cd %5
 start /b wtorcs.exe -r %1 -t 1000000 -nofuel -nodamage -nolaptime
 ::start /b wtorcs.exe -r ./config/raceman/race_config.xml -t 1000000 -nofuel -nodamage -nolaptime
 ::timeout 2 /nobreak
-PING 1.1.1.1 -n 1 -w 1000 > NUL
+PING 1.1.1.1 -n 1 -w 500 > NUL
 echo java -cp %2 scr.Client scr.GeneralAIDriver port:%3 ai_script:%4 python:%6 model_config:%7
 java -cp %2 scr.Client scr.GeneralAIDriver port:%3 ai_script:%4 python:%6 model_config:%7

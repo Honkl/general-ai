@@ -1,13 +1,15 @@
 from games.game import Game
 import subprocess
+from constants import *
 import re
 
 class Alhambra(Game):
-    def __init__(self, command):
-        self.command = command
+    def __init__(self, model_config_file):
+        self.model_config_file = model_config_file
 
     def run(self):
-        p = subprocess.Popen(self.command, stdout=subprocess.PIPE)
+        command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\""
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
         result = p.communicate()[0].decode('ascii')
         result = re.split("\\r\\n|\\n", result)
 
@@ -24,5 +26,5 @@ class Alhambra(Game):
             scores.append(float(value))
             index += 2
 
-        print(scores)
+        #print(scores)
         return scores[0]

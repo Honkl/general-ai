@@ -16,7 +16,6 @@ from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
-from deap import algorithms
 
 
 class EvolutionParams():
@@ -157,14 +156,13 @@ class Evolution():
 
         game = ""
         if self.current_game == "alhambra":
-            game = Alhambra(constants.alhambra_command + " \"" + model_config_file + "\"")
+            game = Alhambra(model_config_file)
         if self.current_game == "2048":
-            game = Game2048(constants.game2048_command + " \"" + model_config_file + "\"")
+            game = Game2048(model_config_file)
         if self.current_game == "mario":
-            game = Mario(constants.mario_command + " \"" + model_config_file + "\"")
+            game = Mario(model_config_file)
         if self.current_game == "torcs":
-            # TODO: Torcs command (ports)
-            game = Torcs(constants.torcs_command + " \"" + model_config_file + "\"")
+            game = Torcs(model_config_file)
 
         result = game.run()
         try:
@@ -239,7 +237,7 @@ class Evolution():
             halloffame.update(population)
 
         record = stats.compile(population) if stats else {}
-        logbook.record(gen=0, nevals=len(invalid_ind), **record)
+        logbook.record(gen=0, nevals=str(len(invalid_ind)) + "*" + str(self.evolution_params.fit_repetitions), **record)
         if self.evolution_params.verbose:
             print(logbook.stream)
 
@@ -267,7 +265,7 @@ class Evolution():
             for i in range(self.evolution_params.elite):
                 offspring.append(toolbox.clone(population[i]))
 
-            #invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            # invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             invalid_ind = offspring
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
@@ -283,7 +281,8 @@ class Evolution():
 
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
-            logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+            logbook.record(gen=gen, nevals=str(len(invalid_ind)) + "*" + str(self.evolution_params.fit_repetitions),
+                           **record)
             if self.evolution_params.verbose:
                 print(logbook.stream)
 

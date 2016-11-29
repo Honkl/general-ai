@@ -15,17 +15,11 @@ TORCS = "\"" + prefix + "general-ai\\Game-interfaces\\TORCS\\torcs_starter.bat\"
 TORCS_XML = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\classes;" + prefix + "general-ai\\Game-interfaces\\TORCS\\scr-client\\lib\\*\""
 PORT = " \"3002\""
-TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
-# TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\""  # TODO: Relative path via cmd parameter
+# TORCS_EXE_DIRECTORY = " \"C:\\Users\\Jan\\Desktop\\torcs\""  # TODO: Relative path via cmd parameter
+TORCS_EXE_DIRECTORY = " \"C:\\Program Files (x86)\\torcs\""  # TODO: Relative path via cmd parameter
 
 # config files for each game (contains I/O sizes)
 GAME2048_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\2048\\2048_config.json"
 ALHAMBRA_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Alhambra\\Alhambra_config.json"
 TORCS_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\TORCS\\TORCS_config.json"
 MARIO_CONFIG_FILE = prefix + "general-ai\\Game-interfaces\\Mario\\Mario_config.json"
-
-# commands used to run games
-torcs_command = TORCS + TORCS_XML + TORCS_JAVA_CP + PORT + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE
-alhambra_command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE
-game2048_command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE
-mario_command = MARIO + PYTHON_SCRIPT + PYTHON_EXE

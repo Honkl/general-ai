@@ -1,13 +1,16 @@
 from games.game import Game
 import subprocess
+from constants import *
 import re
 
+
 class Mario(Game):
-    def __init__(self, command):
-        self.command = command
+    def __init__(self, model_config_file):
+        self.model_config_file = model_config_file
 
     def run(self):
-        p = subprocess.Popen(self.command, stdout=subprocess.PIPE)
+        command = MARIO + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\""
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
         result = p.communicate()[0].decode('ascii')
         result = re.split("\\r\\n|\\n", result)
 
