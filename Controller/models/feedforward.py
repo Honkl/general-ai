@@ -59,7 +59,7 @@ class Network():
 
         for W in self.matrices:
             x = np.concatenate((x, [1]), axis=0)
-            x = activation(np.dot(x, W))
+            x = activation(np.matmul(x, W))
         result = ""
         assert (self.layer_sizes[-1] == len(x))
         for i in range(len(x)):

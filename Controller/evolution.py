@@ -29,6 +29,7 @@ class EvolutionParams():
                  cxpb,
                  mutpb,
                  ngen,
+                 fit_repetitions,
                  cxindpb,
                  mutindpb,
                  hof_size,
@@ -40,6 +41,7 @@ class EvolutionParams():
         self._cxpb = cxpb
         self._mutpb = mutpb
         self._ngen = ngen
+        self._fit_repetitions = fit_repetitions
         self._cxindpb = cxindpb
         self._mutindpb = mutindpb
         self._hof_size = hof_size
@@ -63,6 +65,10 @@ class EvolutionParams():
     @property
     def ngen(self):
         return self._ngen
+
+    @property
+    def fit_repetitions(self):
+        return self._fit_repetitions
 
     @property
     def cxindpb(self):
@@ -168,6 +174,12 @@ class Evolution():
 
         return result,
 
+    def eval_avg_fitness(self, individual):
+        fitnesses = []
+        for i in range(self.evolution_params.fit_repetitions):
+            fitnesses.append(self.eval_fitness(individual))
+        return np.average(fitnesses),
+
     def mut_random(self, individual, mutpb):
         for i in range(len(individual)):
             if (np.random.random() < mutpb):
@@ -190,7 +202,7 @@ class Evolution():
         toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-        toolbox.register("evaluate", self.eval_fitness)
+        toolbox.register("evaluate", self.eval_avg_fitness)
         toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
         # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
         toolbox.register("mutate", self.mut_random, mutpb=self.evolution_params.mutindpb)
@@ -217,14 +229,12 @@ class Evolution():
         else:
             halloffame = None
 
-        # Evaluate all individuals
         # invalid_ind = [ind for ind in population if not ind.fitness.valid]
         invalid_ind = population
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        # TODO: hall of fame != elite
         if halloffame is not None:
             halloffame.update(population)
 
@@ -233,16 +243,31 @@ class Evolution():
         if self.evolution_params.verbose:
             print(logbook.stream)
 
+        population.sort(key=lambda ind: ind.fitness.values, reverse=True)
+
         # Begin the generational process
         for gen in range(1, self.evolution_params.ngen + 1):
+
             # Select the next generation individuals
-            offspring = toolbox.select(population, len(population))
+            offspring = toolbox.select(population, len(population) - self.evolution_params.elite)
+            offspring = [toolbox.clone(ind) for ind in offspring]
 
-            # Vary the pool of individuals
-            offspring = algorithms.varAnd(offspring, toolbox, self.evolution_params.cxpb, self.evolution_params.mutpb)
+            # Apply crossover and mutation on the offspring
+            for i in range(1, len(offspring), 2):
+                if np.random.random() < self.evolution_params.cxpb:
+                    offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
+                    del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
-            # Evaluate all individuals
-            # invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            for i in range(len(offspring)):
+                if np.random.random() < self.evolution_params.mutpb:
+                    offspring[i], = toolbox.mutate(offspring[i])
+                    del offspring[i].fitness.values
+
+            # Add elite individuals (they lived through mutation and x-over)
+            for i in range(self.evolution_params.elite):
+                offspring.append(toolbox.clone(population[i]))
+
+            #invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             invalid_ind = offspring
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
@@ -254,6 +279,7 @@ class Evolution():
 
             # Replace the current population by the offspring
             population[:] = offspring
+            population.sort(key=lambda ind: ind.fitness.values, reverse=True)
 
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
@@ -261,10 +287,9 @@ class Evolution():
             if self.evolution_params.verbose:
                 print(logbook.stream)
 
-            # Logging hall of fame
-            if halloffame is not None:
-                for i in range(len(halloffame)):
-                    model_config_file = constants.loc + "\\config\\feedforward_hof_" + str(i) + ".json"
-                    self.write_to_file(halloffame[i], model_config_file)
+            if self.evolution_params.verbose:
+                for i in range(self.evolution_params.elite):
+                    model_config_file = constants.loc + "\\config\\feedforward_elite_" + str(i) + ".json"
+                    self.write_to_file(population[i], model_config_file)
 
         return population, logbook
