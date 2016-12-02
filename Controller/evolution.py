@@ -28,7 +28,7 @@ class EvolutionParams():
                  cxpb,
                  mutpb,
                  ngen,
-                 fit_repetitions,
+                 game_batch_size,
                  cxindpb,
                  mutindpb,
                  hof_size,
@@ -40,7 +40,7 @@ class EvolutionParams():
         self._cxpb = cxpb
         self._mutpb = mutpb
         self._ngen = ngen
-        self._fit_repetitions = fit_repetitions
+        self._game_batch_size = game_batch_size
         self._cxindpb = cxindpb
         self._mutindpb = mutindpb
         self._hof_size = hof_size
@@ -67,7 +67,7 @@ class EvolutionParams():
 
     @property
     def fit_repetitions(self):
-        return self._fit_repetitions
+        return self._game_batch_size
 
     @property
     def cxindpb(self):
@@ -156,13 +156,13 @@ class Evolution():
 
         game = ""
         if self.current_game == "alhambra":
-            game = Alhambra(model_config_file)
+            game = Alhambra(model_config_file, self.evolution_params._game_batch_size)
         if self.current_game == "2048":
-            game = Game2048(model_config_file)
+            game = Game2048(model_config_file, self.evolution_params._game_batch_size)
         if self.current_game == "mario":
-            game = Mario(model_config_file)
+            game = Mario(model_config_file, self.evolution_params._game_batch_size)
         if self.current_game == "torcs":
-            game = Torcs(model_config_file)
+            game = Torcs(model_config_file, self.evolution_params._game_batch_size)
 
         result = game.run()
         try:
@@ -171,12 +171,6 @@ class Evolution():
             print("Failed attempt to delete config file (leaving file non-deleted).")
 
         return result,
-
-    def eval_avg_fitness(self, individual):
-        fitnesses = []
-        for i in range(self.evolution_params.fit_repetitions):
-            fitnesses.append(self.eval_fitness(individual))
-        return np.average(fitnesses),
 
     def mut_random(self, individual, mutpb):
         for i in range(len(individual)):
@@ -200,7 +194,7 @@ class Evolution():
         toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-        toolbox.register("evaluate", self.eval_avg_fitness)
+        toolbox.register("evaluate", self.eval_fitness)
         toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
         # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
         toolbox.register("mutate", self.mut_random, mutpb=self.evolution_params.mutindpb)
@@ -237,7 +231,7 @@ class Evolution():
             halloffame.update(population)
 
         record = stats.compile(population) if stats else {}
-        logbook.record(gen=0, nevals=str(len(invalid_ind)) + "*" + str(self.evolution_params.fit_repetitions), **record)
+        logbook.record(gen=0, nevals=str(len(invalid_ind)), **record)
         if self.evolution_params.verbose:
             print(logbook.stream)
 
@@ -281,8 +275,7 @@ class Evolution():
 
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
-            logbook.record(gen=gen, nevals=str(len(invalid_ind)) + "*" + str(self.evolution_params.fit_repetitions),
-                           **record)
+            logbook.record(gen=gen, nevals=str(len(invalid_ind)), **record)
             if self.evolution_params.verbose:
                 print(logbook.stream)
 

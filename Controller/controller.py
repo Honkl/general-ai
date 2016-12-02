@@ -13,11 +13,11 @@ from models.feedforward import ModelParams
 np.random.seed(42)
 
 evolution_params = EvolutionParams(
-    pop_size=10,
+    pop_size=5,
     cxpb=0.3,
     mutpb=0.1,
     ngen=5,
-    fit_repetitions=2,
+    game_batch_size=5,
     cxindpb=0.5,
     mutindpb=0.1,
     hof_size=0,
@@ -34,9 +34,9 @@ if __name__ == '__main__':
     start = time.time()
 
     # game = "alhambra"
-    # game = "2048"
+    game = "2048"
     # game = "mario"
-    game = "torcs"
+    # game = "torcs"
 
     evolution = Evolution(game, evolution_params, model_params)
 
