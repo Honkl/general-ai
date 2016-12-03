@@ -12,8 +12,9 @@ class Torcs(Game):
     master_lock = Lock()
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
 
-    def __init__(self, model_config_file):
+    def __init__(self, model_config_file, game_batch_size):
         self.model_config_file = model_config_file
+        self.game_batch_size = game_batch_size
 
     def run(self):
 
@@ -34,17 +35,20 @@ class Torcs(Game):
         xml = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_" + str(port_num) + ".xml\""
         port = " \"" + str(port_num) + "\""
 
-        MCF = " \"" + self.model_config_file + "\""
-        command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE + MCF
-        p = subprocess.Popen(command, stdout=subprocess.PIPE)
-        result = p.communicate()[0].decode('ascii')
+        avg_result = 0
+        for _ in range(self.game_batch_size):
 
+            MCF = " \"" + self.model_config_file + "\""
+            command = TORCS + xml + TORCS_JAVA_CP + port + PYTHON_SCRIPT + TORCS_EXE_DIRECTORY + PYTHON_EXE + MCF
+            p = subprocess.Popen(command, stdout=subprocess.PIPE)
+            result = p.communicate()[0].decode('ascii')
+            result = re.split("\\r\\n|\\n", result)
+            distances = []
+            for line in result:
+                if "RACED DISTANCE:" in line:
+                    distances.append(line.split(":")[1].strip())
+            avg_result += float(distances[0])
+
+        avg_result = avg_result / float(self.game_batch_size)
         my_port_lock.release()
-
-        result = re.split("\\r\\n|\\n", result)
-        distances = []
-        print(result)
-        for line in result:
-            if "RACED DISTANCE:" in line:
-                distances.append(line.split(":")[1].strip())
-        return float(distances[0])
+        return avg_result
