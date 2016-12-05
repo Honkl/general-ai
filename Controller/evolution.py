@@ -151,7 +151,7 @@ class Evolution():
         :return: Fitness of the individual (must be tuple for Deap library).
         """
         id = uuid.uuid4()
-        model_config_file = constants.loc + "\\config\\feedforward_" + str(id) + ".json"
+        model_config_file = constants.loc + "\\config\\" + self.current_game + "\\feedforward_" + str(id) + ".json"
         self.write_to_file(individual, model_config_file)
 
         game = ""
@@ -178,6 +178,19 @@ class Evolution():
                 individual[i] = np.random.random()
         return individual,
 
+    def init_individual(self, icls, length, content=None):
+        if content == None:
+            return icls([np.random.random() for _ in range(length)])
+        return icls(content)
+
+    def init_population(self, pop_size, container, ind_init, file_name=None):
+        if file_name == None:
+            return container(ind_init() for _ in range(pop_size))
+
+        with open(file_name) as f:
+            content = json.load(f)
+            return container(ind_init(content=x) for x in content["population"])
+
     def deap_toolbox_init(self):
         """
         Initializes the current instance of evolution.
@@ -191,8 +204,8 @@ class Evolution():
         toolbox = base.Toolbox()
 
         toolbox.register("attr_float", np.random.random)
-        toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=individual_len)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox.register("individual", self.init_individual, length=individual_len, icls=creator.Individual)
+        toolbox.register("population", self.init_population, container=list, ind_init=toolbox.individual)
 
         toolbox.register("evaluate", self.eval_fitness)
         toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
@@ -204,6 +217,12 @@ class Evolution():
         toolbox.register("map", executor.map)
         return toolbox
 
+    def save_population(self, pop, file_name):
+        with open(file_name, "w") as f:
+            data = {}
+            data["population"] = pop
+            f.write(json.dumps(data))
+
     def start(self):
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -211,7 +230,7 @@ class Evolution():
         stats.register("max", np.max)
 
         toolbox = self.deap_toolbox_init()
-        population = toolbox.population(n=self.evolution_params.pop_size)
+        population = toolbox.population(pop_size=self.evolution_params.pop_size)
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
@@ -278,10 +297,5 @@ class Evolution():
             logbook.record(gen=gen, nevals=str(len(invalid_ind)), **record)
             if self.evolution_params.verbose:
                 print(logbook.stream)
-
-            if self.evolution_params.verbose:
-                for i in range(self.evolution_params.elite):
-                    model_config_file = constants.loc + "\\config\\feedforward_elite_" + str(i) + ".json"
-                    self.write_to_file(population[i], model_config_file)
 
         return population, logbook
