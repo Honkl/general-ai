@@ -12,9 +12,10 @@ class Torcs(Game):
     master_lock = Lock()
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
 
-    def __init__(self, model_config_file, game_batch_size):
+    def __init__(self, model_config_file, game_batch_size, seed):
         self.model_config_file = model_config_file
         self.game_batch_size = game_batch_size
+        self.seed = seed
 
     def run(self):
 

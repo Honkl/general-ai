@@ -10,7 +10,6 @@ namespace AlhambraInterface
     class AlhambraStarter
     {
         private const int NumberOfPlayers = 3;
-        private static Random rng = new Random();
 
         static void Main(string[] args)
         {
@@ -20,9 +19,10 @@ namespace AlhambraInterface
             string pythonExe = "\"" + args[1] + "\"";
             string modelConfigFile = " \"" + args[2] + "\"";
             int gameBatchSize = int.Parse(args[3]);
+            int seed = int.Parse(args[4]);
 
             string gameConfigFile = " \"Game-interfaces\\Alhambra\\Alhambra_config.json\"";
-            RunGame(pythonScript, pythonExe, gameConfigFile, modelConfigFile, gameBatchSize);
+            RunGame(pythonScript, pythonExe, gameConfigFile, modelConfigFile, gameBatchSize, seed);
         }
 
         /// <summary>
@@ -33,7 +33,8 @@ namespace AlhambraInterface
         /// <param name="gameConfigFile">Game configuration file (number of inputs / outputs for AI.</param>
         /// <param name="modelConfigFile">Model configuration file for AI.</param>
         /// <param name="gameBatchSize">Number of games that will be played and averaged as a result.</param>
-        private static void RunGame(string pythonScript, string pythonExe, string gameConfigFile, string modelConfigFile, int gameBatchSize)
+        /// <param name="seed">Seed for random generator.</param>
+        private static void RunGame(string pythonScript, string pythonExe, string gameConfigFile, string modelConfigFile, int gameBatchSize, int seed)
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonExe;
@@ -50,11 +51,13 @@ namespace AlhambraInterface
                 JsonMessageObject.InitStaticValues();
 
                 int playedGames = 0;
+                Random rnd = new Random(seed);
                 double[] avgResults = new double[NumberOfPlayers]; // At index 0 is our general-ai agent
                 while (playedGames < gameBatchSize)
                 {
                     bool ok = false;
-                    Controller c = CreateGame(NumberOfPlayers, rng, reader, writer);
+                    Random rndForGame = new Random(rnd.Next());
+                    Controller c = CreateGame(NumberOfPlayers, rndForGame, reader, writer);
                     try
                     {
                         c.ExecuteNewMove();

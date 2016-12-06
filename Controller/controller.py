@@ -5,12 +5,15 @@ from __future__ import division
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 from deap import tools
 from evolution import Evolution, EvolutionParams
 from models.feedforward import ModelParams
 
-np.random.seed(42)
+MASTER_SEED = 42
+random.seed(MASTER_SEED)
+np.random.seed(MASTER_SEED)
 
 evolution_params = EvolutionParams(
     pop_size=5,

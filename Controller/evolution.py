@@ -6,6 +6,7 @@ import json
 from builtins import property
 
 import numpy as np
+import random
 import concurrent.futures
 import constants
 import uuid
@@ -178,25 +179,27 @@ class Evolution():
             data["activation"] = self.model_params.activation
             f.write(json.dumps(data))
 
-    def eval_fitness(self, individual):
+    def eval_fitness(self, individual, seed):
         """
         Evaluates a fitness of the specified individual.
         :param individual: Individual whose fitness will be evaluated.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
         id = uuid.uuid4()
-        model_config_file = constants.loc + "\\config\\" + self.current_game + "\\feedforward_" + str(id) + ".json"
+        model_config_file = constants.loc + "\\config\\" + self.current_game + "\\tmp\\feedforward_" + str(id) + ".json"
         self.write_to_file(individual, model_config_file)
 
         game = ""
+        params = [model_config_file, self.evolution_params._game_batch_size, seed]
+
         if self.current_game == "alhambra":
-            game = Alhambra(model_config_file, self.evolution_params._game_batch_size)
+            game = Alhambra(*params)
         if self.current_game == "2048":
-            game = Game2048(model_config_file, self.evolution_params._game_batch_size)
+            game = Game2048(*params)
         if self.current_game == "mario":
-            game = Mario(model_config_file, self.evolution_params._game_batch_size)
+            game = Mario(*params)
         if self.current_game == "torcs":
-            game = Torcs(model_config_file, self.evolution_params._game_batch_size)
+            game = Torcs(*params)
 
         result = game.run()
         try:
@@ -253,14 +256,13 @@ class Evolution():
 
     def save_population(self, pop, log):
         current = time.localtime()
-        t_string = str(current.tm_year) + "-" + \
-                   str(current.tm_mon) + "-" + \
-                   str(current.tm_mday) + "_" + \
-                   str(current.tm_hour) + "-" + \
-                   str(current.tm_min) + "-" + \
-                   str(current.tm_sec)
+        t_string = str(current.tm_year).zfill(2) + "-" + \
+                   str(current.tm_mon).zfill(2) + "-" + \
+                   str(current.tm_mday).zfill(2) + "_" + \
+                   str(current.tm_hour).zfill(2) + "-" + \
+                   str(current.tm_min).zfill(2) + "-" + \
+                   str(current.tm_sec).zfill(2)
         dir = constants.loc + "\\config\\" + self.current_game + "\\logs_" + t_string
-        print(dir)
         if os.path.exists(dir):
             print("Can not make logs. Directory already exists")
             return
@@ -284,6 +286,8 @@ class Evolution():
         dir = constants.loc + "\\config\\" + self.current_game
         if not os.path.exists(dir):
             os.makedirs(dir)
+        if not os.path.exists(dir + "\\tmp"):
+            os.makedirs(dir + "\\tmp")
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -303,7 +307,8 @@ class Evolution():
 
         # invalid_ind = [ind for ind in population if not ind.fitness.valid]
         invalid_ind = population
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(invalid_ind))]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, seeds)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
@@ -341,7 +346,8 @@ class Evolution():
 
             # invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             invalid_ind = offspring
-            fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+            seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(invalid_ind))]
+            fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, seeds)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
 
