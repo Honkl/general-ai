@@ -9,6 +9,7 @@ import numpy as np
 import concurrent.futures
 import constants
 import uuid
+import time
 
 from deap import creator, base, tools
 
@@ -22,6 +23,23 @@ class EvolutionParams():
     """
     Encapsulates parameters of the evolution algorithm.
     """
+
+    @staticmethod
+    def from_dict(data):
+        params = EvolutionParams(
+            data["pop_size"],
+            data["cxpb"],
+            data["mutpb"],
+            data["ngen"],
+            data["game_batch_size"],
+            data["cxindpb"],
+            data["mutindpb"],
+            data["hof_size"],
+            data["elite"],
+            data["tournsize"],
+            data["verbose"],
+            data["max_workers"])
+        return params
 
     def __init__(self,
                  pop_size,
@@ -96,6 +114,22 @@ class EvolutionParams():
     @property
     def max_workers(self):
         return self._max_workers
+
+    def to_dict(self):
+        data = {}
+        data["pop_size"] = self._pop_size
+        data["cxpb"] = self._cxpb
+        data["mutpb"] = self._mutpb
+        data["ngen"] = self._ngen
+        data["game_batch_size"] = self._game_batch_size
+        data["cxindpb"] = self._cxindpb
+        data["mutindpb"] = self._mutindpb
+        data["hof_size"] = self._hof_size
+        data["elite"] = self._elite
+        data["tournsize"] = self._tournsize
+        data["verbose"] = self._verbose
+        data["max_workers"] = self._max_workers
+        return data
 
 
 class Evolution():
@@ -217,13 +251,40 @@ class Evolution():
         toolbox.register("map", executor.map)
         return toolbox
 
-    def save_population(self, pop, file_name):
-        with open(file_name, "w") as f:
+    def save_population(self, pop, log):
+        current = time.localtime()
+        t_string = str(current.tm_year) + "-" + \
+                   str(current.tm_mon) + "-" + \
+                   str(current.tm_mday) + "_" + \
+                   str(current.tm_hour) + "-" + \
+                   str(current.tm_min) + "-" + \
+                   str(current.tm_sec)
+        dir = constants.loc + "\\config\\" + self.current_game + "\\logs_" + t_string
+        print(dir)
+        if os.path.exists(dir):
+            print("Can not make logs. Directory already exists")
+            return
+
+        os.makedirs(dir)
+        with open((dir + "\\pop.json"), "w") as f:
             data = {}
             data["population"] = pop
             f.write(json.dumps(data))
 
+        with open((dir + "\\logbook.txt"), "w") as f:
+            f.write(str(log))
+
+        with open((dir + "\\settings.json"), "w") as f:
+            data = {}
+            data["evolution_params"] = self.evolution_params.to_dict()
+            data["model_params"] = self.model_params.to_dict()
+            f.write(json.dumps(data))
+
     def start(self):
+        dir = constants.loc + "\\config\\" + self.current_game
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
         stats.register("min", np.min)
@@ -298,4 +359,5 @@ class Evolution():
             if self.evolution_params.verbose:
                 print(logbook.stream)
 
+        self.save_population(population, logbook)
         return population, logbook

@@ -1,12 +1,20 @@
 import numpy as np
 import sys
 from models.model import Model
+import json
 
 
 class ModelParams():
     """
     Encapsulates parameters of a model.
     """
+
+    @staticmethod
+    def from_dict(data):
+        params = ModelParams(
+            data["hidden_layers"],
+            data["activation"])
+        return params
 
     def __init__(self, hidden_layers, activation):
         self._hidden_layers = hidden_layers
@@ -19,6 +27,12 @@ class ModelParams():
     @property
     def activation(self):
         return self._activation
+
+    def to_dict(self):
+        data = {}
+        data["hidden_layers"] = self._hidden_layers
+        data["activation"] = self._activation
+        return data
 
 
 class Network():
