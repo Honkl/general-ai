@@ -254,20 +254,10 @@ class Evolution():
         toolbox.register("map", executor.map)
         return toolbox
 
-    def save_population(self, pop, log):
-        current = time.localtime()
-        t_string = str(current.tm_year).zfill(2) + "-" + \
-                   str(current.tm_mon).zfill(2) + "-" + \
-                   str(current.tm_mday).zfill(2) + "_" + \
-                   str(current.tm_hour).zfill(2) + "-" + \
-                   str(current.tm_min).zfill(2) + "-" + \
-                   str(current.tm_sec).zfill(2)
-        dir = constants.loc + "\\config\\" + self.current_game + "\\logs_" + t_string
-        if os.path.exists(dir):
-            print("Can not make logs. Directory already exists")
-            return
+    def save_population(self, dir, pop, log):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-        os.makedirs(dir)
         with open((dir + "\\pop.json"), "w") as f:
             data = {}
             data["population"] = pop
@@ -322,6 +312,16 @@ class Evolution():
 
         population.sort(key=lambda ind: ind.fitness.values, reverse=True)
 
+        # create name for directory to store logs
+        current = time.localtime()
+        t_string = str(current.tm_year).zfill(2) + "-" + \
+                   str(current.tm_mon).zfill(2) + "-" + \
+                   str(current.tm_mday).zfill(2) + "_" + \
+                   str(current.tm_hour).zfill(2) + "-" + \
+                   str(current.tm_min).zfill(2) + "-" + \
+                   str(current.tm_sec).zfill(2)
+        dir = constants.loc + "\\config\\" + self.current_game + "\\logs_" + t_string
+
         # Begin the generational process
         for gen in range(1, self.evolution_params.ngen + 1):
 
@@ -365,5 +365,8 @@ class Evolution():
             if self.evolution_params.verbose:
                 print(logbook.stream)
 
-        self.save_population(population, logbook)
+            if (gen % 10 == 0):
+                self.save_population(dir, population, logbook)
+
+        self.save_population(dir, population, logbook)
         return population, logbook
