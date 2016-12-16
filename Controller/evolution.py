@@ -11,6 +11,7 @@ import concurrent.futures
 import constants
 import uuid
 import time
+import matplotlib.pyplot as plt
 
 from deap import creator, base, tools
 
@@ -134,10 +135,11 @@ class EvolutionParams():
 
 
 class Evolution():
-    def __init__(self, game, evolution_params, model_params):
+    def __init__(self, game, evolution_params, model_params, logs_every=50):
         self.current_game = game
         self.evolution_params = evolution_params
         self.model_params = model_params
+        self.logs_every = logs_every
 
     def get_number_of_weights(self):
         """
@@ -254,7 +256,7 @@ class Evolution():
         toolbox.register("map", executor.map)
         return toolbox
 
-    def save_population(self, dir, pop, log):
+    def create_log_files(self, dir, pop, log, start_time):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
@@ -272,7 +274,23 @@ class Evolution():
             data["model_params"] = self.model_params.to_dict()
             f.write(json.dumps(data))
 
+        with open((dir + "\\runtime.txt"), "w") as f:
+            f.write("{} sec".format(time.time() - start_time))
+
+        gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
+        plt.figure()
+        plt.plot(gen, avg, label="average")
+        plt.plot(gen, min_, label="minimum")
+        plt.plot(gen, max_, label="maximum")
+        plt.xlabel("Generation")
+        plt.ylabel("Fitness")
+        plt.legend(loc="lower right")
+        plt.title(self.current_game)
+        plt.savefig(dir + "\\plot.jpg")
+
     def start(self):
+        start_time = time.time()
+
         dir = constants.loc + "\\config\\" + self.current_game
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -365,8 +383,10 @@ class Evolution():
             if self.evolution_params.verbose:
                 print(logbook.stream)
 
-            if (gen % 10 == 0):
-                self.save_population(dir, population, logbook)
+            if (gen % 20 == 0):
+                print("Time elapsed: {}".format(time.time() - start_time))
+                self.create_log_files(dir, population, logbook, start_time)
 
-        self.save_population(dir, population, logbook)
+        self.create_log_files(dir, population, logbook, start_time)
+
         return population, logbook
