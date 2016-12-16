@@ -118,10 +118,10 @@ class EvolutionParams():
         return data
 
     def to_string(self):
-        return "pop_size: {}, xover: {}/{}, mut: {}/{}, elite: {}, sel: {}".format(self.pop_size, self.cxpb,
+        return "pop_size: {}, xover: {}/{}, mut: {}/{}, hof: {}, sel: {}".format(self.pop_size, self.cxpb,
                                                                                    self.cxindpb,
                                                                                    self.mutpb, self.mutindpb,
-                                                                                   self.elite, self.selection)
+                                                                                   self.hof_size, self.selection)
 
 
 class Evolution():
@@ -180,7 +180,7 @@ class Evolution():
         :return: Fitness of the individual (must be tuple for Deap library).
         """
         id = uuid.uuid4()
-        model_config_file = constants.loc + "\\config\\" + self.current_game + "\\tmp\\feedforward_" + str(id) + ".json"
+        model_config_file = self.dir + "\\tmp\\feedforward_" + str(id) + ".json"
         self.write_to_file(individual, model_config_file)
 
         game = ""
@@ -290,11 +290,11 @@ class Evolution():
     def start(self):
         start_time = time.time()
 
-        dir = constants.loc + "\\config\\" + self.current_game
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        if not os.path.exists(dir + "\\tmp"):
-            os.makedirs(dir + "\\tmp")
+        self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model_params.name
+        if not os.path.exists(self.dir):
+            os.makedirs(self.dir)
+        if not os.path.exists(self.dir + "\\tmp"):
+            os.makedirs(self.dir + "\\tmp")
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -337,7 +337,7 @@ class Evolution():
                    str(current.tm_hour).zfill(2) + "-" + \
                    str(current.tm_min).zfill(2) + "-" + \
                    str(current.tm_sec).zfill(2)
-        dir = constants.loc + "\\config\\" + self.current_game + "\\logs_" + t_string
+        logs_dir = self.dir + "\\logs_" + t_string
 
         # Begin the generational process
         for gen in range(1, self.evolution_params.ngen + 1):
@@ -383,10 +383,12 @@ class Evolution():
             print(logbook.stream)
 
             if (gen % 20 == 0):
+                self.create_log_files(logs_dir, population, logbook, start_time)
                 print("Time elapsed: {}".format(time.time() - start_time))
-                self.create_log_files(dir, population, logbook, start_time)
+                if halloffame is not None:
+                    for i in range(len(halloffame)):
+                        self.write_to_file(halloffame[i], logs_dir + "\\best_" + str(i) + ".json")
 
-
-        self.create_log_files(dir, population, logbook, start_time)
+        self.create_log_files(logs_dir, population, logbook, start_time)
 
         return population, logbook

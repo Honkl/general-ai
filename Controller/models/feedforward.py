@@ -21,6 +21,10 @@ class ModelParams():
         self._activation = activation
 
     @property
+    def name(self):
+        return "feedforward"
+
+    @property
     def hidden_layers(self):
         return self._hidden_layers
 

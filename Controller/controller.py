@@ -17,18 +17,18 @@ np.random.seed(MASTER_SEED)
 
 evolution_params = EvolutionParams(
     pop_size=50,
-    cxpb=0.3,
-    mutpb=0.1,
-    ngen=100,
+    cxpb=0.05,
+    mutpb=0.05,
+    ngen=200,
     game_batch_size=10,
     cxindpb=0.5,
-    mutindpb=0.1,
-    hof_size=0,
-    elite=5,
-    selection=("selbest",))
+    mutindpb=0.3,
+    hof_size=5,
+    elite=0,
+    selection=("tournament",3))
 
 model_params = ModelParams(
-    hidden_layers=[16],
+    hidden_layers=[16,32],
     activation="relu")
 
 if __name__ == '__main__':
