@@ -25,9 +25,7 @@ evolution_params = EvolutionParams(
     mutindpb=0.1,
     hof_size=0,
     elite=5,
-    tournsize=3,
-    verbose=True,
-    max_workers=8)
+    selection=("selbest",))
 
 model_params = ModelParams(
     hidden_layers=[16],
@@ -39,5 +37,5 @@ if __name__ == '__main__':
     # game = "mario"
     # game = "torcs"
 
-    evolution = Evolution(game, evolution_params, model_params, logs_every=50)
+    evolution = Evolution(game, evolution_params, model_params, logs_every=50, max_workers=8)
     pop, log = evolution.start()

@@ -34,6 +34,9 @@ class ModelParams():
         data["activation"] = self._activation
         return data
 
+    def to_string(self):
+        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation)
+
 
 class Network():
     def __init__(self, layer_sizes, model_config):

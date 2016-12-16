@@ -38,9 +38,7 @@ class EvolutionParams():
             data["mutindpb"],
             data["hof_size"],
             data["elite"],
-            data["tournsize"],
-            data["verbose"],
-            data["max_workers"])
+            data["selection"])
         return params
 
     def __init__(self,
@@ -53,9 +51,7 @@ class EvolutionParams():
                  mutindpb,
                  hof_size,
                  elite,
-                 tournsize,
-                 verbose,
-                 max_workers):
+                 selection):
         self._pop_size = pop_size
         self._cxpb = cxpb
         self._mutpb = mutpb
@@ -65,9 +61,7 @@ class EvolutionParams():
         self._mutindpb = mutindpb
         self._hof_size = hof_size
         self._elite = elite
-        self._tournsize = tournsize
-        self._verbose = verbose
-        self._max_workers = max_workers
+        self._selection = selection
 
     @property
     def pop_size(self):
@@ -106,16 +100,8 @@ class EvolutionParams():
         return self._elite
 
     @property
-    def tournsize(self):
-        return self._tournsize
-
-    @property
-    def verbose(self):
-        return self._verbose
-
-    @property
-    def max_workers(self):
-        return self._max_workers
+    def selection(self):
+        return self._selection
 
     def to_dict(self):
         data = {}
@@ -128,17 +114,22 @@ class EvolutionParams():
         data["mutindpb"] = self._mutindpb
         data["hof_size"] = self._hof_size
         data["elite"] = self._elite
-        data["tournsize"] = self._tournsize
-        data["verbose"] = self._verbose
-        data["max_workers"] = self._max_workers
+        data["selection"] = self._selection
         return data
+
+    def to_string(self):
+        return "pop_size: {}, xover: {}/{}, mut: {}/{}, elite: {}, sel: {}".format(self.pop_size, self.cxpb,
+                                                                                   self.cxindpb,
+                                                                                   self.mutpb, self.mutindpb,
+                                                                                   self.elite, self.selection)
 
 
 class Evolution():
-    def __init__(self, game, evolution_params, model_params, logs_every=50):
+    def __init__(self, game, evolution_params, model_params, max_workers, logs_every=50):
         self.current_game = game
         self.evolution_params = evolution_params
         self.model_params = model_params
+        self.max_workers = max_workers
         self.logs_every = logs_every
 
     def get_number_of_weights(self):
@@ -185,6 +176,7 @@ class Evolution():
         """
         Evaluates a fitness of the specified individual.
         :param individual: Individual whose fitness will be evaluated.
+        :param seed: Seed for the game instance.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
         id = uuid.uuid4()
@@ -250,9 +242,16 @@ class Evolution():
         toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
         # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
         toolbox.register("mutate", self.mut_random, mutpb=self.evolution_params.mutindpb)
-        toolbox.register("select", tools.selTournament, tournsize=self.evolution_params.tournsize)
 
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.evolution_params.max_workers)
+        sel = self.evolution_params.selection[0]
+        if sel == "tournament":
+            toolbox.register("select", tools.selTournament, tournsize=self.evolution_params.selection[1])
+        elif sel == "selbest":
+            toolbox.register("select", tools.selBest)
+        else:
+            raise NotImplementedError
+
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
         toolbox.register("map", executor.map)
         return toolbox
 
@@ -285,7 +284,7 @@ class Evolution():
         plt.xlabel("Generation")
         plt.ylabel("Fitness")
         plt.legend(loc="lower right")
-        plt.title(self.current_game)
+        plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(), self.model_params.to_string()), fontsize=10)
         plt.savefig(dir + "\\plot.jpg")
 
     def start(self):
@@ -325,8 +324,8 @@ class Evolution():
 
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=str(len(invalid_ind)), **record)
-        if self.evolution_params.verbose:
-            print(logbook.stream)
+
+        print(logbook.stream)
 
         population.sort(key=lambda ind: ind.fitness.values, reverse=True)
 
@@ -380,12 +379,13 @@ class Evolution():
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
             logbook.record(gen=gen, nevals=str(len(invalid_ind)), **record)
-            if self.evolution_params.verbose:
-                print(logbook.stream)
+
+            print(logbook.stream)
 
             if (gen % 20 == 0):
                 print("Time elapsed: {}".format(time.time() - start_time))
                 self.create_log_files(dir, population, logbook, start_time)
+
 
         self.create_log_files(dir, population, logbook, start_time)
 
