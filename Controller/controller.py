@@ -17,15 +17,14 @@ np.random.seed(MASTER_SEED)
 
 evolution_params = EvolutionParams(
     pop_size=50,
-    cxpb=0.05,
-    mutpb=0.05,
+    cxpb=0.01,
+    mut=("uniform", 0.1, 0.1),
     ngen=200,
     game_batch_size=10,
     cxindpb=0.5,
-    mutindpb=0.3,
-    hof_size=5,
-    elite=0,
-    selection=("tournament",3))
+    hof_size=0,
+    elite=5,
+    selection=("selbest",))
 
 model_params = ModelParams(
     hidden_layers=[16,32],
@@ -37,5 +36,5 @@ if __name__ == '__main__':
     # game = "mario"
     # game = "torcs"
 
-    evolution = Evolution(game, evolution_params, model_params, logs_every=50, max_workers=8)
+    evolution = Evolution(game, evolution_params, model_params, logs_every=20, max_workers=8)
     pop, log = evolution.start()

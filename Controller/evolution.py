@@ -8,6 +8,9 @@ from builtins import property
 import numpy as np
 import random
 import concurrent.futures
+
+from sqlalchemy.ext.associationproxy import _AssociationList
+
 import constants
 import uuid
 import time
@@ -31,11 +34,10 @@ class EvolutionParams():
         params = EvolutionParams(
             data["pop_size"],
             data["cxpb"],
-            data["mutpb"],
+            data["mut"],
             data["ngen"],
             data["game_batch_size"],
             data["cxindpb"],
-            data["mutindpb"],
             data["hof_size"],
             data["elite"],
             data["selection"])
@@ -44,21 +46,19 @@ class EvolutionParams():
     def __init__(self,
                  pop_size,
                  cxpb,
-                 mutpb,
+                 mut,
                  ngen,
                  game_batch_size,
                  cxindpb,
-                 mutindpb,
                  hof_size,
                  elite,
                  selection):
         self._pop_size = pop_size
         self._cxpb = cxpb
-        self._mutpb = mutpb
+        self._mut = mut
         self._ngen = ngen
         self._game_batch_size = game_batch_size
         self._cxindpb = cxindpb
-        self._mutindpb = mutindpb
         self._hof_size = hof_size
         self._elite = elite
         self._selection = selection
@@ -72,8 +72,8 @@ class EvolutionParams():
         return self._cxpb
 
     @property
-    def mutpb(self):
-        return self._mutpb
+    def mut(self):
+        return self._mut
 
     @property
     def ngen(self):
@@ -86,10 +86,6 @@ class EvolutionParams():
     @property
     def cxindpb(self):
         return self._cxindpb
-
-    @property
-    def mutindpb(self):
-        return self._mutindpb
 
     @property
     def hof_size(self):
@@ -107,21 +103,20 @@ class EvolutionParams():
         data = {}
         data["pop_size"] = self._pop_size
         data["cxpb"] = self._cxpb
-        data["mutpb"] = self._mutpb
+        data["mut"] = self._mut
         data["ngen"] = self._ngen
         data["game_batch_size"] = self._game_batch_size
         data["cxindpb"] = self._cxindpb
-        data["mutindpb"] = self._mutindpb
         data["hof_size"] = self._hof_size
         data["elite"] = self._elite
         data["selection"] = self._selection
         return data
 
     def to_string(self):
-        return "pop_size: {}, xover: {}/{}, mut: {}/{}, hof: {}, sel: {}".format(self.pop_size, self.cxpb,
-                                                                                   self.cxindpb,
-                                                                                   self.mutpb, self.mutindpb,
-                                                                                   self.hof_size, self.selection)
+        return "pop_size: {}, xover: {}/{}, mut: {}, hof: {}, elite: {}, sel: {}".format(self.pop_size, self.cxpb,
+                                                                                         self.cxindpb,
+                                                                                         self.mut, self.hof_size,
+                                                                                         self.elite, self.selection)
 
 
 class Evolution():
@@ -203,9 +198,9 @@ class Evolution():
 
         return result,
 
-    def mut_random(self, individual, mutpb):
+    def mut_random(self, individual, mutindpb):
         for i in range(len(individual)):
-            if (np.random.random() < mutpb):
+            if (np.random.random() < mutindpb):
                 individual[i] = np.random.random()
         return individual,
 
@@ -240,8 +235,13 @@ class Evolution():
 
         toolbox.register("evaluate", self.eval_fitness)
         toolbox.register("mate", tools.cxUniform, indpb=self.evolution_params.cxindpb)
-        # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
-        toolbox.register("mutate", self.mut_random, mutpb=self.evolution_params.mutindpb)
+
+        mut_name = self.evolution_params.mut[0]
+        if mut_name == "uniform":
+            toolbox.register("mutate", self.mut_random, mutindpb=self.evolution_params.mut[2])
+        else:
+            raise NotImplementedError
+            # toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.05, indpb=0.05)
 
         sel = self.evolution_params.selection[0]
         if sel == "tournament":
@@ -284,7 +284,8 @@ class Evolution():
         plt.xlabel("Generation")
         plt.ylabel("Fitness")
         plt.legend(loc="lower right")
-        plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(), self.model_params.to_string()), fontsize=10)
+        plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(),
+                                            self.model_params.to_string()), fontsize=10)
         plt.savefig(dir + "\\plot.jpg")
 
     def start(self):
@@ -353,7 +354,7 @@ class Evolution():
                     del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
             for i in range(len(offspring)):
-                if np.random.random() < self.evolution_params.mutpb:
+                if np.random.random() < self.evolution_params.mut[1]:
                     offspring[i], = toolbox.mutate(offspring[i])
                     del offspring[i].fitness.values
 
@@ -382,12 +383,15 @@ class Evolution():
 
             print(logbook.stream)
 
-            if (gen % 20 == 0):
+            if (gen % self.logs_every == 0):
                 self.create_log_files(logs_dir, population, logbook, start_time)
                 print("Time elapsed: {}".format(time.time() - start_time))
                 if halloffame is not None:
                     for i in range(len(halloffame)):
                         self.write_to_file(halloffame[i], logs_dir + "\\best_" + str(i) + ".json")
+                elif self.evolution_params.elite > 0:
+                    for i in range(self.evolution_params.elite):
+                        self.write_to_file(population[i], logs_dir + "\\best_" + str(i) + ".json")
 
         self.create_log_files(logs_dir, population, logbook, start_time)
 
