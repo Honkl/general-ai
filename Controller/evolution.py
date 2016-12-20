@@ -9,8 +9,6 @@ import numpy as np
 import random
 import concurrent.futures
 
-from sqlalchemy.ext.associationproxy import _AssociationList
-
 import constants
 import uuid
 import time
@@ -278,11 +276,15 @@ class Evolution():
 
         gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
         plt.figure()
-        plt.plot(gen, avg, label="average")
-        plt.plot(gen, min_, label="minimum")
-        plt.plot(gen, max_, label="maximum")
+        plt.plot(gen, avg, label="avg")
+        plt.plot(gen, min_, label="min")
+        plt.plot(gen, max_, label="max")
+        i = np.argmax(avg)
+        plt.scatter(gen[i], avg[i])
+        plt.text(gen[i], avg[i], "{}".format(round(max(avg), 2)))
         plt.xlabel("Generation")
         plt.ylabel("Fitness")
+        plt.xlim([0, len(gen)])
         plt.legend(loc="lower right")
         plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(),
                                             self.model_params.to_string()), fontsize=10)
