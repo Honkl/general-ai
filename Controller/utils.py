@@ -13,7 +13,7 @@ GAME = "2048"
 
 models = []
 models.append(("Random", constants.loc + "/config/2048/random/random.json"))
-models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-16_21-02-27/best_0.json"))
+models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-20_14-40-18/best_0.json"))
 
 
 def plot_graph(values):
@@ -38,6 +38,7 @@ def plot_graph(values):
                      label=values[1][0])
 
     plt.ylim([0, 4000])
+    plt.gca().axes.set_xticklabels([])
     plt.ylabel('AVG fitness')
     plt.title('Model comparison (based on {} runs)'.format(EVALS))
     plt.legend(loc='upper center', fancybox=True, shadow=True, ncol=5)

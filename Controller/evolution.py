@@ -14,107 +14,12 @@ import uuid
 import time
 import matplotlib.pyplot as plt
 
-from deap import creator, base, tools
+from deap import creator, base, tools, cma
 
 from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
-
-
-class EvolutionParams():
-    """
-    Encapsulates parameters of the evolution algorithm.
-    """
-
-    @staticmethod
-    def from_dict(data):
-        params = EvolutionParams(
-            data["pop_size"],
-            data["cxpb"],
-            data["mut"],
-            data["ngen"],
-            data["game_batch_size"],
-            data["cxindpb"],
-            data["hof_size"],
-            data["elite"],
-            data["selection"])
-        return params
-
-    def __init__(self,
-                 pop_size,
-                 cxpb,
-                 mut,
-                 ngen,
-                 game_batch_size,
-                 cxindpb,
-                 hof_size,
-                 elite,
-                 selection):
-        self._pop_size = pop_size
-        self._cxpb = cxpb
-        self._mut = mut
-        self._ngen = ngen
-        self._game_batch_size = game_batch_size
-        self._cxindpb = cxindpb
-        self._hof_size = hof_size
-        self._elite = elite
-        self._selection = selection
-
-    @property
-    def pop_size(self):
-        return self._pop_size
-
-    @property
-    def cxpb(self):
-        return self._cxpb
-
-    @property
-    def mut(self):
-        return self._mut
-
-    @property
-    def ngen(self):
-        return self._ngen
-
-    @property
-    def fit_repetitions(self):
-        return self._game_batch_size
-
-    @property
-    def cxindpb(self):
-        return self._cxindpb
-
-    @property
-    def hof_size(self):
-        return self._hof_size
-
-    @property
-    def elite(self):
-        return self._elite
-
-    @property
-    def selection(self):
-        return self._selection
-
-    def to_dict(self):
-        data = {}
-        data["pop_size"] = self._pop_size
-        data["cxpb"] = self._cxpb
-        data["mut"] = self._mut
-        data["ngen"] = self._ngen
-        data["game_batch_size"] = self._game_batch_size
-        data["cxindpb"] = self._cxindpb
-        data["hof_size"] = self._hof_size
-        data["elite"] = self._elite
-        data["selection"] = self._selection
-        return data
-
-    def to_string(self):
-        return "pop_size: {}, xover: {}/{}, mut: {}, hof: {}, elite: {}, sel: {}".format(self.pop_size, self.cxpb,
-                                                                                         self.cxindpb,
-                                                                                         self.mut, self.hof_size,
-                                                                                         self.elite, self.selection)
 
 
 class Evolution():
@@ -226,7 +131,6 @@ class Evolution():
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
         toolbox = base.Toolbox()
-
         toolbox.register("attr_float", np.random.random)
         toolbox.register("individual", self.init_individual, length=individual_len, icls=creator.Individual)
         toolbox.register("population", self.init_population, container=list, ind_init=toolbox.individual)
@@ -290,14 +194,17 @@ class Evolution():
                                             self.model_params.to_string()), fontsize=10)
         plt.savefig(dir + "\\plot.jpg")
 
-    def start(self):
-        start_time = time.time()
-
+    def check_directory(self):
         self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model_params.name
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
         if not os.path.exists(self.dir + "\\tmp"):
             os.makedirs(self.dir + "\\tmp")
+
+    def start_simple_ea(self):
+        start_time = time.time()
+
+        self.check_directory()
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -398,3 +305,53 @@ class Evolution():
         self.create_log_files(logs_dir, population, logbook, start_time)
 
         return population, logbook
+
+    def start_evolution_strategy(self):
+        start_time = time.time()
+
+        self.check_directory()
+
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("avg", np.mean)
+        stats.register("min", np.min)
+        stats.register("max", np.max)
+
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMax)
+
+        toolbox = base.Toolbox()
+        toolbox.register("evaluate", self.eval_fitness, seed=np.random.randint(0, 100000))
+
+        logbook = tools.Logbook()
+        logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+        N = self.get_number_of_weights()
+
+        strategy = cma.Strategy(centroid=N, sigma=5.0, lambda_=10)
+        toolbox.register("generate", strategy.generate, creator.Individual)
+        toolbox.register("update", strategy.update)
+
+        hof = tools.HallOfFame(1)
+
+        print("ES Started")
+        for gen in range(10):
+
+            # Generate a new population
+            population = toolbox.generate()
+
+            # Evaluate the individuals
+            fitnesses = toolbox.map(toolbox.evaluate, population)
+            for ind, fit in zip(population, fitnesses):
+                ind.fitness.values = fit
+
+            if hof is not None:
+                hof.update(population)
+
+            # Update the strategy with the evaluated individuals
+            toolbox.update(population)
+
+            record = stats.compile(population) if stats is not None else {}
+            logbook.record(gen=gen, nevals=len(population), **record)
+            print(logbook.stream)
+
+        print("ES Complete")

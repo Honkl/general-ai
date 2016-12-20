@@ -8,14 +8,15 @@ import matplotlib.pyplot as plt
 import random
 
 from deap import tools
-from evolution import Evolution, EvolutionParams
+from evolution import Evolution
+from evolution_params import EvolutionParamsSEA
 from models.feedforward import ModelParams
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
-evolution_params = EvolutionParams(
+evolution_params = EvolutionParamsSEA(
     pop_size=50,
     cxpb=0.01,
     mut=("uniform", 0.1, 0.1),
@@ -24,10 +25,10 @@ evolution_params = EvolutionParams(
     cxindpb=0.5,
     hof_size=0,
     elite=5,
-    selection=("selbest",))
+    selection=("selbest", ))
 
 model_params = ModelParams(
-    hidden_layers=[16,32],
+    hidden_layers=[16],
     activation="relu")
 
 if __name__ == '__main__':
@@ -37,4 +38,5 @@ if __name__ == '__main__':
     # game = "torcs"
 
     evolution = Evolution(game, evolution_params, model_params, logs_every=20, max_workers=8)
-    pop, log = evolution.start()
+    evolution.start_simple_ea()
+    # evolution.start_evolution_strategy()

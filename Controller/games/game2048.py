@@ -17,4 +17,8 @@ class Game2048(Game):
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
         result = p.communicate()[0].decode('ascii')
         result = re.split("\\r\\n|\\n", result)
-        return float(result[0].split(":")[1].strip())
+        try:
+            return float(result[0].split(":")[1].strip())
+        except:
+            print("WRONG GAME RESULT")
+            print(result)
