@@ -20,4 +20,5 @@ class Mario(Game):
 
         for line in result:
             if "passed_distance" in line:
-                return float(line.split("=")[1].strip())
+                value = float(line.split("=")[1].strip())
+                return value

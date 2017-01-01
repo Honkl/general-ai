@@ -117,6 +117,7 @@ public class GeneralAIDriver extends Controller {
             act.steering = getSteer(values[5]);
             act.restartRace = false;
 
+            /**
             if (last == 0) {
                 last = System.currentTimeMillis();
             } else {
@@ -126,6 +127,7 @@ public class GeneralAIDriver extends Controller {
                     act.restartRace = true;
                 }
             }
+            /**/
             
             lastSensor = sensors;
 

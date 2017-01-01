@@ -7,14 +7,16 @@ from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
 
-EVALS = 100
+EVALS = 50
 np.random.seed(42)
-GAME = "2048"
+GAME = "mario"
 
 models = []
-models.append(("Random", constants.loc + "/config/2048/random/random.json"))
-models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-20_14-40-18/best_0.json"))
+#models.append(("Random", constants.loc + "/config/2048/random/random.json"))
+#models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-20_14-40-18/best_0.json"))
 
+models.append(("Random", constants.loc + "/config/mario/random/random.json"))
+models.append(("EVA + Feedforward", constants.loc + "/config/mario/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
 
 def plot_graph(values):
     n_groups = 1
@@ -37,7 +39,7 @@ def plot_graph(values):
                      error_kw=error_config,
                      label=values[1][0])
 
-    plt.ylim([0, 4000])
+    plt.ylim([0, 1.2])
     plt.gca().axes.set_xticklabels([])
     plt.ylabel('AVG fitness')
     plt.title('Model comparison (based on {} runs)'.format(EVALS))
@@ -56,7 +58,7 @@ def autolabel(rects, ax):
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                '%d' % int(height),
+                '{}'.format(float(height)),
                 ha='center', va='bottom')
 
 
