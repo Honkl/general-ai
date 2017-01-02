@@ -61,6 +61,11 @@ class Evolution():
         return total_weights
 
     def write_to_file(self, individual, filename):
+        """
+        Writes individual to file for logging purposes.
+        :param individual: Individual to log.
+        :param filename: Filename where to write.
+        """
         with open(filename, "w") as f:
             data = {}
             data["model_name"] = "feedforward"
@@ -102,6 +107,12 @@ class Evolution():
         return result,
 
     def mut_random(self, individual, mutindpb):
+        """
+        Provides random mutation of a individual.
+        :param individual: Individual to mutate.
+        :param mutindpb: Probability of mutation for single "bit" of individual.
+        :return: New mutated individual.
+        """
         for i in range(len(individual)):
             if (np.random.random() < mutindpb):
                 individual[i] = np.random.random()

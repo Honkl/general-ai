@@ -9,7 +9,7 @@ from games.game2048 import Game2048
 
 EVALS = 5
 np.random.seed(42)
-GAME = "mario"
+GAME = "alhambra"
 
 models = []
 #models.append(("Random", constants.loc + "/config/2048/random/random.json"))
@@ -18,9 +18,11 @@ models = []
 #models.append(("Random", constants.loc + "/config/mario/random/random.json"))
 #models.append(("EVA + Feedforward", constants.loc + "/config/mario/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
 
-models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
-models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
+#models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
 #models.append(("EVA + Feedforward", constants.loc + "/config/torcs/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
+
+models.append(("Random", constants.loc + "/config/alhambra/random/random.json"))
+models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2016-12-29_13-56-49/best_0.json"))
 
 
 def plot_graph(values):
@@ -44,7 +46,7 @@ def plot_graph(values):
                      error_kw=error_config,
                      label=values[1][0])
 
-    plt.ylim([0, 1.2])
+    plt.ylim([0, 200])
     plt.gca().axes.set_xticklabels([])
     plt.ylabel('AVG fitness')
     plt.title('Model comparison (based on {} runs)'.format(EVALS))
@@ -86,6 +88,9 @@ if __name__ == '__main__':
         if GAME == "torcs":
             game = Torcs(*params)
 
-        values.append((name, game.run()))
+        game_result = game.run(advanced_results=False)
+        print(game_result)
+        values.append((name, game_result))
+        print(values)
 
     plot_graph(values)

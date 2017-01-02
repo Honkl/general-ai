@@ -10,7 +10,7 @@ class Game2048(Game):
         self.game_batch_size = game_batch_size
         self.seed = seed
 
-    def run(self):
+    def run(self, advanced_results=False):
         command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\" " + str(
             self.game_batch_size) + " " + str(self.seed)
 

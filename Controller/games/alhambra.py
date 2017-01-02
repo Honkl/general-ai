@@ -10,13 +10,17 @@ class Alhambra(Game):
         self.game_batch_size = game_batch_size
         self.seed = seed
 
-    def run(self):
+    def run(self, advanced_results=False):
         command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\" " + str(
             self.game_batch_size) + " " + str(self.seed)
 
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
         result = p.communicate()[0].decode('ascii')
-        result = re.split("\\r\\n|\\n", result)
+        result = list(filter(None, re.split("\\r\\n|\\n", result)))
 
         number_of_players = 3  # TODO: set correct number of players
-        return float(result[0])
+        if advanced_results:
+            print(result)
+            return map(float, result)
+        else:
+            return float(result[0])
