@@ -121,12 +121,14 @@ class EvolutionParamsES(EvolutionParams):
                  ngen,
                  game_batch_size,
                  hof_size,
-                 elite):
+                 elite,
+                 sigma):
         self._pop_size = pop_size
         self._ngen = ngen
         self._game_batch_size = game_batch_size
         self._hof_size = hof_size
         self._elite = elite
+        self._sigma = sigma
 
     @property
     def pop_size(self):
@@ -148,6 +150,10 @@ class EvolutionParamsES(EvolutionParams):
     def elite(self):
         return self._elite
 
+    @property
+    def sigma(self):
+        return self._sigma
+
     def to_dict(self):
         data = {}
         data["pop_size"] = self._pop_size
@@ -158,4 +164,5 @@ class EvolutionParamsES(EvolutionParams):
         return data
 
     def to_string(self):
-        return "Evolution Strategy - pop_size: {}, hof: {}, elite: {}".format(self.pop_size, self.hof_size, self.elite)
+        return "Evolution Strategy - pop_size: {}, hof: {}, elite: {}, sigma: {}".format(self.pop_size, self.hof_size,
+                                                                                         self.elite, self.sigma)

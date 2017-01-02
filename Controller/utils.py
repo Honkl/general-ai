@@ -7,7 +7,7 @@ from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
 
-EVALS = 50
+EVALS = 5
 np.random.seed(42)
 GAME = "mario"
 
@@ -15,8 +15,13 @@ models = []
 #models.append(("Random", constants.loc + "/config/2048/random/random.json"))
 #models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-20_14-40-18/best_0.json"))
 
-models.append(("Random", constants.loc + "/config/mario/random/random.json"))
-models.append(("EVA + Feedforward", constants.loc + "/config/mario/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
+#models.append(("Random", constants.loc + "/config/mario/random/random.json"))
+#models.append(("EVA + Feedforward", constants.loc + "/config/mario/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
+
+models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
+models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
+#models.append(("EVA + Feedforward", constants.loc + "/config/torcs/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
+
 
 def plot_graph(values):
     n_groups = 1

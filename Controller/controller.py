@@ -9,34 +9,44 @@ import random
 
 from deap import tools
 from evolution import Evolution
-from evolution_params import EvolutionParamsSEA
+from evolution_params import EvolutionParamsSEA, EvolutionParamsES
 from models.feedforward import ModelParams
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
-evolution_params = EvolutionParamsSEA(
-    pop_size=50,
-    cxpb=0.01,
-    mut=("uniform", 0.1, 0.1),
+evolution_paramsSEA = EvolutionParamsSEA(
+    pop_size=25,
+    cxpb=0.5,
+    mut=("uniform", 0.2, 0.1),
     ngen=200,
-    game_batch_size=10,
-    cxindpb=0.5,
+    game_batch_size=5,
+    cxindpb=0.1,
     hof_size=0,
     elite=5,
-    selection=("selbest", ))
+    selection=("tournament", 2))
+
+evolution_paramsES = EvolutionParamsES(
+    pop_size=25,
+    ngen=500,
+    game_batch_size=5,
+    hof_size=5,
+    elite=0,
+    sigma=1.0)
 
 model_params = ModelParams(
-    hidden_layers=[16],
+    hidden_layers=[32, 32],
     activation="relu")
 
 if __name__ == '__main__':
     # game = "alhambra"
-    game = "2048"
-    # game = "mario"
+    # game = "2048"
+    game = "mario"
     # game = "torcs"
 
-    evolution = Evolution(game, evolution_params, model_params, logs_every=20, max_workers=8)
-    evolution.start_simple_ea()
-    # evolution.start_evolution_strategy()
+    # evolution = Evolution(game, evolution_paramsSEA, model_params, logs_every=10, max_workers=2)
+    # evolution.start_simple_ea()
+
+    evolution = Evolution(game, evolution_paramsES, model_params, logs_every=10, max_workers=2)
+    evolution.start_evolution_strategy()

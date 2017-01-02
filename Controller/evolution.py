@@ -194,17 +194,49 @@ class Evolution():
                                             self.model_params.to_string()), fontsize=10)
         plt.savefig(dir + "\\plot.jpg")
 
-    def check_directory(self):
+    def init_directories(self):
         self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model_params.name
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
         if not os.path.exists(self.dir + "\\tmp"):
             os.makedirs(self.dir + "\\tmp")
 
+        # create name for directory to store logs
+        current = time.localtime()
+        t_string = str(current.tm_year).zfill(2) + "-" + \
+                   str(current.tm_mon).zfill(2) + "-" + \
+                   str(current.tm_mday).zfill(2) + "_" + \
+                   str(current.tm_hour).zfill(2) + "-" + \
+                   str(current.tm_min).zfill(2) + "-" + \
+                   str(current.tm_sec).zfill(2)
+
+        return self.dir + "\\logs_" + t_string
+
+    def log_all(self, logs_dir, population, hof, logbook, start_time):
+        """
+        Creates all logs of the current state of evolution.
+        :param logs_dir: Logging directory.
+        :param population: Population to log.
+        :param hof: Hall of fame to log (can be None).
+        :param logbook: Logbook info (from deap lib).
+        :param start_time: Start time of evolution.
+        """
+        self.create_log_files(logs_dir, population, logbook, start_time)
+        print("Time elapsed: {}".format(time.time() - start_time))
+        if hof is not None:
+            for i in range(len(hof)):
+                self.write_to_file(hof[i], logs_dir + "\\best_" + str(i) + ".json")
+        elif self.evolution_params.elite > 0:
+            for i in range(self.evolution_params.elite):
+                self.write_to_file(population[i], logs_dir + "\\best_" + str(i) + ".json")
+
     def start_simple_ea(self):
+        """
+        Starts simple evolution algorithm.
+        """
         start_time = time.time()
 
-        self.check_directory()
+        logs_dir = self.init_directories()
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -236,18 +268,7 @@ class Evolution():
         logbook.record(gen=0, nevals=str(len(invalid_ind)), **record)
 
         print(logbook.stream)
-
         population.sort(key=lambda ind: ind.fitness.values, reverse=True)
-
-        # create name for directory to store logs
-        current = time.localtime()
-        t_string = str(current.tm_year).zfill(2) + "-" + \
-                   str(current.tm_mon).zfill(2) + "-" + \
-                   str(current.tm_mday).zfill(2) + "_" + \
-                   str(current.tm_hour).zfill(2) + "-" + \
-                   str(current.tm_min).zfill(2) + "-" + \
-                   str(current.tm_sec).zfill(2)
-        logs_dir = self.dir + "\\logs_" + t_string
 
         # Begin the generational process
         for gen in range(1, self.evolution_params.ngen + 1):
@@ -293,23 +314,19 @@ class Evolution():
             print(logbook.stream)
 
             if (gen % self.logs_every == 0):
-                self.create_log_files(logs_dir, population, logbook, start_time)
-                print("Time elapsed: {}".format(time.time() - start_time))
-                if halloffame is not None:
-                    for i in range(len(halloffame)):
-                        self.write_to_file(halloffame[i], logs_dir + "\\best_" + str(i) + ".json")
-                elif self.evolution_params.elite > 0:
-                    for i in range(self.evolution_params.elite):
-                        self.write_to_file(population[i], logs_dir + "\\best_" + str(i) + ".json")
+                self.log_all(logs_dir, population, halloffame, logbook, start_time)
 
-        self.create_log_files(logs_dir, population, logbook, start_time)
+        self.log_all(logs_dir, population, halloffame, logbook, start_time)
 
         return population, logbook
 
     def start_evolution_strategy(self):
-        start_time = time.time()
+        """
+        Starts evolution strategy (CMA-ES).
+        """
 
-        self.check_directory()
+        start_time = time.time()
+        logs_dir = self.init_directories()
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -320,27 +337,33 @@ class Evolution():
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
         toolbox = base.Toolbox()
-        toolbox.register("evaluate", self.eval_fitness, seed=np.random.randint(0, 100000))
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
+        toolbox.register("map", executor.map)
+        toolbox.register("evaluate", self.eval_fitness)
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
         N = self.get_number_of_weights()
-
-        strategy = cma.Strategy(centroid=N, sigma=5.0, lambda_=10)
+        strategy = cma.Strategy(centroid=[1.0] * N, sigma=self.evolution_params.sigma,
+                                lambda_=self.evolution_params.pop_size)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 
-        hof = tools.HallOfFame(1)
+        if (self.evolution_params.hof_size > 0):
+            hof = tools.HallOfFame(self.evolution_params.hof_size)
+        else:
+            hof = None
 
         print("ES Started")
-        for gen in range(10):
+        for gen in range(1, self.evolution_params.ngen + 1):
 
             # Generate a new population
             population = toolbox.generate()
 
             # Evaluate the individuals
-            fitnesses = toolbox.map(toolbox.evaluate, population)
+            seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(population))]
+            fitnesses = toolbox.map(toolbox.evaluate, population, seeds)
             for ind, fit in zip(population, fitnesses):
                 ind.fitness.values = fit
 
@@ -354,4 +377,8 @@ class Evolution():
             logbook.record(gen=gen, nevals=len(population), **record)
             print(logbook.stream)
 
+            if (gen % self.logs_every == 0):
+                self.log_all(logs_dir, population, hof, logbook, start_time)
+
+        self.log_all(logs_dir, population, hof, logbook, start_time)
         print("ES Complete")
