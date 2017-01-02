@@ -17,7 +17,7 @@ class Torcs(Game):
         self.game_batch_size = game_batch_size
         self.seed = seed
 
-    def run(self):
+    def run(self, advanced_results=False):
 
         Torcs.master_lock.acquire()
 

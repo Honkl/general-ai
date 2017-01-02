@@ -7,7 +7,7 @@ from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
 
-EVALS = 5
+EVALS = 50
 np.random.seed(42)
 GAME = "alhambra"
 
@@ -88,9 +88,9 @@ if __name__ == '__main__':
         if GAME == "torcs":
             game = Torcs(*params)
 
-        game_result = game.run(advanced_results=False)
+        game_result = game.run(advanced_results=True)
         print(game_result)
-        values.append((name, game_result))
-        print(values)
+        #values.append((name, game_result))
+        #print(values)
 
-    plot_graph(values)
+    #plot_graph(values)

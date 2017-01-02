@@ -21,6 +21,6 @@ class Alhambra(Game):
         number_of_players = 3  # TODO: set correct number of players
         if advanced_results:
             print(result)
-            return map(float, result)
+            return list(map(float, result))
         else:
             return float(result[0])
