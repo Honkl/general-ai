@@ -168,7 +168,7 @@ class Evolution():
         toolbox.register("map", executor.map)
         return toolbox
 
-    def create_log_files(self, dir, pop, log, start_time):
+    def create_log_files(self, dir, pop, log, elapsed_time):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
@@ -187,7 +187,7 @@ class Evolution():
             f.write(json.dumps(data))
 
         with open((dir + "\\runtime.txt"), "w") as f:
-            f.write("{} sec".format(time.time() - start_time))
+            f.write("{}".format(elapsed_time))
 
         gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
         plt.figure()
@@ -232,8 +232,14 @@ class Evolution():
         :param logbook: Logbook info (from deap lib).
         :param start_time: Start time of evolution.
         """
-        self.create_log_files(logs_dir, population, logbook, start_time)
-        print("Time elapsed: {}".format(time.time() - start_time))
+        t = time.time() - start_time
+        h = t // 3600
+        m = (t % 3600) // 60
+        s = t - (h * 3600) - (m * 60)
+        elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+
+        self.create_log_files(logs_dir, population, logbook, elapsed_time)
+        print("Time elapsed: {}".format(elapsed_time))
         if hof is not None:
             for i in range(len(hof)):
                 self.write_to_file(hof[i], logs_dir + "\\best_" + str(i) + ".json")
