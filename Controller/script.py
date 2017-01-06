@@ -3,8 +3,6 @@ import os
 import json
 import sys
 
-np.random.seed(42)
-
 if (len(sys.argv) != 3):
     raise Exception("Wrong number of parameters. Insert config file.")
 

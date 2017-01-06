@@ -7,53 +7,29 @@ from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
 
-EVALS = 50
-np.random.seed(42)
-GAME = "alhambra"
-
-models = []
-#models.append(("Random", constants.loc + "/config/2048/random/random.json"))
-#models.append(("EVA + Feedforward", constants.loc + "/config/2048/feedforward/logs_2016-12-20_14-40-18/best_0.json"))
-
-#models.append(("Random", constants.loc + "/config/mario/random/random.json"))
-#models.append(("EVA + Feedforward", constants.loc + "/config/mario/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
-
-#models.append(("Random", constants.loc + "/config/torcs/random/random.json"))
-#models.append(("EVA + Feedforward", constants.loc + "/config/torcs/feedforward/logs_2016-12-30_18-49-51/best_0.json"))
-
-models.append(("Random", constants.loc + "/config/alhambra/random/random.json"))
-models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2016-12-29_13-56-49/best_0.json"))
-
 
 def plot_graph(values):
-    n_groups = 1
+    fig, ax = plt.subplots(figsize=(6, 7))
 
-    fig, ax = plt.subplots(figsize=(7, 7))
-    index = np.arange(n_groups)
-    bar_width = 0.35
-    opacity = 0.4
-    error_config = {'ecolor': '0.3'}
+    bar_width = 0.3
+    opacity = 0.5
 
-    rects1 = plt.bar(index, values[0][1], bar_width,
-                     alpha=opacity,
-                     color='b',
-                     error_kw=error_config,
-                     label=values[0][0])
-
-    rects2 = plt.bar(index + bar_width, values[1][1], bar_width,
-                     alpha=opacity,
-                     color='r',
-                     error_kw=error_config,
-                     label=values[1][0])
+    for index, (name, value) in enumerate(values):
+        rects = plt.bar(index, value, bar_width,
+                        alpha=opacity,
+                        color='b',
+                        label=name,
+                        align='center')
+        autolabel(rects, ax)
 
     plt.ylim([0, 200])
     plt.gca().axes.set_xticklabels([])
     plt.ylabel('AVG fitness')
     plt.title('Model comparison (based on {} runs)'.format(EVALS))
-    plt.legend(loc='upper center', fancybox=True, shadow=True, ncol=5)
 
-    autolabel(rects1, ax)
-    autolabel(rects2, ax)
+    x = np.arange(len(values))
+    ax.set_xticks(x)
+    ax.set_xticklabels([name for (name, _) in values])
 
     plt.tight_layout()
     plt.savefig('comparison.jpg')
@@ -70,6 +46,14 @@ def autolabel(rects, ax):
 
 
 if __name__ == '__main__':
+
+    np.random.seed(42)
+    EVALS = 100
+    GAME = "alhambra"
+
+    models = []
+    #models.append(("Random", constants.loc + "/config/alhambra/random/random.json"))
+    models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2017-01-03_11-12-59/best_0.json"))
 
     values = []
     for model in models:
@@ -89,8 +73,8 @@ if __name__ == '__main__':
             game = Torcs(*params)
 
         game_result = game.run(advanced_results=True)
-        print(game_result)
-        #values.append((name, game_result))
-        #print(values)
+        values.append((name, game_result[0]))
+        values.append(("Original#1", game_result[1]))
+        values.append(("Original#2", game_result[2]))
 
-    #plot_graph(values)
+    plot_graph(values)
