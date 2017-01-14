@@ -1,4 +1,5 @@
 Controller/config/
+pop.json
 
 *.class
 *.pyc
