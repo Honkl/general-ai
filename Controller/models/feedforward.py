@@ -92,7 +92,7 @@ class Network():
 
 class FeedForward(Model):
     """
-    Represents a simple feedforward neural network model.
+    Represents a simple feedforward neural network model (fully connected).
     Can contain multiple networks (for each game phase).
     """
 

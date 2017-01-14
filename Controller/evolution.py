@@ -23,6 +23,8 @@ from games.game2048 import Game2048
 
 
 class Evolution():
+    all_time_best = []
+
     def __init__(self, game, evolution_params, model_params, max_workers, logs_every=50):
         self.current_game = game
         self.evolution_params = evolution_params
@@ -240,12 +242,25 @@ class Evolution():
 
         self.create_log_files(logs_dir, population, logbook, elapsed_time)
         print("Time elapsed: {}".format(elapsed_time))
-        if hof is not None:
-            for i in range(len(hof)):
-                self.write_to_file(hof[i], logs_dir + "\\best_" + str(i) + ".json")
-        elif self.evolution_params.elite > 0:
-            for i in range(self.evolution_params.elite):
-                self.write_to_file(population[i], logs_dir + "\\best_" + str(i) + ".json")
+
+        best_dir = logs_dir + "/best"
+        last_dir = logs_dir + "/last"
+
+        if not os.path.exists(best_dir):
+            os.makedirs(best_dir)
+        if not os.path.exists(last_dir):
+            os.makedirs(last_dir)
+
+        number_to_log = max(self.evolution_params.hof_size, self.evolution_params.elite)
+        for i in range(number_to_log):
+            self.write_to_file(population[i], last_dir + "\\best_" + str(i) + ".json")
+            self.all_time_best.append(population[i])
+
+        self.all_time_best.sort(key=lambda ind: ind.fitness.values, reverse=True)
+        self.all_time_best = self.all_time_best[:number_to_log]
+
+        for i in range(number_to_log):
+            self.write_to_file(self.all_time_best[i], best_dir + "\\best_" + str(i) + ".json")
 
     def start_simple_ea(self):
         """
@@ -362,8 +377,10 @@ class Evolution():
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
         N = self.get_number_of_weights()
-        strategy = cma.Strategy(centroid=[1.0] * N, sigma=self.evolution_params.sigma,
+        print("N: {}".format(N))
+        strategy = cma.Strategy(centroid=[0.0] * N, sigma=self.evolution_params.sigma,
                                 lambda_=self.evolution_params.pop_size)
+        print("CMA strategy created ({} s)".format(time.time() - start_time))
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 
@@ -387,8 +404,11 @@ class Evolution():
             if hof is not None:
                 hof.update(population)
 
+            print("Updating population...")
+            st = time.time()
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
+            print("Population updated ({} s)".format(time.time() - st))
 
             record = stats.compile(population) if stats is not None else {}
             logbook.record(gen=gen, nevals=len(population), **record)
