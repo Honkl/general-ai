@@ -17,6 +17,10 @@ import java.io.OutputStreamWriter;
  */
 public class GeneralAIDriver extends Controller {
 
+    /* Gear Changing Constants*/
+    final int[] gearUp = {5000, 6000, 6000, 6500, 7000, 0};
+    final int[] gearDown = {0, 2500, 3000, 3000, 3500, 3500};
+
     private BufferedWriter writer;
     private BufferedReader reader;
     private Process p;
@@ -62,7 +66,7 @@ public class GeneralAIDriver extends Controller {
             System.out.println("Exception while runtime.exec");
             ex.printStackTrace();
         }
-        
+
         float[] angles = new float[19];
 
         /* set angles as {-90,-75,-60,-45,-30,-20,-15,-10,-5,0,5,10,15,20,30,45,60,75,90} */
@@ -102,33 +106,34 @@ public class GeneralAIDriver extends Controller {
             writer.write(json);
             writer.flush();
 
+            // Debug
+            for (int i = 0; i < 20; i++) {
+                System.err.println(reader.readLine());
+            }
+            
             String[] output = reader.readLine().split(" ");
             double[] values = new double[output.length];
             for (int i = 0; i < output.length; i++) {
                 values[i] = Double.parseDouble(output[i]);
             }
-            
+
+            // AI results
             act = new Action();
             act.accelerate = values[0];
             act.brake = values[1];
             act.clutch = values[2];
             act.focus = getFocus(values[3]);
-            act.gear = getGear(values[4]);
             act.steering = getSteer(values[5]);
+
+            // Non-AI results
+            act.gear = getGear(sensors);
             act.restartRace = false;
 
             /**
-            if (last == 0) {
-                last = System.currentTimeMillis();
-            } else {
-                long current = System.currentTimeMillis();
-                if (current - last >= 1000) {
-                    last = current;
-                    act.restartRace = true;
-                }
-            }
-            /**/
-            
+             * if (last == 0) { last = System.currentTimeMillis(); } else { long
+             * current = System.currentTimeMillis(); if (current - last >= 1000)
+             * { last = current; act.restartRace = true; } } /*
+             */
             lastSensor = sensors;
 
             return act;
@@ -154,14 +159,41 @@ public class GeneralAIDriver extends Controller {
      *
      * @param outputFromAi Ouput of the AI.
      */
-    private int getGear(double outputFromAi) {
-        // Gear is in {-1, 0, ..., 6}
-        for (int i = 0; i < intervals.length; i++) {
-            if (outputFromAi >= intervals[i].lowerBound && outputFromAi <= intervals[i].upperBound) {
-                return i - 1;
+    /**
+     * private int getGear(double outputFromAi) { // Gear is in {-1, 0, ..., 6}
+     * for (int i = 0; i < intervals.length; i++) {
+     * if (outputFromAi >= intervals[i].lowerBound && outputFromAi <=
+     * intervals[i].upperBound) { return i - 1; } } return 0; } /*
+     */
+    /**
+     * Reused method from SimpleDriver.java.
+     *
+     * @param sensors Sensors from the server.
+     * @return Gear to use.
+     */
+    private int getGear(SensorModel sensors) {
+
+        int gear = sensors.getGear();
+        double rpm = sensors.getRPM();
+
+        // if gear is 0 (N) or -1 (R) just return 1 
+        if (gear < 1) {
+            return 1;
+        }
+        // check if the RPM value of car is greater than the one suggested 
+        // to shift up the gear from the current one     
+        if (gear < 6 && rpm >= gearUp[gear - 1]) {
+            return gear + 1;
+        } else // check if the RPM value of car is lower than the one suggested 
+        // to shift down the gear from the current one
+        {
+            if (gear > 1 && rpm <= gearDown[gear - 1]) {
+                return gear - 1;
+            } else // otherwhise keep current gear
+            {
+                return gear;
             }
         }
-        return 0;
     }
 
     /**
