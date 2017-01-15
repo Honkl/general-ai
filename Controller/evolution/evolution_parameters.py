@@ -1,4 +1,4 @@
-class EvolutionParams():
+class EvolutionParameters():
     def to_dict(self):
         raise NotImplementedError
 
@@ -6,14 +6,14 @@ class EvolutionParams():
         raise NotImplementedError
 
 
-class EvolutionParamsSEA(EvolutionParams):
+class EvolutionaryAlgorithmParameters(EvolutionParameters):
     """
     Encapsulates parameters of the simple evolutionary algorithm.
     """
 
     @staticmethod
     def from_dict(data):
-        params = EvolutionParamsSEA(
+        params = EvolutionaryAlgorithmParameters(
             data["pop_size"],
             data["cxpb"],
             data["mut"],
@@ -101,14 +101,14 @@ class EvolutionParamsSEA(EvolutionParams):
                                                                                          self.elite, self.selection)
 
 
-class EvolutionParamsES(EvolutionParams):
+class EvolutionStrategyParameters(EvolutionParameters):
     """
-       Encapsulates parameters of the evolution using evolution strategy.
-       """
+    Encapsulates parameters of the evolution using evolution strategy.
+    """
 
     @staticmethod
     def from_dict(data):
-        params = EvolutionParamsSEA(
+        params = EvolutionStrategyParameters(
             data["pop_size"],
             data["ngen"],
             data["game_batch_size"],

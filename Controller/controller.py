@@ -8,49 +8,53 @@ import matplotlib.pyplot as plt
 import random
 
 from deap import tools
-from evolution import Evolution
-from evolution_params import EvolutionParamsSEA, EvolutionParamsES
+from evolution.evolution import Evolution
+from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
+from evolution.evolution_strategy import EvolutionStrategy
+from evolution.evolution_parameters import EvolutionaryAlgorithmParameters, EvolutionStrategyParameters
 from models.feedforward import ModelParams
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
-evolution_paramsSEA1 = EvolutionParamsSEA(
+evolution_paramsSEA1 = EvolutionaryAlgorithmParameters(
+    pop_size=10,
+    cxpb=0.5,
+    mut=("uniform", 0.3, 0.1),
+    ngen=100,
+    game_batch_size=1,
+    cxindpb=0.3,
+    hof_size=0,
+    elite=2,
+    selection=("tournament", 3))
+
+evolution_paramsSEA2 = EvolutionaryAlgorithmParameters(
     pop_size=50,
     cxpb=0.75,
     mut=("uniform", 0.05, 0.1),
-    ngen=5000,
-    game_batch_size=5,
-    cxindpb=0.5,
+    ngen=500,
+    game_batch_size=10,
+    cxindpb=0.3,
     hof_size=0,
     elite=5,
     selection=("tournament", 3))
 
-"""
-evolution_paramsES = EvolutionParamsES(
-    pop_size=10,
-    ngen=500,
-    game_batch_size=5,
-    hof_size=5,
-    elite=0,
-    sigma=5.0)
-"""
+evolution_paramsES = EvolutionStrategyParameters(
+    pop_size=25,
+    ngen=200,
+    game_batch_size=50,
+    hof_size=0,
+    elite=5,
+    sigma=1.0)
 
 model_params1 = ModelParams(
-    hidden_layers=[128, 64, 32],
+    hidden_layers=[128, 64],
     activation="relu")
 
 if __name__ == '__main__':
-    # game = "alhambra"
-    # game = "2048"
-    # game = "mario"
-    # game = "torcs"
+    # evolution = EvolutionaryAlgorithm("2048", evolution_paramsSEA2, model_params1, logs_every=10, max_workers=6)
+    # evolution.run()
 
-
-    evolution = Evolution("2048", evolution_paramsSEA1, model_params1, logs_every=20, max_workers=5)
-    evolution.start_simple_ea()
-
-
-    # evolution = Evolution(game, evolution_paramsES, model_params, logs_every=10, max_workers=2)
-    # evolution.start_evolution_strategy()
+    evolution = EvolutionStrategy("2048", evolution_paramsES, model_params1, logs_every=10, max_workers=6)
+    evolution.run()
