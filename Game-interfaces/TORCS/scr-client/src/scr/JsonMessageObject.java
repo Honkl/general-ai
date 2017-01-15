@@ -21,35 +21,39 @@ public class JsonMessageObject {
      *
      * @param sensors Information about a game state.
      */
-    public JsonMessageObject(SensorModel sensors) {
+    public JsonMessageObject(SensorModel sensors, double bestDistanceRaced) {
         List<Double> result = new ArrayList<>();
 
         result.add((sensors.getAngleToTrackAxis() + piRadians) / (2 * piRadians));
         result.add(Math.log(sensors.getCurrentLapTime() + 1));
         result.add(Math.log(sensors.getDamage() + 1));
         result.add(Math.log(sensors.getDistanceFromStartLine() + 1));
-        result.add(Math.log(sensors.getDistanceRaced() + 1));
+
+        //result.add(Math.log(sensors.getDistanceRaced() + 1));
+        result.add(Math.log(bestDistanceRaced + 1));
+
         result.add(Math.log(sensors.getFuelLevel() + 1));
         result.add((double) sensors.getGear() / 8.0);
         result.add(Math.log(sensors.getLastLapTime() + 1));
-        result.add(Math.log(sensors.getLateralSpeed() + 1));
-        result.add(Math.log(sensors.getRPM() + 1));
         result.add((double) sensors.getRacePosition());
-        result.add(sensors.getSpeed());
+        result.add(Math.log(sensors.getRPM() + 1));
         result.add(sensors.getTrackPosition());
-        result.add(sensors.getZ());
+
+        result.add(sensors.getLateralSpeed());
+        result.add(sensors.getSpeed());
         result.add(sensors.getZSpeed());
+        result.add(sensors.getZ());
 
         for (double value : sensors.getFocusSensors()) {
-            result.add(value / 200);
+            result.add(1 - (value / 200));
         }
 
         for (double value : sensors.getOpponentSensors()) {
-            result.add(value / 200);
+            result.add(1 - (value / 200));
         }
 
         for (double value : sensors.getTrackEdgeSensors()) {
-            result.add(value / 200);
+            result.add(1 - (value / 200));
         }
 
         // ABS should be done manually
@@ -57,9 +61,13 @@ public class JsonMessageObject {
         //    result.add(value);
         //}
         // Debug print
-        //for (int i = 0; i < result.size(); i++) {
-        //    System.err.print(result.get(i) + " ");
-        //}
+        /**
+        for (int i = 0; i < result.size(); i++) {
+            //System.err.print(result.get(i) + " index: " + i + ", ");
+            System.err.print(result.get(i) + " ");
+        }
+        System.err.println();
+        /**/
         state = new Double[result.size()];
         result.toArray(state);
     }

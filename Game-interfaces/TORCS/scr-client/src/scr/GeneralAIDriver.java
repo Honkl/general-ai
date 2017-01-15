@@ -32,6 +32,7 @@ public class GeneralAIDriver extends Controller {
 
     private SensorModel lastSensor;
     private double last = 0;
+    private double bestDistanceRaced = 0;
 
     /**
      * Represents an interval to discretise values for gear integer.
@@ -100,17 +101,20 @@ public class GeneralAIDriver extends Controller {
     public Action control(SensorModel sensors) {
         Action act = null;
         try {
-            JsonMessageObject jmo = new JsonMessageObject(sensors);
+            double raced = sensors.getDistanceRaced();
+            if (raced != Double.NaN && raced != Double.NEGATIVE_INFINITY && raced != Double.POSITIVE_INFINITY) {
+                bestDistanceRaced = Math.max(raced, bestDistanceRaced);
+            }
+            JsonMessageObject jmo = new JsonMessageObject(sensors, bestDistanceRaced);
             String json = jmo.convertToJson() + "\n";
 
             writer.write(json);
             writer.flush();
 
             // Debug
-            for (int i = 0; i < 20; i++) {
-                System.err.println(reader.readLine());
-            }
-            
+            //for (int i = 0; i < 20; i++) {
+            //    System.err.println(reader.readLine());
+            //}
             String[] output = reader.readLine().split(" ");
             double[] values = new double[output.length];
             for (int i = 0; i < output.length; i++) {
@@ -186,14 +190,12 @@ public class GeneralAIDriver extends Controller {
             return gear + 1;
         } else // check if the RPM value of car is lower than the one suggested 
         // to shift down the gear from the current one
-        {
-            if (gear > 1 && rpm <= gearDown[gear - 1]) {
+         if (gear > 1 && rpm <= gearDown[gear - 1]) {
                 return gear - 1;
             } else // otherwhise keep current gear
             {
                 return gear;
             }
-        }
     }
 
     /**
