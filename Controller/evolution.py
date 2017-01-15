@@ -253,7 +253,7 @@ class Evolution():
 
         number_to_log = max(self.evolution_params.hof_size, self.evolution_params.elite)
         for i in range(number_to_log):
-            self.write_to_file(population[i], last_dir + "\\best_" + str(i) + ".json")
+            self.write_to_file(population[i], last_dir + "\\last_" + str(i) + ".json")
             self.all_time_best.append(population[i])
 
         self.all_time_best.sort(key=lambda ind: ind.fitness.values, reverse=True)

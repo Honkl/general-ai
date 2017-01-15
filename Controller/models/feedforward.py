@@ -64,6 +64,9 @@ class Network():
     def tanh(self, x):
         return np.array([np.tanh(y) for y in x])
 
+    def logsig(self, x):
+        return np.array([1 / (1 + np.exp(-y)) for y in x])
+
     def predict(self, input):
         """
         Performs forward pass in the current network instance.
@@ -77,17 +80,33 @@ class Network():
             activation = self.relu
         if (activation_str == "tanh"):
             activation = self.tanh
+        if (activation_str == "logsig"):
+            activation = self.logsig
 
         for W in self.matrices:
             x = np.concatenate((x, [1]), axis=0)
             x = activation(np.matmul(x, W))
+
         result = ""
         assert (self.layer_sizes[-1] == len(x))
+        x = self.normalize(x)
         for i in range(len(x)):
             result += str(x[i])
             if (i < self.layer_sizes[-1] - 1):
                 result += " "
         return result
+
+    def normalize(self, x):
+        """
+        Normalizes the specified interval to [0, 1].
+        :param x: Values to be normalized.
+        :return: Normalized [0, 1] interval.
+        """
+        min_val = min(x)
+        max_val = max(x)
+        if max_val - min_val == 0:
+            return x
+        return np.array([((x_i - min_val) / (max_val - min_val)) for x_i in x])
 
 
 class FeedForward(Model):
