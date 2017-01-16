@@ -1,5 +1,5 @@
 class EvolutionParameters():
-    def to_dict(self):
+    def to_dictionary(self):
         raise NotImplementedError
 
     def to_string(self):
@@ -81,7 +81,7 @@ class EvolutionaryAlgorithmParameters(EvolutionParameters):
     def selection(self):
         return self._selection
 
-    def to_dict(self):
+    def to_dictionary(self):
         data = {}
         data["pop_size"] = self._pop_size
         data["cxpb"] = self._cxpb
@@ -154,7 +154,7 @@ class EvolutionStrategyParameters(EvolutionParameters):
     def sigma(self):
         return self._sigma
 
-    def to_dict(self):
+    def to_dictionary(self):
         data = {}
         data["pop_size"] = self._pop_size
         data["ngen"] = self._ngen

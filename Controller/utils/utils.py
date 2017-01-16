@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     models = []
     #models.append(("Random", constants.loc + "/config/alhambra/random/random.json"))
-    models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2017-01-03_11-12-59/best_0.json"))
+    models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2017-01-03_22-17-48/best_0.json"))
 
     values = []
     for model in models:

@@ -6,8 +6,8 @@ import concurrent.futures
 
 
 class EvolutionStrategy(Evolution):
-    def __init__(self, game, evolution_params, model_params, max_workers, logs_every=50):
-        super(EvolutionStrategy, self).__init__(game, evolution_params, model_params, max_workers, logs_every)
+    def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
+        super(EvolutionStrategy, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
     def run(self):
         """
@@ -33,7 +33,7 @@ class EvolutionStrategy(Evolution):
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-        N = self.get_number_of_weights()
+        N = self.model.get_number_of_weights()
         print("N: {}".format(N))
         strategy = cma.Strategy(centroid=[0.0] * N, sigma=self.evolution_params.sigma,
                                 lambda_=self.evolution_params.pop_size)

@@ -5,8 +5,8 @@ from deap import tools
 
 
 class EvolutionaryAlgorithm(Evolution):
-    def __init__(self, game, evolution_params, model_params, max_workers, logs_every=50):
-        super(EvolutionaryAlgorithm, self).__init__(game, evolution_params, model_params, max_workers, logs_every)
+    def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
+        super(EvolutionaryAlgorithm, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
     def run(self):
         """

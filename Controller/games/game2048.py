@@ -1,24 +1,30 @@
 from games.game import Game
 import subprocess
 from constants import *
-import re
+import json
 
 
 class Game2048(Game):
-    def __init__(self, model_config_file, game_batch_size, seed):
-        self.model_config_file = model_config_file
+    def __init__(self, model, game_batch_size, seed):
+        self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
 
     def run(self, advanced_results=False):
-        command = GAME2048 + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\" " + str(
-            self.game_batch_size) + " " + str(self.seed)
+        command = "{} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size))
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, bufsize=1)
 
-        p = subprocess.Popen(command, stdout=subprocess.PIPE)
-        result = p.communicate()[0].decode('ascii')
-        result = re.split("\\r\\n|\\n", result)
-        try:
-            return float(result[0].split(":")[1].strip())
-        except:
-            print("WRONG GAME RESULT")
-            print(result)
+        score = None
+        while (True):
+            std = p.stdout.readline().decode('ascii')
+
+            if ("SCORE" in std):
+                score = std.split(' ')[1]
+                break
+
+            result = self.model.evaluate(json.loads(std))
+            result = "{}{}".format(result, os.linesep)
+            p.stdin.write(result.encode('ascii'))
+            p.stdin.flush()
+
+        return float(score)

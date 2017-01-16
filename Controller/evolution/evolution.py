@@ -5,15 +5,13 @@ import os
 import json
 
 import numpy as np
-import random
 import concurrent.futures
 
 import constants
-import uuid
 import time
 import matplotlib.pyplot as plt
 
-from deap import creator, base, tools, cma
+from deap import creator, base, tools
 
 from games.alhambra import Alhambra
 from games.torcs import Torcs
@@ -24,42 +22,25 @@ from games.game2048 import Game2048
 class Evolution():
     all_time_best = []
 
-    def __init__(self, game, evolution_params, model_params, max_workers, logs_every=50):
+    def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
         self.current_game = game
         self.evolution_params = evolution_params
-        self.model_params = model_params
+        self.model = model
         self.max_workers = max_workers
         self.logs_every = logs_every
 
-    def get_number_of_weights(self):
-        """
-        Evaluates number of parameters of neural networks (e.q. weights of network).
-        :param hidden_sizes: Sizes of hidden fully-connected layers.
-        :return: Numbre of parameters of neural network.
-        """
         game_config_file = ""
-        if self.current_game == "alhambra":
+        if game == "alhambra":
             game_config_file = constants.ALHAMBRA_CONFIG_FILE
-        if self.current_game == "2048":
+        if game == "2048":
             game_config_file = constants.GAME2048_CONFIG_FILE
-        if self.current_game == "mario":
+        if game == "mario":
             game_config_file = constants.MARIO_CONFIG_FILE
-        if self.current_game == "torcs":
+        if game == "torcs":
             game_config_file = constants.TORCS_CONFIG_FILE
 
-        with open(game_config_file) as f:
-            game_config = json.load(f)
-            total_weights = 0
-            h_sizes = self.model_params.hidden_layers
-            for phase in range(game_config["game_phases"]):
-                input_size = game_config["input_sizes"][phase] + 1
-                output_size = game_config["output_sizes"][phase]
-                total_weights += input_size * h_sizes[0]
-                if (len(h_sizes) > 1):
-                    for i in range(len(h_sizes) - 1):
-                        total_weights += (h_sizes[i] + 1) * h_sizes[i + 1]
-                total_weights += (h_sizes[-1] + 1) * output_size
-        return total_weights
+        with open(game_config_file, "r") as f:
+            self.game_config = json.load(f)
 
     def write_to_file(self, individual, filename):
         """
@@ -69,11 +50,11 @@ class Evolution():
         """
         with open(filename, "w") as f:
             data = {}
-            data["model_name"] = "feedforward"
-            data["class_name"] = "FeedForward"
-            data["hidden_sizes"] = self.model_params.hidden_layers
+            data["model_name"] = self.model.get_name()
+            data["class_name"] = self.model.get_class_name()
+            data["hidden_sizes"] = self.model.hidden_layers
             data["weights"] = individual
-            data["activation"] = self.model_params.activation
+            data["activation"] = self.model.activation
             f.write(json.dumps(data))
 
     def eval_fitness(self, individual, seed):
@@ -83,13 +64,12 @@ class Evolution():
         :param seed: Seed for the game instance.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
-        id = uuid.uuid4()
-        model_config_file = self.dir + "\\tmp\\feedforward_" + str(id) + ".json"
-        self.write_to_file(individual, model_config_file)
 
-        game = ""
-        params = [model_config_file, self.evolution_params._game_batch_size, seed]
+        # Need to create new instance of model (using specified weights). Also good usage for multi threading.
+        model = self.model.get_new_instance(weights=individual, game_config=self.game_config)
+        params = [model, self.evolution_params._game_batch_size, seed]
 
+        game = None
         if self.current_game == "alhambra":
             game = Alhambra(*params)
         if self.current_game == "2048":
@@ -100,11 +80,6 @@ class Evolution():
             game = Torcs(*params)
 
         result = game.run()
-        try:
-            os.remove(model_config_file)
-        except IOError:
-            print("Failed attempt to delete config file (leaving file non-deleted).")
-
         return result,
 
     def mut_random(self, individual, mutindpb):
@@ -137,7 +112,7 @@ class Evolution():
         Initializes the current instance of evolution.
         :returns: Deap toolbox.
         """
-        individual_len = self.get_number_of_weights()
+        individual_len = self.model.get_number_of_weights(self.current_game)
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -183,8 +158,8 @@ class Evolution():
 
         with open((dir + "\\settings.json"), "w") as f:
             data = {}
-            data["evolution_params"] = self.evolution_params.to_dict()
-            data["model_params"] = self.model_params.to_dict()
+            data["evolution_params"] = self.evolution_params.to_dictionary()
+            data["model_params"] = self.model.to_dictionary()
             f.write(json.dumps(data))
 
         with open((dir + "\\runtime.txt"), "w") as f:
@@ -203,11 +178,11 @@ class Evolution():
         plt.xlim([0, len(gen)])
         plt.legend(loc="lower right")
         plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(),
-                                            self.model_params.to_string()), fontsize=10)
+                                            self.model.to_string()), fontsize=10)
         plt.savefig(dir + "\\plot.jpg")
 
     def init_directories(self):
-        self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model_params.name
+        self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model.get_name()
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
         if not os.path.exists(self.dir + "\\tmp"):
@@ -215,12 +190,12 @@ class Evolution():
 
         # create name for directory to store logs
         current = time.localtime()
-        t_string = str(current.tm_year).zfill(2) + "-" + \
-                   str(current.tm_mon).zfill(2) + "-" + \
-                   str(current.tm_mday).zfill(2) + "_" + \
-                   str(current.tm_hour).zfill(2) + "-" + \
-                   str(current.tm_min).zfill(2) + "-" + \
-                   str(current.tm_sec).zfill(2)
+        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
+                                              str(current.tm_mon).zfill(2),
+                                              str(current.tm_mday).zfill(2),
+                                              str(current.tm_hour).zfill(2),
+                                              str(current.tm_min).zfill(2),
+                                              str(current.tm_sec).zfill(2))
 
         return self.dir + "\\logs_" + t_string
 
