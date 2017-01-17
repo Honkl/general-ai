@@ -33,7 +33,7 @@ class EvolutionStrategy(Evolution):
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-        N = self.model.get_number_of_weights()
+        N = self.model.get_number_of_parameters()
         print("N: {}".format(N))
         strategy = cma.Strategy(centroid=[0.0] * N, sigma=self.evolution_params.sigma,
                                 lambda_=self.evolution_params.pop_size)

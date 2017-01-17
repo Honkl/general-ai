@@ -2,9 +2,12 @@ class Model():
     """
     Wrapper for all models for evaluating input from a game.
     """
-    def __init__(self, game_config, model_config):
-        self.game_config = game_config
-        self.model_config = model_config
+
+    def get_new_instance(self, weights, game_config):
+        raise NotImplementedError("Calling interface.")
 
     def evaluate(self, input):
-        pass
+        raise NotImplementedError("Calling interface.")
+
+    def get_number_of_parameters(self, game):
+        raise NotImplementedError("Calling interface.")

@@ -3,6 +3,10 @@ import numpy as np
 
 class Random(Model):
 
+    def __init__(self, game_config):
+        self.game_config = game_config
+
+
     def evaluate(self, input):
         input_sizes = list(map(int, self.game_config["input_sizes"]))
         output_sizes = list(map(int, self.game_config["output_sizes"]))

@@ -1,9 +1,10 @@
 import numpy as np
 import constants
 import json
+from models.model import Model
 
 
-class MLP():
+class MLP(Model):
     """
     Represents a simple feedforward MLP neural network model.
     Can contain multiple networks, each one for each game phase. Contains instances of 'MLPNetwork'.
@@ -110,7 +111,7 @@ class MLP():
         instance = MLP(self.hidden_layers, self.activation, weights, game_config)
         return instance
 
-    def get_number_of_weights(self, game):
+    def get_number_of_parameters(self, game):
         """
         Evaluates number of parameters of neural networks (e.q. weights of network).
         :return: Number of parameters of neural network (this will be equal to evolution individual length).

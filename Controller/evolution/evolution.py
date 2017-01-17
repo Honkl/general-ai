@@ -112,7 +112,7 @@ class Evolution():
         Initializes the current instance of evolution.
         :returns: Deap toolbox.
         """
-        individual_len = self.model.get_number_of_weights(self.current_game)
+        individual_len = self.model.get_number_of_parameters(self.current_game)
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMax)
