@@ -15,85 +15,73 @@ namespace AlhambraInterface
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-            string pythonScript = "\"" + args[0] + "\"";
-            string pythonExe = "\"" + args[1] + "\"";
-            string modelConfigFile = " \"" + args[2] + "\"";
-            int gameBatchSize = int.Parse(args[3]);
-            int seed = int.Parse(args[4]);
+            int seed = int.Parse(args[0]);
+            int gameBatchSize = int.Parse(args[1]);
 
-            string gameConfigFile = " \"Game-interfaces\\Alhambra\\Alhambra_config.json\"";
-            RunGame(pythonScript, pythonExe, gameConfigFile, modelConfigFile, gameBatchSize, seed);
+            RunGame(seed, gameBatchSize);
         }
 
         /// <summary>
-        /// Starts a single Alhambra game.
+        /// Starts a batch of Alhambra games. 
         /// </summary>
-        /// <param name="pythonScript">Python script to evaluate AI's move.</param>
-        /// <param name="pythonExe">Python EXE file to execute .py script.</param>
-        /// <param name="gameConfigFile">Game configuration file (number of inputs / outputs for AI.</param>
-        /// <param name="modelConfigFile">Model configuration file for AI.</param>
-        /// <param name="gameBatchSize">Number of games that will be played and averaged as a result.</param>
         /// <param name="seed">Seed for random generator.</param>
-        private static void RunGame(string pythonScript, string pythonExe, string gameConfigFile, string modelConfigFile, int gameBatchSize, int seed)
+        /// <param name="gameBatchSize">Number of games that will be played and averaged as a result.</param>
+        private static void RunGame(int seed, int gameBatchSize)
         {
-            ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = pythonExe;
-            start.Arguments = pythonScript + gameConfigFile + modelConfigFile;
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
-            start.RedirectStandardInput = true;
+            StreamReader reader = new StreamReader(Console.OpenStandardInput());
+            StreamWriter writer = new StreamWriter(Console.OpenStandardOutput());
+            writer.AutoFlush = true;
 
-            using (Process process = Process.Start(start))
+            JsonMessageObject.InitStaticValues();
+
+            int playedGames = 0;
+            Random rnd = new Random(seed);
+            double[] avgResults = new double[NumberOfPlayers]; // At index 0 is our general-ai agent
+            while (playedGames < gameBatchSize)
             {
-                StreamWriter writer = process.StandardInput;
-                StreamReader reader = process.StandardOutput;
-
-                JsonMessageObject.InitStaticValues();
-
-                int playedGames = 0;
-                Random rnd = new Random(seed);
-                double[] avgResults = new double[NumberOfPlayers]; // At index 0 is our general-ai agent
-                while (playedGames < gameBatchSize)
+                bool ok = false;
+                Random rndForGame = new Random(rnd.Next());
+                Controller c = CreateGame(NumberOfPlayers, rndForGame, reader, writer);
+                try
                 {
-                    bool ok = false;
-                    Random rndForGame = new Random(rnd.Next());
-                    Controller c = CreateGame(NumberOfPlayers, rndForGame, reader, writer);
-                    try
+                    c.ExecuteNewMove();
+                    ok = true;
+                }
+                catch (Exception e)
+                {
+                    if (e.GetType() == typeof(AlhambraException) && e.Message.Contains("CYCLE"))
                     {
-                        c.ExecuteNewMove();
-                        ok = true;
+                        // A cyclic game detected...
                     }
-                    catch (Exception e)
+                    else
                     {
-                        if (e.GetType() == typeof(AlhambraException) && e.Message.Contains("CYCLE"))
-                        {
-                            // A cyclic game detected...
-                        }
-                        else
-                        {
-                            // Some other unexpected exception...
-                        }
-                    }
-                    if (ok)
-                    {
-                        for (int ID = 0; ID < NumberOfPlayers; ID++)
-                        {
-                            avgResults[ID] += c.game.points[ID];
-                        }
-                        playedGames++;
+                        // Some other unexpected exception...
                     }
                 }
-
-                for (int ID = 0; ID < NumberOfPlayers; ID++)
+                if (ok)
                 {
-                    avgResults[ID] /= gameBatchSize;
-                    Console.WriteLine(avgResults[ID]);
+                    for (int ID = 0; ID < NumberOfPlayers; ID++)
+                    {
+                        avgResults[ID] += c.game.points[ID];
+                    }
+                    playedGames++;
                 }
-
-                writer.Write("END");
-                writer.Close();
-                reader.Close();
             }
+
+            string result = "SCORES ";
+            for (int ID = 0; ID < NumberOfPlayers; ID++)
+            {
+                avgResults[ID] /= gameBatchSize;
+                result += avgResults[ID];
+                if (ID < NumberOfPlayers - 1)
+                {
+                    result += " ";
+                }
+            }
+
+            writer.WriteLine(result);
+            writer.Close();
+            reader.Close();
         }
 
         private static Controller CreateGame(int numberOfPlayers, Random rnd, StreamReader reader, StreamWriter writer)

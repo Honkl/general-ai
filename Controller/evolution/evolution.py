@@ -64,7 +64,6 @@ class Evolution():
         :param seed: Seed for the game instance.
         :return: Fitness of the individual (must be tuple for Deap library).
         """
-
         # Need to create new instance of model (using specified weights). Also good usage for multi threading.
         model = self.model.get_new_instance(weights=individual, game_config=self.game_config)
         params = [model, self.evolution_params._game_batch_size, seed]

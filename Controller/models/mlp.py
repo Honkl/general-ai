@@ -149,12 +149,13 @@ class MLP():
         curr_phase = int(input["current_phase"])
         return self.models[curr_phase].predict(input)
 
+
     def to_string(self):
         """
         A string representation of the current object, that describes parameters.
         :return: A string representation of the current object.
         """
-        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation)
+        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation.__name__)
 
     def to_dictionary(self):
         """

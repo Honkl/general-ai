@@ -1,26 +1,31 @@
 from games.game import Game
 import subprocess
 from constants import *
-import re
+import json
 
 
 class Alhambra(Game):
-    def __init__(self, model_config_file, game_batch_size, seed):
-        self.model_config_file = model_config_file
+    def __init__(self, model, game_batch_size, seed):
+        self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
 
     def run(self, advanced_results=False):
-        command = ALHAMBRA + PYTHON_SCRIPT + PYTHON_EXE + " \"" + self.model_config_file + "\" " + str(
-            self.game_batch_size) + " " + str(self.seed)
+        command = "{} {} {}".format(ALHAMBRA, str(self.seed), str(self.game_batch_size))
+        p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             bufsize=-1)  # Using PIPEs is not the best solution...
 
-        p = subprocess.Popen(command, stdout=subprocess.PIPE)
-        result = p.communicate()[0].decode('ascii')
-        result = list(filter(None, re.split("\\r\\n|\\n", result)))
+        score = None
+        while (True):
+            line = p.stdout.readline().decode('ascii')
+            if ("SCORES" in line):
+                score = float(line.split(" ")[1].strip())
+                break
 
-        number_of_players = 3  # TODO: set correct number of players
-        if advanced_results:
-            print(result)
-            return list(map(float, result))
-        else:
-            return float(result[0])
+            result = self.model.evaluate(json.loads(line))
+            result = "{}{}".format(result, os.linesep)
+
+            p.stdin.write(bytearray(result.encode('ascii')))
+            p.stdin.flush()
+
+        return score

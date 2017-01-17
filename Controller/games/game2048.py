@@ -24,6 +24,7 @@ class Game2048(Game):
             if ("SCORE" in line):
                 score = line.split(' ')[1]
                 break
+
             result = self.model.evaluate(json.loads(line))
             result = "{}{}".format(result, os.linesep)
 
