@@ -81,6 +81,31 @@ class MLP():
         self.weights = weights
         self.game_config = game_config
 
+        if not weights == None and not game_config == None:
+            # Init the network
+            phases = self.game_config["game_phases"]
+            self.models = []
+            used_weights = 0
+            hidden_layers = self.hidden_layers
+            for phase in range(phases):
+                input_size = self.game_config["input_sizes"][phase]
+                output_size = self.game_config["output_sizes"][phase]
+                layer_sizes = [input_size] + hidden_layers + [output_size]
+                if (phases == 1):
+                    self.models.append(self.MLPNetwork(layer_sizes, self.activation, self.weights))
+                else:
+                    # slice all weights and use only reliable weights to the current phase
+                    new_used_weights = used_weights
+                    input_size = input_size + 1  # bias
+                    new_used_weights += input_size * hidden_layers[0]
+                    for i in range(len(hidden_layers) - 1):
+                        new_used_weights += (hidden_layers[i] + 1) * hidden_layers[i + 1]
+                    new_used_weights += (hidden_layers[-1] + 1) * output_size
+                    self.models.append(self.MLPNetwork(layer_sizes=layer_sizes,
+                                                       activation=self.activation,
+                                                       weights=self.weights[used_weights:new_used_weights]))
+                    used_weights = new_used_weights
+
     def get_new_instance(self, weights, game_config):
         instance = MLP(self.hidden_layers, self.activation, weights, game_config)
         return instance
@@ -122,29 +147,6 @@ class MLP():
         :return: Output of the forward pass.
         """
         curr_phase = int(input["current_phase"])
-        phases = self.game_config["game_phases"]
-        self.models = []
-        used_weights = 0
-        hidden_layers = self.hidden_layers
-        for phase in range(phases):
-            input_size = self.game_config["input_sizes"][phase]
-            output_size = self.game_config["output_sizes"][phase]
-            layer_sizes = [input_size] + hidden_layers + [output_size]
-            if (phases == 1):
-                self.models.append(self.MLPNetwork(layer_sizes, self.activation, self.weights))
-            else:
-                # slice all weights and use only reliable weights to the current phase
-                new_used_weights = used_weights
-                input_size = input_size + 1  # bias
-                new_used_weights += input_size * hidden_layers[0]
-                for i in range(len(hidden_layers) - 1):
-                    new_used_weights += (hidden_layers[i] + 1) * hidden_layers[i + 1]
-                new_used_weights += (hidden_layers[-1] + 1) * output_size
-                self.models.append(self.MLPNetwork(layer_sizes=layer_sizes,
-                                                   activation=self.activation,
-                                                   weights=self.weights[used_weights:new_used_weights]))
-                used_weights = new_used_weights
-
         return self.models[curr_phase].predict(input)
 
     def to_string(self):
@@ -161,5 +163,5 @@ class MLP():
         """
         data = {}
         data["hidden_layers"] = self.hidden_layers
-        data["activation"] = self.activation
+        data["activation"] = self.activation.__name__
         return data

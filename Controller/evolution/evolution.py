@@ -54,7 +54,7 @@ class Evolution():
             data["class_name"] = self.model.get_class_name()
             data["hidden_sizes"] = self.model.hidden_layers
             data["weights"] = individual
-            data["activation"] = self.model.activation
+            data["activation"] = self.model.activation.__name__
             f.write(json.dumps(data))
 
     def eval_fitness(self, individual, seed):
@@ -80,6 +80,7 @@ class Evolution():
             game = Torcs(*params)
 
         result = game.run()
+
         return result,
 
     def mut_random(self, individual, mutindpb):
