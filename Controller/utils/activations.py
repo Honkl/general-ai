@@ -1,4 +1,23 @@
 import numpy as np
+import tensorflow as tf
+
+
+def get_activation(name):
+    if name == "relu":
+        return relu
+    if name == "tanh":
+        return tanh
+    if name == "logsig":
+        return logsig
+
+    raise NotImplementedError
+
+
+def get_activation_tf(name):
+    if name == "relu":
+        return tf.nn.relu
+    if name == "id":
+        return tf.identity
 
 
 def relu(x):
