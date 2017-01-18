@@ -2,6 +2,7 @@ import numpy as np
 import constants
 import json
 from models.model import Model
+from utils import activations
 
 
 class MLP(Model):
@@ -13,7 +14,7 @@ class MLP(Model):
     class MLPNetwork():
         def __init__(self, layer_sizes, activation, weights):
             self.layer_sizes = layer_sizes
-            self.activation = activation
+            self.activation = activations.get_activation(activation)
             self.weights = weights
 
             weights = np.array(list(map(float, self.weights)))
@@ -150,13 +151,12 @@ class MLP(Model):
         curr_phase = int(input["current_phase"])
         return self.models[curr_phase].predict(input)
 
-
     def to_string(self):
         """
         A string representation of the current object, that describes parameters.
         :return: A string representation of the current object.
         """
-        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation.__name__)
+        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation)
 
     def to_dictionary(self):
         """
@@ -165,5 +165,5 @@ class MLP(Model):
         """
         data = {}
         data["hidden_layers"] = self.hidden_layers
-        data["activation"] = self.activation.__name__
+        data["activation"] = self.activation
         return data

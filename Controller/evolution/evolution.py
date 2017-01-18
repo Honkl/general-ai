@@ -54,7 +54,7 @@ class Evolution():
             data["class_name"] = self.model.get_class_name()
             data["hidden_sizes"] = self.model.hidden_layers
             data["weights"] = individual
-            data["activation"] = self.model.activation.__name__
+            data["activation"] = self.model.activation
             f.write(json.dumps(data))
 
     def eval_fitness(self, individual, seed):
@@ -182,12 +182,9 @@ class Evolution():
         plt.savefig(dir + "\\plot.jpg")
 
     def init_directories(self):
-        self.dir = constants.loc + "\\config\\" + self.current_game + "\\" + self.model.get_name()
+        self.dir = constants.loc + "\\logs\\" + self.current_game + "\\" + self.model.get_name()
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
-        if not os.path.exists(self.dir + "\\tmp"):
-            os.makedirs(self.dir + "\\tmp")
-
         # create name for directory to store logs
         current = time.localtime()
         t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),

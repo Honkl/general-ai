@@ -21,3 +21,9 @@ class Random(Model):
                 result += " "
 
         return result
+
+    def get_name(self):
+        return "random"
+
+    def get_class_name(self):
+        return "Random"

@@ -11,3 +11,9 @@ class Model():
 
     def get_number_of_parameters(self, game):
         raise NotImplementedError("Calling interface.")
+
+    def get_name(self):
+        raise NotImplementedError("Calling interface.")
+
+    def get_class_name(self):
+        raise NotImplementedError("Calling interface.")
