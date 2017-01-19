@@ -9,9 +9,10 @@ class EvolutionStrategy(Evolution):
     def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
         super(EvolutionStrategy, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
-    def run(self):
+    def run(self, file_name=None):
         """
         Starts evolution strategy (CMA-ES).
+        :param file_name: Previously saved population file.
         """
 
         start_time = time.time()
@@ -37,7 +38,7 @@ class EvolutionStrategy(Evolution):
         print("N: {}".format(N))
         strategy = cma.Strategy(centroid=[0.0] * N, sigma=self.evolution_params.sigma,
                                 lambda_=self.evolution_params.pop_size)
-        print("CMA strategy created ({} s)".format(time.time() - start_time))
+        print("CMA strategy created in {} sec".format(time.time() - start_time))
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 
@@ -46,11 +47,15 @@ class EvolutionStrategy(Evolution):
         else:
             hof = None
 
-        print("ES Started")
+        print("Evolution strategy started")
         for gen in range(1, self.evolution_params.ngen + 1):
 
             # Generate a new population
-            population = toolbox.generate()
+            if (gen == 1) and (file_name != None):
+                population = self.init_population(pop_size=self.evolution_params.pop_size, container=list,
+                                                  ind_init=toolbox.individual, file_name=file_name)
+            else:
+                population = toolbox.generate()
 
             # Evaluate the individuals
             seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(population))]
@@ -61,11 +66,10 @@ class EvolutionStrategy(Evolution):
             if hof is not None:
                 hof.update(population)
 
-            print("Updating population...")
             st = time.time()
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
-            print("Population updated ({} s)".format(time.time() - st))
+            print("Population updated in {} sec".format(time.time() - st))
 
             record = stats.compile(population) if stats is not None else {}
             logbook.record(gen=gen, nevals=len(population), **record)
@@ -75,4 +79,3 @@ class EvolutionStrategy(Evolution):
                 self.log_all(logs_dir, population, hof, logbook, start_time)
 
         self.log_all(logs_dir, population, hof, logbook, start_time)
-        print("ES Complete")

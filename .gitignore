@@ -1,4 +1,5 @@
 Controller/config/
+Controller/logs/
 pop.json
 best_1.json
 best_2.json

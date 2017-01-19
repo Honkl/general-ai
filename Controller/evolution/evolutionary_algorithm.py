@@ -8,9 +8,10 @@ class EvolutionaryAlgorithm(Evolution):
     def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
         super(EvolutionaryAlgorithm, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
-    def run(self):
+    def run(self, file_name=None):
         """
         Starts simple evolutionary algorithm.
+        :param file_name: Previously saved population file.
         """
         start_time = time.time()
 
@@ -22,7 +23,7 @@ class EvolutionaryAlgorithm(Evolution):
         stats.register("max", np.max)
 
         toolbox = self.deap_toolbox_init()
-        population = toolbox.population(pop_size=self.evolution_params.pop_size)
+        population = toolbox.population(pop_size=self.evolution_params.pop_size, file_name=file_name)
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])

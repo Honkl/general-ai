@@ -105,7 +105,11 @@ class Evolution():
 
         with open(file_name) as f:
             content = json.load(f)
-            return container(ind_init(content=x) for x in content["population"])
+            pop = content["population"]
+            if len(pop) != pop_size:
+                raise ValueError("Wrong population size.")
+            print("Loading population from file: {}".format(file_name))
+            return container(ind_init(content=x) for x in pop)
 
     def deap_toolbox_init(self):
         """
@@ -233,5 +237,5 @@ class Evolution():
         for i in range(number_to_log):
             self.write_to_file(self.all_time_best[i], best_dir + "\\best_" + str(i) + ".json")
 
-    def run(self):
+    def run(self, file_name=None):
         raise NotImplementedError("Evolution class called. Maybe you should call one of the child classes.")
