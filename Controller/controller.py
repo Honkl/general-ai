@@ -19,45 +19,25 @@ MASTER_SEED = 42
 random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
-evolution_paramsSEA1 = EvolutionaryAlgorithmParameters(
-    pop_size=20,
-    cxpb=0.25,
+sea_params = EvolutionaryAlgorithmParameters(
+    pop_size=50,
+    cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
-    ngen=500,
-    game_batch_size=5,
+    ngen=100,
+    game_batch_size=10,
     cxindpb=0.2,
     hof_size=0,
     elite=5,
     selection=("tournament", 3))
 
-"""
-evolution_paramsSEA2 = EvolutionaryAlgorithmParameters(
-    pop_size=50,
-    cxpb=0.75,
-    mut=("uniform", 0.05, 0.1),
-    ngen=100,
-    game_batch_size=10,
-    cxindpb=0.3,
-    hof_size=0,
-    elite=5,
-    selection=("tournament", 3))
-
-evolution_paramsES = EvolutionStrategyParameters(
-    pop_size=25,
-    ngen=200,
-    game_batch_size=50,
-    hof_size=0,
-    elite=5,
-    sigma=1.0)
-"""
 
 if __name__ == '__main__':
-    mlp = MLP(hidden_layers=[128, 128], activation="relu")
+    mlp = MLP(hidden_layers=[64, 128], activation="relu")
 
     evolution = EvolutionaryAlgorithm(game="2048",
-                                      evolution_params=evolution_paramsSEA1,
+                                      evolution_params=sea_params,
                                       model=mlp,
-                                      logs_every=1,
+                                      logs_every=5,
                                       max_workers=10)
     evolution.run()
 

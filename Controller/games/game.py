@@ -38,6 +38,7 @@ class Game():
         if "final_score" in data:
             scores = data["final_score"]
             self.final_score = list(map(float, scores))
+            self.finalize()
             return None, None, reward, True
 
         new_state = data["state"]
@@ -65,3 +66,9 @@ class Game():
         data = "{}{}".format(data, os.linesep)
         self.process.stdin.write(bytearray(data.encode('ascii')))
         self.process.stdin.flush()
+
+    def finalize(self):
+        """
+        After game ends, do your stuff here (thread lock unlock for torcs...)
+        """
+        pass

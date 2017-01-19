@@ -21,8 +21,8 @@ class Game2048(Game):
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...
 
-        first_state, _ = self.get_process_data()
-        return first_state
+        data = self.get_process_data()
+        return data["state"], data["current_phase"]
 
     def get_process_data(self):
         line = self.process.stdout.readline().decode('ascii')

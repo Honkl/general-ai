@@ -74,7 +74,6 @@ class Reinforcement():
             epoch_loss = 0.0
             epoch_reward = 0.0
             epoch_estimated_reward = 0.0
-            epoch_state_changes = 0.0
             max_reward = 0
             step_id = -1
 
@@ -88,7 +87,6 @@ class Reinforcement():
 
                 _, rewards, dones, _ = zip(*[env.step(action) for env, action in zip(envs, selected_actions)])
                 epoch_reward += np.array(rewards).mean()
-                epoch_state_changes += np.array([env.state_changed for env in envs]).mean()
 
                 # Train Q-net
                 epoch_loss += self.agent.learn([env.state for env in envs], selected_actions, rewards,
@@ -105,14 +103,10 @@ class Reinforcement():
                                 tf.Summary.Value(tag='estimated_reward_total', simple_value=epoch_estimated_reward),
                                 tf.Summary.Value(tag='estimated_reward_average',
                                                  simple_value=float(epoch_estimated_reward) / step_id),
-                                tf.Summary.Value(tag='epoch_state_changes_total', simple_value=epoch_state_changes),
-                                tf.Summary.Value(tag='epoch_state_changes_average',
-                                                 simple_value=float(epoch_state_changes) / step_id),
                                 tf.Summary.Value(tag='number_of_turns', simple_value=step_id),
                                 tf.Summary.Value(tag='max_reward', simple_value=max_reward)])
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_epoch)
             print('Avg loss: {}'.format(float(epoch_loss) / step_id))
-
 
         # TODO: Make better
         if not os.path.isdir(logdir):
@@ -124,5 +118,3 @@ class Reinforcement():
             f.write(str(float(epoch_reward) / step_id) + "\n")
             f.write(str(epoch_estimated_reward) + "\n")
             f.write(str(float(epoch_estimated_reward) / step_id) + "\n")
-            f.write(str(epoch_state_changes) + "\n")
-            f.write(str(float(epoch_state_changes) / step_id) + "\n")

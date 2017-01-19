@@ -5,20 +5,16 @@ class ReinforcementParameters():
 
     @staticmethod
     def from_dict(data):
-        """
         params = ReinforcementParameters(
-            data["pop_size"],
-            data["cxpb"],
-            data["mut"],
-            data["ngen"],
-            data["game_batch_size"],
-            data["cxindpb"],
-            data["hof_size"],
-            data["elite"],
-            data["selection"])
+            data["batch_size"],
+            data["epochs"],
+            data["penalty"],
+            data["gamma"],
+            data["base_reward"],
+            data["dropout"],
+            data["optimizer"],
+            data["learning_rate"])
         return params
-        """
-        raise NotImplementedError("TODO")
 
     def __init__(self,
                  batch_size,
