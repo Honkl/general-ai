@@ -23,10 +23,6 @@ public class Client {
 	private static int maxSteps;
 	private static Stage stage;
 	private static String trackName;
-        
-        public static String pythonScriptFile;
-        public static String pythonExe;
-        public static String modelConfigFile;
 
 	/**
 	 * @param args
@@ -139,11 +135,6 @@ public class Client {
 		stage = Stage.UNKNOWN;
 		trackName = "unknown";
                 
-                pythonScriptFile = null;
-                pythonExe = null;
-                modelConfigFile = null;
-                
-		
 		for (int i = 1; i < args.length; i++) {
 			StringTokenizer st = new StringTokenizer(args[i], ":");
 			String entity = st.nextToken();
@@ -193,15 +184,6 @@ public class Client {
 					System.exit(0);
 				}
 			}
-                        if (entity.equals("ai_script")) {
-                            pythonScriptFile = value + ":" + st.nextToken();
-                        }
-                        if (entity.equals("python")) {
-                            pythonExe = value + ":" + st.nextToken();
-                        }
-                        if (entity.equals("model_config")) {
-                            modelConfigFile = value + ":" + st.nextToken();
-                        }
 		}
 	}
 

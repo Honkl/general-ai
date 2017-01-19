@@ -25,10 +25,6 @@ public class GeneralAIDriver extends Controller {
     private BufferedReader reader;
     private Process p;
     private GearInterval[] intervals;
-    private SimpleDriver sd;
-
-    //Config file for AI (relative path to master "general-ai/Game-interfaces" directory
-    private final String gameConfigFile = "Game-interfaces\\TORCS\\TORCS_config.json";
 
     private SensorModel lastSensor;
     private double last = 0;
@@ -50,23 +46,10 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public float[] initAngles() {
-
-        sd = new SimpleDriver();
         initIntervals();
 
-        try {
-            String[] params = new String[]{Client.pythonExe, Client.pythonScriptFile, gameConfigFile, Client.modelConfigFile};
-            ProcessBuilder pb = new ProcessBuilder(params);
-            pb.redirectErrorStream(true);
-
-            p = pb.start();
-            writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-            reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-        } catch (IOException ex) {
-            System.out.println("Exception while runtime.exec");
-            ex.printStackTrace();
-        }
+        writer = new BufferedWriter(new OutputStreamWriter(System.out));
+        reader = new BufferedReader(new InputStreamReader(System.in));
 
         float[] angles = new float[19];
 
