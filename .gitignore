@@ -1,5 +1,14 @@
 Controller/config/
 pop.json
+best_1.json
+best_2.json
+best_3.json
+best_4.json
+
+last_1.json
+last_2.json
+last_3.json
+last_4.json
 
 *.class
 *.pyc
