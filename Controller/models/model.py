@@ -6,7 +6,7 @@ class Model():
     def get_new_instance(self, weights, game_config):
         raise NotImplementedError("Calling interface.")
 
-    def evaluate(self, input):
+    def evaluate(self, input, current_phase):
         raise NotImplementedError("Calling interface.")
 
     def get_number_of_parameters(self, game):

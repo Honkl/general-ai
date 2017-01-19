@@ -34,7 +34,7 @@ class MLP(Model):
             :param input: Input to the neural network.
             :return: Output of the neural network.
             """
-            x = np.array(list(map(float, input["state"])))
+            x = np.array(list(map(float, input)))
             for W in self.matrices:
                 x = np.concatenate((x, [1]), axis=0)
                 x = self.activation(np.matmul(x, W))
@@ -141,15 +141,14 @@ class MLP(Model):
                 total_weights += (h_sizes[-1] + 1) * output_size
         return total_weights
 
-    def evaluate(self, input):
+    def evaluate(self, input, current_phase):
         """
         Performs a single forward pass.
         :param input: Input from the game.
         :param weights: Weights for the network (individual from evolution).
         :return: Output of the forward pass.
         """
-        curr_phase = int(input["current_phase"])
-        return self.models[curr_phase].predict(input)
+        return self.models[current_phase].predict(input)
 
     def to_string(self):
         """

@@ -7,17 +7,16 @@ class Random(Model):
         self.game_config = game_config
 
 
-    def evaluate(self, input):
+    def evaluate(self, input, current_phase):
         input_sizes = list(map(int, self.game_config["input_sizes"]))
         output_sizes = list(map(int, self.game_config["output_sizes"]))
-        curr_phase = int(input["current_phase"])
 
-        assert (input_sizes[curr_phase] == len(input["state"]))
+        assert (input_sizes[current_phase] == len(input))
 
         result = ""
-        for i in range(output_sizes[curr_phase]):
+        for i in range(output_sizes[current_phase]):
             result += str(np.random.random())
-            if (i < output_sizes[curr_phase] - 1):
+            if (i < output_sizes[current_phase] - 1):
                 result += " "
 
         return result

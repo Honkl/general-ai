@@ -6,30 +6,28 @@ import json
 
 class Mario(Game):
     def __init__(self, model, game_batch_size, seed):
+        super(Mario, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
 
-    def run(self, advanced_results=False):
+    def init_process(self):
+        """
+        Initializes a subprocess with the game and returns first state of the game.
+        """
         command = "{} {} {}".format(MARIO, str(self.seed), str(self.game_batch_size))
-        p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                             bufsize=-1)  # Using PIPEs is not the best solution...
+        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        bufsize=-1)  # Using PIPEs is not the best solution...
 
-        score = None
-        while (True):
-            line = p.stdout.readline().decode('ascii')
-            if ("passed_distance" in line):
-                score = float(line.split("=")[1].strip())
-                break
+        data = self.get_process_data()
+        return data["state"], data["current_phase"]
 
-            if not line[0] == '{':
-                # Not a proper JSON file
-                continue
+    def get_process_data(self):
+        line = " "
 
-            result = self.model.evaluate(json.loads(line))
-            result = "{}{}".format(result, os.linesep)
+        # Skip non-json file outputs from mario
+        while line == '' or line[0] != '{':
+            # print("line: '{}'".format(line))
+            line = self.process.stdout.readline().decode('ascii')
 
-            p.stdin.write(bytearray(result.encode('ascii')))
-            p.stdin.flush()
-
-        return score
+        return json.loads(line)

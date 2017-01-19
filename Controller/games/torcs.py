@@ -13,6 +13,7 @@ class Torcs(Game):
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
 
     def __init__(self, model, game_batch_size, seed):
+        super(Torcs, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
@@ -39,30 +40,31 @@ class Torcs(Game):
         avg_result = 0
         for _ in range(self.game_batch_size):
             command = TORCS + xml + TORCS_JAVA_CP + port + TORCS_EXE_DIRECTORY
-            p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                 bufsize=-1)  # Using PIPEs is not the best solution...
-            score = None
-            while (True):
-                line = p.stdout.readline().decode('ascii')
+            self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                            bufsize=-1)  # Using PIPEs is not the best solution...
 
-                if "RACED DISTANCE" in line:
-                    score = line.split(":")[1].strip()
-                    avg_result += float(score)
+            data = self.get_process_data()
+            state = data["state"]
+            current_phase = data["current_phase"]
+
+            while True:
+                result = self.model.evaluate(state, current_phase)
+
+                state, current_phase, _, done = self.step(result)
+                if done:
+                    avg_result += self.final_score[0]
                     break
-
-                if line[0] != "{":
-                    # Not a proper json
-                    continue
-
-                #print("LINE: {}".format(line))
-                result = self.model.evaluate(json.loads(line))
-                result = "{}{}".format(result, os.linesep)
-
-                p.stdin.write(bytearray(result.encode('ascii')))
-                p.stdin.flush()
-
-
 
         avg_result = avg_result / float(self.game_batch_size)
         my_port_lock.release()
         return avg_result
+
+    def init_process(self):
+        raise NotImplementedError
+
+    def get_process_data(self):
+        line = ' '
+        while line[0] != "{":
+            # Not a proper json
+            line = self.process.stdout.readline().decode('ascii')
+        return json.loads(line)

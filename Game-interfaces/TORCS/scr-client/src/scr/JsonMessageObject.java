@@ -12,6 +12,7 @@ public class JsonMessageObject {
 
     Double[] state;
     int current_phase = 0;
+    double reward = 0.0;
 
     private transient double piRadians = 0.05483;
 

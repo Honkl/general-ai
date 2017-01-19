@@ -22,6 +22,14 @@ namespace AlhambraInterface
             private set;
         }
 
+        public float reward
+        {
+            get
+            {
+                return 0.0f;
+            }
+        }
+
         private static List<Card> allCards = null;
         private static List<Building> allBuildings = null;
         /// <summary>
@@ -192,7 +200,6 @@ namespace AlhambraInterface
         public string ConvertToJson()
         {
             string json = JsonConvert.SerializeObject(this);
-            //Console.WriteLine(json);
             return json;
         }
 

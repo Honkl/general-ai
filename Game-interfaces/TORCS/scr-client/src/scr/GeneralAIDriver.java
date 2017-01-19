@@ -198,7 +198,7 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public void shutdown() {
-        System.out.println("RACED DISTANCE: " + lastSensor.getDistanceRaced());
+        System.out.println("{\"final_score\":[" + lastSensor.getDistanceRaced() + "],\"reward\":0.0}");
         try {
             writer.write("END");
             writer.close();

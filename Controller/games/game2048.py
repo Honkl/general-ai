@@ -8,30 +8,25 @@ import time
 
 class Game2048(Game):
     def __init__(self, model, game_batch_size, seed):
+        super(Game2048, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
 
-    # === VERSION USING PIPELINENS
-    def run(self, advanced_results=False):
+    def init_process(self):
+        """
+        Initializes a subprocess with the game and returns first state of the game.
+        """
         command = "{} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size))
-        p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                             bufsize=-1)  # Using PIPEs is not the best solution...
+        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        bufsize=-1)  # Using PIPEs is not the best solution...
 
-        score = None
-        while (True):
-            line = p.stdout.readline().decode('ascii')
-            if ("SCORE" in line):
-                score = line.split(' ')[1]
-                break
+        first_state, _ = self.get_process_data()
+        return first_state
 
-            result = self.model.evaluate(json.loads(line))
-            result = "{}{}".format(result, os.linesep)
-
-            p.stdin.write(bytearray(result.encode('ascii')))
-            p.stdin.flush()
-
-        return float(score)
+    def get_process_data(self):
+        line = self.process.stdout.readline().decode('ascii')
+        return json.loads(line)
 
     """
     #==== VERSION USING SOCKETS INSTEAD OF PIPELINES

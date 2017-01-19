@@ -68,16 +68,17 @@ namespace AlhambraInterface
                 }
             }
 
-            string result = "SCORES ";
+            string result = "{\"final_score\": [ ";
             for (int ID = 0; ID < NumberOfPlayers; ID++)
             {
                 avgResults[ID] /= gameBatchSize;
                 result += avgResults[ID];
                 if (ID < NumberOfPlayers - 1)
                 {
-                    result += " ";
+                    result += ",";
                 }
             }
+            result += "], \"reward\": 0.0}";
 
             writer.WriteLine(result);
             writer.Close();

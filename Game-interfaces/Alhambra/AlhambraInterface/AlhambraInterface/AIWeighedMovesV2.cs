@@ -518,7 +518,7 @@ namespace AlhambraInterface
 
             if (criteriaArray.Length != results.Length)
             {
-                Console.WriteLine(output);
+                Console.WriteLine("Wrong number of results from general AI expected {0}, got {1}", criteriaArray.Length, results.Length);
                 throw new AlhambraException("Wrong number of results from general AI");
             }
 
