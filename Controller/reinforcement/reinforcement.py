@@ -7,6 +7,11 @@ from reinforcement.agent import Agent
 from reinforcement.environment import Environment
 import tensorflow as tf
 
+from games.alhambra import Alhambra
+from games.torcs import Torcs
+from games.mario import Mario
+from games.game2048 import Game2048
+
 
 class Reinforcement():
     def __init__(self, game, reinforce_params, q_network, threads):
@@ -18,12 +23,16 @@ class Reinforcement():
         game_config_file = ""
         if game == "alhambra":
             game_config_file = constants.ALHAMBRA_CONFIG_FILE
+            self.game_class = Alhambra
         if game == "2048":
             game_config_file = constants.GAME2048_CONFIG_FILE
+            self.game_class = Game2048
         if game == "mario":
             game_config_file = constants.MARIO_CONFIG_FILE
+            self.game_class = Mario
         if game == "torcs":
             game_config_file = constants.TORCS_CONFIG_FILE
+            self.game_class = Torcs
 
         with open(game_config_file, "r") as f:
             self.game_config = json.load(f)
@@ -32,12 +41,13 @@ class Reinforcement():
 
         # we will train only one network inside the Q-network
         self.actions_count = sum(self.game_config["output_sizes"])
+        q_network.set_output_size(self.actions_count)
 
-        expname = "game{}-penalty{}-gamma{}-base_reward{}".format(game, reinforce_params.penalty,
+        self.expname = "game{}-penalty{}-gamma{}-base_reward{}".format(game, reinforce_params.penalty,
                                                                   reinforce_params.gamma,
                                                                   reinforce_params.base_reward)
 
-        self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, expname, threads)
+        self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, self.expname, threads)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/q-network"
@@ -62,7 +72,8 @@ class Reinforcement():
             print("Epoch {}/{}".format(i_epoch, epochs))
 
             # Gym Environment
-            envs = [Environment(self.reinforce_params.base_reward,
+            envs = [Environment(self.game_class,
+                                self.reinforce_params.base_reward,
                                 self.reinforce_params.penalty,
                                 np.random.randint(0, 2 ** 16),
                                 self.state_size,

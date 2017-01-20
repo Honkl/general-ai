@@ -26,7 +26,13 @@ class Environment(gym.Env):
         :param action: Action to make.
         :return: By Gym-interface, returns observation (new state), reward, done, info
         """
-        new_state, reward, done = self.game_instance.step(action)
+        action_string = ""
+        for i in range(self.actions_count):
+            if i == action:
+                action_string += "1 "
+            else:
+                action_string += "0 "
+        new_state, _, reward, done = self.game_instance.step(action_string)
         self.state = new_state
 
         return self.state, reward, done, {}  # info
@@ -43,7 +49,7 @@ class Environment(gym.Env):
         game_batch = 1
         seed = np.random.randint(0, 2 ** 16)
         self.game_instance = self.game_class(model, game_batch, seed)
-        self.state = self.game_instance.init_process()  # First state of the game
+        self.state, _ = self.game_instance.init_process()  # First state of the game
         return self.state
 
     def _render(self, mode='human', close=False):

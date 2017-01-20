@@ -8,7 +8,7 @@ from games.mario import Mario
 from games.game2048 import Game2048
 
 
-def plot_graph(values):
+def bar_plot(values):
     fig, ax = plt.subplots(figsize=(6, 7))
 
     bar_width = 0.3
@@ -52,8 +52,8 @@ if __name__ == '__main__':
     GAME = "alhambra"
 
     models = []
-    #models.append(("Random", constants.loc + "/config/alhambra/random/random.json"))
-    models.append(("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2017-01-03_22-17-48/best_0.json"))
+    models.append(
+        ("EVA + Feedforward FC", constants.loc + "/config/alhambra/feedforward/logs_2017-01-03_22-17-48/best_0.json"))
 
     values = []
     for model in models:
@@ -77,4 +77,3 @@ if __name__ == '__main__':
         values.append(("Original#1", game_result[1]))
         values.append(("Original#2", game_result[2]))
 
-    plot_graph(values)

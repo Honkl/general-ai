@@ -35,13 +35,14 @@ class Game():
         data = self.get_process_data()
 
         reward = data["reward"]
+        new_state = data["state"]
         if "final_score" in data:
             scores = data["final_score"]
             self.final_score = list(map(float, scores))
             self.finalize()
-            return None, None, reward, True
+            return new_state, None, reward, True
 
-        new_state = data["state"]
+
         phase = data["current_phase"]
         return new_state, phase, reward, False
 

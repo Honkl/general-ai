@@ -16,7 +16,7 @@ def get_activation(name):
 def get_activation_tf(name):
     if name == "relu":
         return tf.nn.relu
-    if name == "id":
+    if name == "identity":
         return tf.identity
 
 
