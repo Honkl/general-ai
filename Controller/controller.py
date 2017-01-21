@@ -23,7 +23,7 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 sea_params = EvolutionaryAlgorithmParameters(
-    pop_size=20,
+    pop_size=5,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
     ngen=1000,
@@ -43,23 +43,33 @@ es_params = EvolutionStrategyParameters(
 
 rl_params = ReinforcementParameters(
     batch_size=1,
-    epochs=10,
+    epochs=1000,
     penalty=0,
     gamma=0.7,
     base_reward=0,
     dropout=None,
     optimizer="adam")
 
-if __name__ == '__main__':
-    q_net = QNetwork(hidden_layers=[32, 32], activations=["relu", "relu", "identity"])
-    RL = Reinforcement("2048", rl_params, q_net, threads=1)
+
+def run_reinforcement():
+    q_net = QNetwork(hidden_layers=[16, 16], activations=["relu", "relu", "identity"])
+    RL = Reinforcement("torcs", rl_params, q_net, threads=10)
     RL.run()
 
 
-    #mlp = MLP(hidden_layers=[32, 32], activation="relu")
+def run_eva():
+    mlp = MLP(hidden_layers=[16, 16], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=mlp, logs_every=10,
+                                      max_workers=10)
+    evolution.run()
 
-    #evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=mlp, logs_every=5, max_workers=1)
-    #evolution.run()
 
-    #strategy = EvolutionStrategy("torcs", es_params, mlp, logs_every=10, max_workers=3)
-    #strategy.run()
+def run_es():
+    mlp = MLP(hidden_layers=[32, 32], activation="relu")
+    strategy = EvolutionStrategy("2048", es_params, mlp, logs_every=10, max_workers=3)
+    strategy.run()
+
+
+if __name__ == '__main__':
+    #run_reinforcement()
+    run_eva()

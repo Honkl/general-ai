@@ -35,7 +35,7 @@ class Environment(gym.Env):
         new_state, _, reward, done = self.game_instance.step(action_string)
         self.state = new_state
 
-        return self.state, reward, done, {}  # info
+        return self.state, reward, done, self.game_instance.score
 
     def _configure(self, display=None):
         self.display = display
@@ -57,3 +57,6 @@ class Environment(gym.Env):
 
     def _close(self):
         pass
+
+    def shut_down(self):
+        self.game_instance.finalize()

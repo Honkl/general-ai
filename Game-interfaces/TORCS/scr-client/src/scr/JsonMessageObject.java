@@ -12,7 +12,9 @@ public class JsonMessageObject {
 
     Double[] state;
     int current_phase = 0;
+    int done = 0;
     double reward = 0.0;
+    double[] score = new double[1]; // We have only one score (passed distance)
 
     private transient double piRadians = 0.05483;
 
@@ -21,8 +23,13 @@ public class JsonMessageObject {
      * state of the game. All game sensor values are scaled for the AI.
      *
      * @param sensors Information about a game state.
+     * @param reward Current reward of the driver.
+     * @param bestDistanceRaced Best distance raced of the current driver. 
+     * @param score Current score of the driver.
+     * @param done Determines whether the race has already finished.
      */
-    public JsonMessageObject(SensorModel sensors, double bestDistanceRaced) {
+    public JsonMessageObject(SensorModel sensors, double reward,
+            double bestDistanceRaced, double score, boolean done) {
         List<Double> result = new ArrayList<>();
 
         result.add((sensors.getAngleToTrackAxis() + piRadians) / (2 * piRadians));
@@ -63,14 +70,16 @@ public class JsonMessageObject {
         //}
         // Debug print
         /**
-        for (int i = 0; i < result.size(); i++) {
-            //System.err.print(result.get(i) + " index: " + i + ", ");
-            System.err.print(result.get(i) + " ");
-        }
-        System.err.println();
-        /**/
+         * for (int i = 0; i < result.size(); i++) {
+         * //System.err.print(result.get(i) + " index: " + i + ", ");
+         * System.err.print(result.get(i) + " "); } System.err.println(); /*
+         */
         state = new Double[result.size()];
         result.toArray(state);
+        this.score[0] = score;
+        this.reward = reward;
+        this.done = done ? 1 : 0;
+
     }
 
     /**

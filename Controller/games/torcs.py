@@ -27,7 +27,7 @@ class Torcs(Game):
 
                 state, current_phase, _, done = self.step(result)
                 if done:
-                    avg_result += self.final_score[0]
+                    avg_result += self.score[0]
                     break
 
         avg_result = avg_result / float(self.game_batch_size)
@@ -63,7 +63,13 @@ class Torcs(Game):
         while line[0] != "{":
             # Not a proper json
             line = self.process.stdout.readline().decode('ascii')
+
         return json.loads(line)
 
     def finalize(self):
-        self.my_port_lock.release()
+        try:
+            self.my_port_lock.release()
+        except:
+            pass
+
+        self.process.kill()

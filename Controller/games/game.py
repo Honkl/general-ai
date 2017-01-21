@@ -7,7 +7,7 @@ class Game():
     def __init__(self):
         self.process = None
         self.model = None
-        self.final_score = None
+        self.score = None
 
     def run(self, advanced_results=False):
         """
@@ -21,9 +21,9 @@ class Game():
             state, current_phase, _, done = self.step(result)
             if done:
                 if advanced_results:
-                    return self.final_score
+                    return self.score
                 else:
-                    return self.final_score[0]
+                    return self.score[0]
 
     def step(self, action):
         """
@@ -36,14 +36,15 @@ class Game():
 
         reward = data["reward"]
         new_state = data["state"]
-        if "final_score" in data:
-            scores = data["final_score"]
-            self.final_score = list(map(float, scores))
+        phase = data["current_phase"]
+        scores = data["score"]
+        done = data["done"]
+        self.score = list(map(float, scores))
+
+        if int(done) == 1:
             self.finalize()
             return new_state, None, reward, True
 
-
-        phase = data["current_phase"]
         return new_state, phase, reward, False
 
     def init_process(self):
@@ -72,4 +73,4 @@ class Game():
         """
         After game ends, do your stuff here (thread lock unlock for torcs...)
         """
-        pass
+        self.process.kill()

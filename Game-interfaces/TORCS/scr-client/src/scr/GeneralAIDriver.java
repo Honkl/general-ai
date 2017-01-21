@@ -27,8 +27,9 @@ public class GeneralAIDriver extends Controller {
     private GearInterval[] intervals;
 
     private SensorModel lastSensor;
-    private double last = 0;
+    private double lastDistanceRaced = 0;
     private double bestDistanceRaced = 0;
+    private double score = 0;
 
     /**
      * Represents an interval to discretise values for gear integer.
@@ -88,7 +89,7 @@ public class GeneralAIDriver extends Controller {
             if (raced != Double.NaN && raced != Double.NEGATIVE_INFINITY && raced != Double.POSITIVE_INFINITY) {
                 bestDistanceRaced = Math.max(raced, bestDistanceRaced);
             }
-            JsonMessageObject jmo = new JsonMessageObject(sensors, bestDistanceRaced);
+            JsonMessageObject jmo = new JsonMessageObject(sensors, evaluateReward(), bestDistanceRaced, score, false);
             String json = jmo.convertToJson() + "\n";
 
             writer.write(json);
@@ -122,12 +123,26 @@ public class GeneralAIDriver extends Controller {
              * { last = current; act.restartRace = true; } } /*
              */
             lastSensor = sensors;
+            score = lastSensor.getDistanceRaced();
 
             return act;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return act;
+    }
+
+    private double evaluateReward() {
+        if (lastSensor == null) {
+            return 0;
+        }
+        double raced = lastSensor.getDistanceRaced();
+        double reward = 0;
+        reward += raced - lastDistanceRaced; 
+        lastDistanceRaced = raced;
+        reward -= 100 * lastSensor.getDamage();
+        //System.err.println(lastSensor.getDistanceRaced());
+        return reward;
     }
 
     /**
@@ -198,14 +213,12 @@ public class GeneralAIDriver extends Controller {
 
     @Override
     public void shutdown() {
-        System.out.println("{\"final_score\":[" + lastSensor.getDistanceRaced() + "],\"reward\":0.0}");
+        JsonMessageObject jmo = new JsonMessageObject(lastSensor, evaluateReward(), bestDistanceRaced, score, true);
         try {
-            writer.write("END");
+            writer.write(jmo.convertToJson() + "\n");
             writer.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        System.out.println("Bye bye!");
     }
-
 }

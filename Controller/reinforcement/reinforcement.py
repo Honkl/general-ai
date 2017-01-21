@@ -44,8 +44,8 @@ class Reinforcement():
         q_network.set_output_size(self.actions_count)
 
         self.expname = "game{}-penalty{}-gamma{}-base_reward{}".format(game, reinforce_params.penalty,
-                                                                  reinforce_params.gamma,
-                                                                  reinforce_params.base_reward)
+                                                                       reinforce_params.gamma,
+                                                                       reinforce_params.base_reward)
 
         self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, self.expname, threads)
 
@@ -68,9 +68,7 @@ class Reinforcement():
         logdir = self.init_directories()
         epochs = self.reinforce_params.epochs
 
-        for i_epoch in range(epochs):
-            print("Epoch {}/{}".format(i_epoch, epochs))
-
+        for i_epoch in range(1, epochs + 1):
             # Gym Environment
             envs = [Environment(self.game_class,
                                 self.reinforce_params.base_reward,
@@ -79,24 +77,21 @@ class Reinforcement():
                                 self.state_size,
                                 self.actions_count) for _ in range(self.reinforce_params.batch_size)]
 
-            for env in envs:
-                env.reset()
-
             epoch_loss = 0.0
             epoch_reward = 0.0
+            epoch_score = 0.0
             epoch_estimated_reward = 0.0
             max_reward = 0
-            step_id = -1
+            step_id = 0
 
             while True:
                 step_id += 1
                 # TODO: Set step limit?
-
                 # Evaluate action (forward pass in Q-net) and apply it
                 selected_actions, estimated_rewards = self.agent.play([env.state for env in envs])
                 epoch_estimated_reward += estimated_rewards.mean()
 
-                _, rewards, dones, _ = zip(*[env.step(action) for env, action in zip(envs, selected_actions)])
+                _, rewards, dones, scores = zip(*[env.step(action) for env, action in zip(envs, selected_actions)])
                 epoch_reward += np.array(rewards).mean()
 
                 # Train Q-net
@@ -105,6 +100,8 @@ class Reinforcement():
                 max_reward = max(max_reward, np.max(rewards))
 
                 if sum(dones):
+                    # print(scores)
+                    epoch_score = max(scores)
                     break
 
             report_measures = ([tf.Summary.Value(tag='loss_total', simple_value=epoch_loss),
@@ -117,15 +114,22 @@ class Reinforcement():
                                 tf.Summary.Value(tag='number_of_turns', simple_value=step_id),
                                 tf.Summary.Value(tag='max_reward', simple_value=max_reward)])
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_epoch)
-            print('Avg loss: {}'.format(float(epoch_loss) / step_id))
+
+            for env in envs:
+                env.shut_down()
+
+            # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
+            print("Epoch: {}/{} Avg score: {}".format(i_epoch, epochs, epoch_score))
 
         # TODO: Make better
+        """
         if not os.path.isdir(logdir):
             os.mkdir(logdir)
-        with open(os.path.join(logdir, self.expname), "w") as f:
+        with open(os.path.join(logdir, self.expname + ".txt"), "w") as f:
             f.write(str(epoch_loss) + "\n")
             f.write(str(float(epoch_loss) / step_id) + "\n")
             f.write(str(epoch_reward) + "\n")
             f.write(str(float(epoch_reward) / step_id) + "\n")
             f.write(str(epoch_estimated_reward) + "\n")
             f.write(str(float(epoch_estimated_reward) / step_id) + "\n")
+        """
