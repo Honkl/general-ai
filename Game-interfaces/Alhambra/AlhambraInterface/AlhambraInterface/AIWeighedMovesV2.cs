@@ -506,7 +506,13 @@ namespace AlhambraInterface
                 }
             }
 
-            JsonMessageObject jmo = new JsonMessageObject(RepresentedPlayer, gamePhase);
+            float[] scores = new float[RepresentedPlayer.game.points.Length];
+            for (int i = 0; i < RepresentedPlayer.game.points.Length; i++)
+			{
+                scores[i] = RepresentedPlayer.game.points[i];
+			}
+
+            JsonMessageObject jmo = new JsonMessageObject(RepresentedPlayer, scores, gamePhase, done: false);
             string json = jmo.ConvertToJson();
             writer.WriteLine(json);
 
@@ -515,10 +521,9 @@ namespace AlhambraInterface
             double[] results = jmo.Decode(output);
             int resultIndex = 0;
             double sum = 0;
-
             if (criteriaArray.Length != results.Length)
             {
-                Console.WriteLine("Wrong number of results from general AI expected {0}, got {1}", criteriaArray.Length, results.Length);
+                Console.Error.WriteLine("Wrong number of results from general AI expected {0}, got {1}", criteriaArray.Length, results.Length);
                 throw new AlhambraException("Wrong number of results from general AI");
             }
 

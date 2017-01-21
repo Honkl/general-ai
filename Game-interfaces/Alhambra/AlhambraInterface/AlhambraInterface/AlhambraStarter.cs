@@ -36,12 +36,14 @@ namespace AlhambraInterface
 
             int playedGames = 0;
             Random rnd = new Random(seed);
-            double[] avgResults = new double[NumberOfPlayers]; // At index 0 is our general-ai agent
+            float[] avgResults = new float[NumberOfPlayers]; // At index 0 is our general-ai agent
+            Player player = null;
             while (playedGames < gameBatchSize)
             {
                 bool ok = false;
                 Random rndForGame = new Random(rnd.Next());
                 Controller c = CreateGame(NumberOfPlayers, rndForGame, reader, writer);
+                player = c.players[0];
                 try
                 {
                     c.ExecuteNewMove();
@@ -56,6 +58,7 @@ namespace AlhambraInterface
                     else
                     {
                         // Some other unexpected exception...
+                        throw;
                     }
                 }
                 if (ok)
@@ -68,19 +71,12 @@ namespace AlhambraInterface
                 }
             }
 
-            string result = "{\"final_score\": [ ";
             for (int ID = 0; ID < NumberOfPlayers; ID++)
             {
                 avgResults[ID] /= gameBatchSize;
-                result += avgResults[ID];
-                if (ID < NumberOfPlayers - 1)
-                {
-                    result += ",";
-                }
             }
-            result += "], \"reward\": 0.0}";
-
-            writer.WriteLine(result);
+            JsonMessageObject jmo = new JsonMessageObject(player, avgResults, 0, done: true);
+            writer.WriteLine(jmo.ConvertToJson());
             writer.Close();
             reader.Close();
         }

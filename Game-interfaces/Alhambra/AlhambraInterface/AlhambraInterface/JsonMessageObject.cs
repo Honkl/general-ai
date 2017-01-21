@@ -24,10 +24,20 @@ namespace AlhambraInterface
 
         public float reward
         {
-            get
-            {
-                return 0.0f;
-            }
+            get;
+            private set;
+        }
+
+        public float[] score
+        {
+            get;
+            private set;
+        }
+
+        public int done
+        {
+            get;
+            private set;
         }
 
         private static List<Card> allCards = null;
@@ -86,11 +96,30 @@ namespace AlhambraInterface
         /// Initializes a new instance of JsonMessageObject with the specified paramters.
         /// </summary>
         /// <param name="representedPlayer">Currently represented player.</param>
+        /// <param name="scores">Scores of the players.</param>
         /// <param name="gamePhase">Current game phase.</param>
-        public JsonMessageObject(Player representedPlayer, int gamePhase)
+        /// <param name="done">Determines whether the game has come to an end.</param>
+        public JsonMessageObject(Player representedPlayer, float[] scores, int gamePhase, bool done)
         {
-            state = EncodeState(representedPlayer);
-            current_phase = gamePhase;
+            this.done = done ? 1 : 0;
+            this.reward = EvaluateReward(representedPlayer);
+            this.score = scores;
+            this.state = EncodeState(representedPlayer);
+            this.current_phase = gamePhase;
+        }
+
+        private int EvaluateReward(Player player)
+        {
+            int sum = 0;
+            foreach (Card c in player.cards)
+            {
+                sum += c.Value;
+            }
+            foreach (Building b in player.constructed)
+            {
+                sum += b.Value;
+            }
+            return sum;
         }
 
         /// <summary>
