@@ -1,6 +1,7 @@
 import numpy as np
 import constants
 import json
+import utils.miscellaneous
 from models.model import Model
 from utils import activations
 
@@ -10,6 +11,20 @@ class MLP(Model):
     Represents a simple feedforward MLP neural network model.
     Can contain multiple networks, each one for each game phase. Contains instances of 'MLPNetwork'.
     """
+
+    @staticmethod
+    def load_from_file(file_name, game):
+        with open(file_name, "r") as f:
+            data = json.load(f)
+        if data["class_name"] != "MLP" and data["class_name"] != "FeedForward":  # old class name
+            raise ValueError("Wrong model file.")
+
+        weights = data["weights"]
+        hidden = list(map(int, data["hidden_sizes"]))
+        activation = data["activation"]
+
+        game_config = utils.miscellaneous.get_game_config(game)
+        return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
 
     class MLPNetwork():
         def __init__(self, layer_sizes, activation, weights):
@@ -117,28 +132,17 @@ class MLP(Model):
         Evaluates number of parameters of neural networks (e.q. weights of network).
         :return: Number of parameters of neural network (this will be equal to evolution individual length).
         """
-        game_config_file = ""
-        if game == "alhambra":
-            game_config_file = constants.ALHAMBRA_CONFIG_FILE
-        if game == "2048":
-            game_config_file = constants.GAME2048_CONFIG_FILE
-        if game == "mario":
-            game_config_file = constants.MARIO_CONFIG_FILE
-        if game == "torcs":
-            game_config_file = constants.TORCS_CONFIG_FILE
-
-        with open(game_config_file) as f:
-            game_config = json.load(f)
-            total_weights = 0
-            h_sizes = self.hidden_layers
-            for phase in range(game_config["game_phases"]):
-                input_size = game_config["input_sizes"][phase] + 1
-                output_size = game_config["output_sizes"][phase]
-                total_weights += input_size * h_sizes[0]
-                if (len(h_sizes) > 1):
-                    for i in range(len(h_sizes) - 1):
-                        total_weights += (h_sizes[i] + 1) * h_sizes[i + 1]
-                total_weights += (h_sizes[-1] + 1) * output_size
+        game_config = utils.miscellaneous.get_game_config(game)
+        total_weights = 0
+        h_sizes = self.hidden_layers
+        for phase in range(game_config["game_phases"]):
+            input_size = game_config["input_sizes"][phase] + 1
+            output_size = game_config["output_sizes"][phase]
+            total_weights += input_size * h_sizes[0]
+            if (len(h_sizes) > 1):
+                for i in range(len(h_sizes) - 1):
+                    total_weights += (h_sizes[i] + 1) * h_sizes[i + 1]
+            total_weights += (h_sizes[-1] + 1) * output_size
         return total_weights
 
     def evaluate(self, input, current_phase):

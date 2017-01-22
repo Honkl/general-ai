@@ -1,10 +1,11 @@
 from models.model import Model
 import numpy as np
+import utils.miscellaneous
 
 class Random(Model):
 
-    def __init__(self, game_config):
-        self.game_config = game_config
+    def __init__(self, game):
+        self.game_config = utils.miscellaneous.get_game_config(game)
 
 
     def evaluate(self, input, current_phase):

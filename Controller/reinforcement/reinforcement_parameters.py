@@ -4,6 +4,17 @@ class ReinforcementParameters():
     """
 
     @staticmethod
+    def get_empty_params():
+        return ReinforcementParameters(
+            batch_size=None,
+            epochs=None,
+            penalty=None,
+            gamma=None,
+            base_reward=None,
+            dropout=None,
+            optimizer=None)
+
+    @staticmethod
     def from_dict(data):
         params = ReinforcementParameters(
             data["batch_size"],

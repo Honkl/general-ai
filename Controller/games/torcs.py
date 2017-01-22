@@ -31,6 +31,8 @@ class Torcs(Game):
                     break
 
         avg_result = avg_result / float(self.game_batch_size)
+        if advanced_results:
+            return [avg_result]
         return avg_result
 
     def init_process(self):
