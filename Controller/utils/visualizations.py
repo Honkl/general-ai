@@ -8,6 +8,7 @@ from reinforcement.reinforcement import Reinforcement
 from reinforcement.reinforcement_parameters import ReinforcementParameters
 from reinforcement.q_network import QNetwork
 from models.mlp import MLP
+from models.learned_q_net import LearnedQNet
 from models.random import Random
 import utils.miscellaneous
 
@@ -75,20 +76,22 @@ def eval(game, evals, model):
 
 if __name__ == '__main__':
     np.random.seed(42)
-    evals = 1
+    evals = 10
 
-    game = "mario"
+    game = "2048"
 
     # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_0.json"
-    file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
+    # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
+    logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
 
-    mlp = MLP.load_from_file(file_name, game)
-    random = Random(game)
+    #mlp = MLP.load_from_file(file_name, game)
+    q_net = LearnedQNet(logdir)
+    random=Random(game)
 
     values = []
     values += eval(game=game, evals=evals, model=random)
-    values += eval(game=game, evals=evals, model=mlp)
+    values += eval(game=game, evals=evals, model=q_net)
     bar_plot(values, evals, game)

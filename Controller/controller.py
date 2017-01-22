@@ -23,11 +23,11 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 sea_params = EvolutionaryAlgorithmParameters(
-    pop_size=5,
+    pop_size=20,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
     ngen=1000,
-    game_batch_size=1,
+    game_batch_size=5,
     cxindpb=0.2,
     hof_size=0,
     elite=5,
@@ -42,8 +42,8 @@ es_params = EvolutionStrategyParameters(
     sigma=1.0)
 
 rl_params = ReinforcementParameters(
-    batch_size=1,
-    epochs=1000,
+    batch_size=10,
+    epochs=100,
     penalty=0,
     gamma=0.7,
     base_reward=0,
@@ -52,15 +52,15 @@ rl_params = ReinforcementParameters(
 
 
 def run_reinforcement():
-    q_net = QNetwork(hidden_layers=[16, 16], activations=["relu", "relu", "identity"])
-    RL = Reinforcement("torcs", rl_params, q_net, threads=10)
+    q_net = QNetwork(hidden_layers=[64, 64], activations=["relu", "relu", "identity"])
+    RL = Reinforcement("mario", rl_params, q_net, threads=10)
     RL.run()
 
 
 def run_eva():
-    mlp = MLP(hidden_layers=[16, 16], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=mlp, logs_every=10,
-                                      max_workers=10)
+    mlp = MLP(hidden_layers=[512, 512], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=mlp, logs_every=10,
+                                      max_workers=5)
     evolution.run()
 
 
@@ -71,5 +71,5 @@ def run_es():
 
 
 if __name__ == '__main__':
-    #run_reinforcement()
-    run_eva()
+    run_reinforcement()
+    # run_eva()

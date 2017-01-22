@@ -6,7 +6,7 @@ import tensorflow as tf
 
 
 class Agent():
-    def __init__(self, reinfoce_params, q_network, state_size, actions_count, expname, threads):
+    def __init__(self, reinfoce_params, q_network, state_size, actions_count, logdir, threads):
         self.batch_size = reinfoce_params.batch_size
         batch_size = self.batch_size
         self.dropout = reinfoce_params.dropout
@@ -14,6 +14,8 @@ class Agent():
         self.state_size = state_size
         self.actions_count = actions_count
         self.q_network = q_network
+        self.logdir = logdir
+        self.saver = None
 
         with tf.device('/cpu:0'):
             with tf.variable_scope('agent') as scope:
@@ -25,7 +27,8 @@ class Agent():
                 self.new_state = tf.placeholder(shape=[batch_size, state_size], dtype=tf.float32, name="new_state")
                 self.last_action = tf.placeholder(shape=[batch_size], dtype=tf.int32, name="last_action")
                 self.last_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32, name="last_reward")
-                self.last_estimated_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32, name="last_estm_reward")
+                self.last_estimated_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32,
+                                                            name="last_estm_reward")
                 _, new_estimated_reward = self.select_best_action(self.new_state)
 
                 # loss = (r + γ*max_a'Q(s',a';θ) - Q(s,a;θ))^2
@@ -39,8 +42,9 @@ class Agent():
                                                                 allow_soft_placement=True))
 
                 self.session.run(tf.global_variables_initializer())
+                self.saver = tf.train.Saver(tf.all_variables(), max_to_keep=None)
 
-                self.summary_writer = tf.train.SummaryWriter('train_{}'.format(expname),
+                self.summary_writer = tf.train.SummaryWriter(logdir,
                                                              graph=self.session.graph,
                                                              flush_secs=10)
 

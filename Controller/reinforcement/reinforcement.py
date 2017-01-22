@@ -7,6 +7,7 @@ from reinforcement.agent import Agent
 from reinforcement.environment import Environment
 import tensorflow as tf
 
+import utils.miscellaneous
 from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
@@ -20,22 +21,8 @@ class Reinforcement():
         self.q_network = q_network
         self.threads = threads
 
-        game_config_file = ""
-        if game == "alhambra":
-            game_config_file = constants.ALHAMBRA_CONFIG_FILE
-            self.game_class = Alhambra
-        if game == "2048":
-            game_config_file = constants.GAME2048_CONFIG_FILE
-            self.game_class = Game2048
-        if game == "mario":
-            game_config_file = constants.MARIO_CONFIG_FILE
-            self.game_class = Mario
-        if game == "torcs":
-            game_config_file = constants.TORCS_CONFIG_FILE
-            self.game_class = Torcs
-
-        with open(game_config_file, "r") as f:
-            self.game_config = json.load(f)
+        self.game_config = utils.miscellaneous.get_game_config(game)
+        self.game_class = utils.miscellaneous.get_game_class(game)
         self.agents = []
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
 
@@ -43,11 +30,8 @@ class Reinforcement():
         self.actions_count = sum(self.game_config["output_sizes"])
         q_network.set_output_size(self.actions_count)
 
-        self.expname = "game{}-penalty{}-gamma{}-base_reward{}".format(game, reinforce_params.penalty,
-                                                                       reinforce_params.gamma,
-                                                                       reinforce_params.base_reward)
-
-        self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, self.expname, threads)
+        self.logdir = self.init_directories()
+        self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, self.logdir, threads)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/q-network"
@@ -64,9 +48,19 @@ class Reinforcement():
 
         return self.dir + "/logs_" + t_string
 
+    def log_metadata(self):
+        with open(os.path.join(self.logdir, "metadata.json"), "w") as f:
+            data = {}
+            data["model_name"] = "Q-Network"
+            data["game"] = self.game
+            data["q_network"] = self.q_network.to_dictionary()
+            data["reinforce_params"] = self.reinforce_params.to_dictionary()
+            f.write(json.dumps(data))
+
     def run(self):
-        logdir = self.init_directories()
+        self.log_metadata()
         epochs = self.reinforce_params.epochs
+        max_score = 0.0
 
         for i_epoch in range(1, epochs + 1):
             # Gym Environment
@@ -100,12 +94,12 @@ class Reinforcement():
                 max_reward = max(max_reward, np.max(rewards))
 
                 if sum(dones):
-                    # print(scores)
-                    epoch_score = max(scores)
+                    epoch_score = max(scores)[0]  # Max score from batch
                     break
 
             report_measures = ([tf.Summary.Value(tag='loss_total', simple_value=epoch_loss),
                                 tf.Summary.Value(tag='loss_average', simple_value=float(epoch_loss) / step_id),
+                                tf.Summary.Value(tag='score', simple_value=epoch_score),
                                 tf.Summary.Value(tag='reward_total', simple_value=epoch_reward),
                                 tf.Summary.Value(tag='reward_average', simple_value=float(epoch_reward) / step_id),
                                 tf.Summary.Value(tag='estimated_reward_total', simple_value=epoch_estimated_reward),
@@ -118,8 +112,13 @@ class Reinforcement():
             for env in envs:
                 env.shut_down()
 
+            if epoch_score >= max_score:
+                checkpoint_path = os.path.join(self.logdir, "q-net-model.ckpt")
+                self.agent.saver.save(self.agent.session, checkpoint_path)
+
             # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
             print("Epoch: {}/{} Avg score: {}".format(i_epoch, epochs, epoch_score))
+
 
         # TODO: Make better
         """
@@ -133,3 +132,13 @@ class Reinforcement():
             f.write(str(epoch_estimated_reward) + "\n")
             f.write(str(float(epoch_estimated_reward) / step_id) + "\n")
         """
+
+    def load_checkpoint(self, checkpoint):
+        #tf.initialize_all_variables().run()
+        saver = tf.train.Saver(tf.all_variables())
+        ckpt = tf.train.get_checkpoint_state(checkpoint)
+        if ckpt and ckpt.model_checkpoint_path:
+            print('Restoring model: {}'.format(ckpt.model_checkpoint_path))
+            saver.restore(self.agent.session, ckpt.model_checkpoint_path)
+        else:
+            raise IOError('No model found in {}.'.format(checkpoint))
