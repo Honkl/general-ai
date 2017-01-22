@@ -1,0 +1,1 @@
+{"model_params": {"activation": "relu", "hidden_layers": [256, 256]}, "evolution_params": {"mut": ["uniform", 0.1, 0.1], "game_batch_size": 10, "elite": 5, "hof_size": 0, "cxpb": 0.75, "ngen": 1000, "pop_size": 50, "cxindpb": 0.2, "selection": ["tournament", 3]}}
