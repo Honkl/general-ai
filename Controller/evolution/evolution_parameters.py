@@ -113,7 +113,8 @@ class EvolutionStrategyParameters(EvolutionParameters):
             data["ngen"],
             data["game_batch_size"],
             data["hof_size"],
-            data["elite"])
+            data["elite"],
+            data["sigma"])
         return params
 
     def __init__(self,
@@ -166,3 +167,83 @@ class EvolutionStrategyParameters(EvolutionParameters):
     def to_string(self):
         return "Evolution Strategy - pop_size: {}, hof: {}, elite: {}, sigma: {}".format(self.pop_size, self.hof_size,
                                                                                          self.elite, self.sigma)
+
+
+class DifferentialEvolutionParameters(EvolutionParameters):
+    """
+    Encapsulates parameters of the evolution using evolution strategy.
+    """
+
+    @staticmethod
+    def from_dict(data):
+        params = DifferentialEvolutionParameters(
+            data["pop_size"],
+            data["ngen"],
+            data["game_batch_size"],
+            data["hof_size"],
+            data["elite"],
+            data["cr"],
+            data["f"])
+        return params
+
+    def __init__(self,
+                 pop_size,
+                 ngen,
+                 game_batch_size,
+                 hof_size,
+                 elite,
+                 cr,
+                 f):
+        self._pop_size = pop_size
+        self._ngen = ngen
+        self._game_batch_size = game_batch_size
+        self._hof_size = hof_size
+        self._elite = elite
+        self._cr = cr
+        self._f = f
+
+    @property
+    def pop_size(self):
+        return self._pop_size
+
+    @property
+    def ngen(self):
+        return self._ngen
+
+    @property
+    def fit_repetitions(self):
+        return self._game_batch_size
+
+    @property
+    def hof_size(self):
+        return self._hof_size
+
+    @property
+    def elite(self):
+        return self._elite
+
+    @property
+    def cr(self):
+        return self._cr
+
+    @property
+    def f(self):
+        return self._f
+
+    def to_dictionary(self):
+        data = {}
+        data["pop_size"] = self._pop_size
+        data["ngen"] = self._ngen
+        data["game_batch_size"] = self._game_batch_size
+        data["hof_size"] = self._hof_size
+        data["elite"] = self._elite
+        data["cr"] = self._cr
+        data["f"] = self._f
+        return data
+
+    def to_string(self):
+        return "Differential Evolution - pop_size: {}, hof: {}, elite: {}, cr: {}, f: {}".format(self.pop_size,
+                                                                                                 self.hof_size,
+                                                                                                 self.elite,
+                                                                                                 self.cr,
+                                                                                                 self.f)

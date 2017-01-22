@@ -116,14 +116,14 @@ class Evolution():
         Initializes the current instance of evolution.
         :returns: Deap toolbox.
         """
-        individual_len = self.model.get_number_of_parameters(self.current_game)
+        self.individual_len = self.model.get_number_of_parameters(self.current_game)
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
         toolbox = base.Toolbox()
         toolbox.register("attr_float", np.random.random)
-        toolbox.register("individual", self.init_individual, length=individual_len, icls=creator.Individual)
+        toolbox.register("individual", self.init_individual, length=self.individual_len, icls=creator.Individual)
         toolbox.register("population", self.init_population, container=list, ind_init=toolbox.individual)
 
         toolbox.register("evaluate", self.eval_fitness)
