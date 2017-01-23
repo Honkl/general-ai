@@ -117,7 +117,7 @@ class Reinforcement():
                 self.agent.saver.save(self.agent.session, checkpoint_path)
 
             # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
-            print("Epoch: {}/{} Avg score: {}".format(i_epoch, epochs, epoch_score))
+            print("Epoch: {}/{} avg score: {} avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
 
 
         # TODO: Make better

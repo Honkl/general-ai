@@ -83,6 +83,11 @@ class DifferentialEvolution(Evolution):
                 if y.fitness > agent.fitness:
                     population[k] = y
 
+            seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(population))]
+            fitnesses = toolbox.map(toolbox.evaluate, population, seeds)
+            for ind, fit in zip(population, fitnesses):
+                ind.fitness.values = fit
+
             if halloffame is not None:
                 halloffame.update(population)
 

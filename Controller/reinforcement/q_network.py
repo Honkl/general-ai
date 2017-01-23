@@ -18,7 +18,7 @@ class QNetwork():
         for i, (dim, activation) in enumerate(zip(dimensions, [get_activation_tf(x) for x in self.activations])):
             W = tf.get_variable(name="W_{}".format(i),
                                 shape=[x.get_shape()[1], dim],
-                                initializer=tf.random_normal_initializer())
+                                initializer=tf.random_normal_initializer(mean=0, stddev=1))
             h = tf.get_variable(name="h_{}".format(i),
                                 shape=[dim],
                                 initializer=tf.constant_initializer(0.0))

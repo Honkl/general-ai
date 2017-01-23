@@ -52,10 +52,19 @@ rl_params = ReinforcementParameters(
     dropout=None,
     optimizer="adam")
 
-de_params = DifferentialEvolutionParameters(
-    pop_size=20,
-    ngen=100,
+de_params1 = DifferentialEvolutionParameters(
+    pop_size=50,
+    ngen=500,
     game_batch_size=10,
+    hof_size=0,
+    elite=5,
+    cr=0.25,
+    f=1)
+
+de_params2 = DifferentialEvolutionParameters(
+    pop_size=20,
+    ngen=500,
+    game_batch_size=5,
     hof_size=0,
     elite=5,
     cr=0.25,
@@ -82,10 +91,9 @@ def run_es():
 
 
 def run_de():
-    mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    diff = DifferentialEvolution(game="2048", evolution_params=de_params, model=mlp, logs_every=10, max_workers=8)
+    mlp = MLP(hidden_layers=[64, 64], activation="relu")
+    diff = DifferentialEvolution(game="2048", evolution_params=de_params1, model=mlp, logs_every=10, max_workers=8)
     diff.run()
-
 
 if __name__ == '__main__':
     # run_reinforcement()
