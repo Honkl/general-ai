@@ -23,7 +23,6 @@ class QNetwork():
                                 shape=[dim],
                                 initializer=tf.constant_initializer(0.0))
             x = activation(tf.matmul(x, W) + h)
-
         return x
 
     def to_dictionary(self):

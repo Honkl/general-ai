@@ -6,13 +6,12 @@ import tensorflow as tf
 
 
 class Agent():
-    def __init__(self, reinfoce_params, q_network, state_size, actions_count, logdir, threads):
+    def __init__(self, reinfoce_params, q_network, state_size, logdir, threads):
         self.batch_size = reinfoce_params.batch_size
         batch_size = self.batch_size
         self.dropout = reinfoce_params.dropout
         self.gamma = reinfoce_params.gamma
         self.state_size = state_size
-        self.actions_count = actions_count
         self.q_network = q_network
         self.logdir = logdir
         self.saver = None
@@ -25,17 +24,19 @@ class Agent():
 
                 self.selected_action, self.estimated_reward = self.select_best_action(self.state)
                 self.new_state = tf.placeholder(shape=[batch_size, state_size], dtype=tf.float32, name="new_state")
-                self.last_action = tf.placeholder(shape=[batch_size], dtype=tf.int32, name="last_action")
+                # self.last_action = tf.placeholder(shape=[batch_size], dtype=tf.int32, name="last_action")
                 self.last_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32, name="last_reward")
                 self.last_estimated_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32,
                                                             name="last_estm_reward")
                 _, new_estimated_reward = self.select_best_action(self.new_state)
 
+                self.global_step = tf.Variable(0, dtype=tf.int64, trainable=False, name="global_step")
+
                 # loss = (r + γ*max_a'Q(s',a';θ) - Q(s,a;θ))^2
                 self.losses = (self.last_reward + self.gamma * self.last_estimated_reward - new_estimated_reward) ** 2
                 self.loss = tf.reduce_mean(self.losses)
                 self.optimizer = self.get_optimizer(reinfoce_params.optimizer)
-                self.training = self.optimizer().minimize(self.loss)
+                self.training = self.optimizer(reinfoce_params.learning_rate).minimize(self.loss, global_step=self.global_step)
 
                 self.session = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
                                                                 intra_op_parallelism_threads=threads,
@@ -51,7 +52,8 @@ class Agent():
     def get_optimizer(self, opt_str):
         if opt_str == "adam":
             return tf.train.AdamOptimizer
-
+        if opt_str == "rmsprop":
+            return tf.train.RMSPropOptimizer
         raise NotImplementedError
 
     def play(self, env_states):
@@ -62,7 +64,8 @@ class Agent():
 
     def select_best_action(self, state):
         result = self.Q(state)
-        selected_action = tf.argmax(result, 1)
+        # selected_action = tf.argmax(result, 1)
+        selected_action = result
         estimated_reward = tf.reduce_max(result, 1)
         return selected_action, estimated_reward
 
@@ -70,9 +73,10 @@ class Agent():
         return self.q_network.forward_pass(state)
 
     def learn(self, env_states, last_action, last_reward, last_estimated_reward):
+        # print("{} + {} * {} - {}".format(last_reward , self.gamma, last_estimated_reward, "unknown"))
         _, loss = self.session.run([self.training, self.loss],
                                    {self.new_state: np.array(env_states).reshape(self.batch_size, self.state_size),
-                                    self.last_action: last_action,
+                                    # self.last_action: last_action,
                                     self.last_reward: last_reward,
                                     self.last_estimated_reward: last_estimated_reward})
         return loss

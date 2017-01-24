@@ -27,11 +27,12 @@ class Reinforcement():
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
 
         # we will train only one network inside the Q-network
-        self.actions_count = sum(self.game_config["output_sizes"])
-        q_network.set_output_size(self.actions_count)
+        self.actions_count = self.game_config["output_sizes"]
+        self.actions_count_sum = sum(self.actions_count)
+        q_network.set_output_size(self.actions_count_sum)
 
         self.logdir = self.init_directories()
-        self.agent = Agent(reinforce_params, q_network, self.state_size, self.actions_count, self.logdir, threads)
+        self.agent = Agent(reinforce_params, q_network, self.state_size, self.logdir, threads)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/q-network"
@@ -62,7 +63,9 @@ class Reinforcement():
         epochs = self.reinforce_params.epochs
         max_score = 0.0
 
+        start = time.time()
         for i_epoch in range(1, epochs + 1):
+
             # Gym Environment
             envs = [Environment(self.game_class,
                                 self.reinforce_params.base_reward,
@@ -117,8 +120,15 @@ class Reinforcement():
                 self.agent.saver.save(self.agent.session, checkpoint_path)
 
             # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
-            print("Epoch: {}/{} avg score: {} avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
+            print("Epoch: {}/{}, avg score: {}, avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
 
+            if i_epoch % 100 == 0:
+                t = time.time() - start
+                h = t // 3600
+                m = (t % 3600) // 60
+                s = t - (h * 3600) - (m * 60)
+                elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+                print("Time: {}".format(elapsed_time))
 
         # TODO: Make better
         """
@@ -134,7 +144,7 @@ class Reinforcement():
         """
 
     def load_checkpoint(self, checkpoint):
-        #tf.initialize_all_variables().run()
+        # tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
         ckpt = tf.train.get_checkpoint_state(checkpoint)
         if ckpt and ckpt.model_checkpoint_path:
