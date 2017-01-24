@@ -235,7 +235,8 @@ namespace AlhambraInterface
         public double[] Decode(string respond)
         {
             List<double> result = new List<double>();
-            foreach (string part in respond.Split(' '))
+            char[] sep = new char[] { ' ' };
+            foreach (string part in respond.Split(sep, StringSplitOptions.RemoveEmptyEntries))
             {
                 result.Add(double.Parse(part));
             }

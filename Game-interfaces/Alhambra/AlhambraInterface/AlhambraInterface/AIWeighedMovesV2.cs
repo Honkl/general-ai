@@ -527,6 +527,21 @@ namespace AlhambraInterface
                 throw new AlhambraException("Wrong number of results from general AI");
             }
 
+            // Alhambra assume that we have non-negative weights. So we just rescale them.
+            double min = double.PositiveInfinity;
+            for (int i = 0; i < results.Length; i++)
+			{
+                if (results[i] < min)
+                {
+                    min = results[i];
+                }
+			}
+            for (int i = 0; i < results.Length; i++)
+            {
+                results[i] += Math.Abs(min);
+            }
+
+
             foreach (int index in criteriaArray)
             {
                 if (methods[index](argumentForMethod))

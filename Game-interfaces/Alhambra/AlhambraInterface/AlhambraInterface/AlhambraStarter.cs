@@ -57,8 +57,8 @@ namespace AlhambraInterface
                     }
                     else
                     {
-                        // Some other unexpected exception...
-                        throw;
+                        // Some other unexpected exception... Need to play another game.
+                        // Console.Error.WriteLine(e.StackTrace + "\n" + e.Message);
                     }
                 }
                 if (ok)
