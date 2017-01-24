@@ -12,11 +12,13 @@ class Torcs(Game):
     master_lock = Lock()
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
 
-    def __init__(self, model, game_batch_size, seed):
+    def __init__(self, model, game_batch_size, seed, vis_on=False):
         super(Torcs, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
+        self.vis_on = vis_on
+
 
     def run(self, advanced_results=False):
         avg_result = 0
@@ -53,7 +55,10 @@ class Torcs(Game):
         xml = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_" + str(port_num) + ".xml\""
         port = " \"" + str(port_num) + "\""
 
-        command = TORCS + xml + TORCS_JAVA_CP + port + TORCS_EXE_DIRECTORY
+        if self.vis_on:
+            command = TORCS_VIS_ON + xml +  TORCS_JAVA_CP + port + TORCS_EXE_DIRECTORY
+        else:
+            command = TORCS + xml + TORCS_JAVA_CP + port + TORCS_EXE_DIRECTORY
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...
 

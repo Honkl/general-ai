@@ -12,7 +12,9 @@ class Mario(Game):
         self.seed = seed
 
         self.use_visualization_tool = use_visualization_tool
-        self.vis_on = vis_on
+        self.vis_on = "0"
+        if vis_on:
+            self.vis_on = "1"
         self.level = level
 
     def init_process(self):

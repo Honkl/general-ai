@@ -84,20 +84,27 @@ def compare(game, evals, *args):
 
 
 def eval_mario_winrate(model, evals):
-    game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level="gombas", vis_on="1", use_visualization_tool=True)
+    game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level="gombas", vis_on=True,
+                                      use_visualization_tool=True)
     results = game_instance.run(advanced_results=True)
     print("Mario winrate: {}".format(results))
 
 
+def run_torcs_vis_on(model, evals):
+    game_instance = games.torcs.Torcs(model, evals, np.random.randint(0, 2 ** 16), vis_on=True)
+    print("Torcs visualization")
+    results = game_instance.run(advanced_results=True)
+
+
 if __name__ == '__main__':
     np.random.seed(42)
-    game = "mario"
-    evals = 10
+    game = "torcs"
+    evals = 2
 
     # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
-    # file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_0.json"
-    file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
+    file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_1.json"
+    # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
     # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-01-23_00-39-46/last/last_0.json"
@@ -106,4 +113,6 @@ if __name__ == '__main__':
     # q_net = LearnedQNet(logdir)
     random = Random(game)
 
-    eval_mario_winrate(model=mlp, evals=evals)
+    # eval_mario_winrate(model=mlp, evals=evals)
+    # compare(game, evals, mlp, random)
+    run_torcs_vis_on(model=mlp, evals=evals)
