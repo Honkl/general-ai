@@ -15,6 +15,8 @@ from evolution.differential_evolution import DifferentialEvolution
 from evolution.evolution_parameters import EvolutionaryAlgorithmParameters, EvolutionStrategyParameters, \
     DifferentialEvolutionParameters
 from models.mlp import MLP
+from models.echo_state_network import EchoState
+
 from utils.activations import relu, tanh, logsig
 from reinforcement.reinforcement import Reinforcement
 from reinforcement.reinforcement_parameters import ReinforcementParameters
@@ -44,8 +46,8 @@ es_params = EvolutionStrategyParameters(
     sigma=1.0)
 
 rl_params = ReinforcementParameters(
-    batch_size=1,
-    epochs=1000,
+    batch_size=10,
+    epochs=50000,
     penalty=0,
     gamma=0.7,
     base_reward=0,
@@ -72,14 +74,15 @@ de_params2 = DifferentialEvolutionParameters(
 
 
 def run_reinforcement():
-    q_net = QNetwork(hidden_layers=[64], activations=["relu", "relu", "identity"])
-    RL = Reinforcement("2048", rl_params, q_net, threads=10)
+    q_net = QNetwork(hidden_layers=[128, 128], activations=["relu", "relu", "identity"])
+    RL = Reinforcement("mario", rl_params, q_net, threads=10)
     RL.run()
 
 
 def run_eva():
-    mlp = MLP(hidden_layers=[512, 512], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=mlp, logs_every=10,
+    #mlp = MLP(hidden_layers=[32, 32], activation="relu")
+    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=esn, logs_every=10,
                                       max_workers=5)
     evolution.run()
 
@@ -95,8 +98,9 @@ def run_de():
     diff = DifferentialEvolution(game="2048", evolution_params=de_params1, model=mlp, logs_every=10, max_workers=8)
     diff.run()
 
+
 if __name__ == '__main__':
     # run_reinforcement()
-    # run_eva()
+    run_eva()
 
-    run_de()
+    # run_de()
