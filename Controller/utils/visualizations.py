@@ -13,6 +13,7 @@ from reinforcement.q_network import QNetwork
 from models.mlp import MLP
 from models.learned_q_net import LearnedQNet
 from models.random import Random
+from models.echo_state_network import EchoState
 
 
 def bar_plot(values, evals, game):
@@ -98,21 +99,22 @@ def run_torcs_vis_on(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(42)
-    game = "torcs"
-    evals = 2
+    game = "2048"
+    evals = 100
 
     # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
-    file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_1.json"
+    # file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_1.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
     # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
-    # file_name = "../../Controller/logs/2048/mlp/logs_2017-01-23_00-39-46/last/last_0.json"
-
+    file_name = "../../Controller/logs/2048/mlp/logs_2017-01-23_00-39-46/best/best_0.json"
+    file_name2 = "../../Controller/logs/2048/echo_state/logs_2017-01-26_15-22-39/best/best_0.json"
     mlp = MLP.load_from_file(file_name, game)
+    esn = EchoState.load_from_file(file_name2, game)
     # q_net = LearnedQNet(logdir)
     random = Random(game)
 
     # eval_mario_winrate(model=mlp, evals=evals)
-    # compare(game, evals, mlp, random)
-    run_torcs_vis_on(model=mlp, evals=evals)
+    compare(game, evals, mlp, esn, random)
+    # run_torcs_vis_on(model=mlp, evals=evals)

@@ -9,22 +9,26 @@ from models.model import Model
 
 class EchoState(Model):
     library_esn = None
+    echo_state_seed = None
 
     @staticmethod
     def load_from_file(file_name, game):
-        # TODO
-        with open(file_name, "r") as f:
-            data = json.load(f)
-            # if data["class_name"] != "MLP" and data["class_name"] != "FeedForward":  # old class name
-            raise ValueError("Wrong model file.")
+        try:
+            with open(file_name, "r") as f:
+                data = json.load(f)
 
-        weights = data["weights"]
-        hidden = list(map(int, data["hidden_sizes"]))
-        activation = data["activation"]
+            weights = data["weights"]
+            model = data["model"]
+            hidden = list(map(int, model["output_layers"]))
+            activation = model["activation"]
+            n_readouts = int(model["n_readouts"])
+            n_components = int(model["n_components"])
+            seed = int(model["echo_state_seed"])
+        except:
+            raise ValueError("File has wrong format.")
 
         game_config = utils.miscellaneous.get_game_config(game)
-        # return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
-        raise NotImplementedError
+        return EchoState(n_readouts, n_components, hidden, activation, weights, game_config, seed)
 
     class EchoStateNetwork():
         def __init__(self, layer_sizes, activation, weights):
@@ -79,24 +83,29 @@ class EchoState(Model):
     def get_class_name(self):
         return "EchoState"
 
-    def __init__(self, n_readout, n_components, output_layers, activation, weights=None, game_config=None):
+    def __init__(self, n_readout, n_components, output_layers, activation, weights=None, game_config=None,
+                 echo_state_seed=None):
         self.n_readout = n_readout
         self.n_components = n_components
-        self.hidden_layers = output_layers
+        self.output_layers = output_layers
         self.activation = activation
         self.weights = weights
         self.game_config = game_config
 
         if EchoState.library_esn == None:
             # Init only one time at the beginning (multiple reads from more threads are ok)
-            EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components)
+            if EchoState.echo_state_seed == None:
+                EchoState.echo_state_seed = np.random.randint(0, 2 ** 16)
+            else:
+                raise Exception
+            EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components, random_state=EchoState.echo_state_seed)
 
         if not weights == None and not game_config == None:
             # Init the network
             phases = self.game_config["game_phases"]
             self.models = []
             used_weights = 0
-            output_layers = self.hidden_layers
+            output_layers = self.output_layers
             for phase in range(phases):
                 input_size = self.game_config["input_sizes"][phase]
                 output_size = self.game_config["output_sizes"][phase]
@@ -118,7 +127,7 @@ class EchoState(Model):
                     used_weights = new_used_weights
 
     def get_new_instance(self, weights, game_config):
-        instance = EchoState(self.n_readout, self.n_components, self.hidden_layers, self.activation, weights,
+        instance = EchoState(self.n_readout, self.n_components, self.output_layers, self.activation, weights,
                              game_config)
         return instance
 
@@ -129,7 +138,7 @@ class EchoState(Model):
         """
         game_config = utils.miscellaneous.get_game_config(game)
         total_weights = 0
-        learnable_layers = self.hidden_layers
+        learnable_layers = self.output_layers
         for phase in range(game_config["game_phases"]):
             input_size = self.n_readout + 1  # bias
             output_size = game_config["output_sizes"][phase]
@@ -157,7 +166,7 @@ class EchoState(Model):
         """
         return "echo-state-size: {}, n_readouts: {}, output_layers: {}, activation: {}".format(self.n_components,
                                                                                                self.n_readout,
-                                                                                               self.hidden_layers,
+                                                                                               self.output_layers,
                                                                                                self.activation)
 
     def to_dictionary(self):
@@ -168,6 +177,7 @@ class EchoState(Model):
         data = {}
         data["n_readouts"] = self.n_readout
         data["n_components"] = self.n_components
-        data["hidden_layers"] = self.hidden_layers
+        data["output_layers"] = self.output_layers
         data["activation"] = self.activation
+        data["echo_state_seed"] = EchoState.echo_state_seed
         return data

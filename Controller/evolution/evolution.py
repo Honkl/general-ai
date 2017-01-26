@@ -50,11 +50,9 @@ class Evolution():
         """
         with open(filename, "w") as f:
             data = {}
+            data["model"] = self.model.to_dictionary()
             data["model_name"] = self.model.get_name()
-            data["class_name"] = self.model.get_class_name()
-            data["hidden_sizes"] = self.model.hidden_layers
             data["weights"] = individual
-            data["activation"] = self.model.activation
             f.write(json.dumps(data))
 
     def eval_fitness(self, individual, seed):

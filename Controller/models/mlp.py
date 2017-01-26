@@ -14,14 +14,21 @@ class MLP(Model):
 
     @staticmethod
     def load_from_file(file_name, game):
-        with open(file_name, "r") as f:
-            data = json.load(f)
-        if data["class_name"] != "MLP" and data["class_name"] != "FeedForward":  # old class name
-            raise ValueError("Wrong model file.")
+        try:
+            with open(file_name, "r") as f:
+                data = json.load(f)
 
-        weights = data["weights"]
-        hidden = list(map(int, data["hidden_sizes"]))
-        activation = data["activation"]
+            weights = data["weights"]
+            if "hidden_sizes" and "activation" in data:
+                # old format
+                hidden = list(map(int, data["hidden_sizes"]))
+                activation = data["activation"]
+            else:
+                # new format
+                hidden = list(map(int, data["model"]["hidden_sizes"]))
+                activation = data["model"]["activation"]
+        except:
+            raise ValueError("File has wrong format.")
 
         game_config = utils.miscellaneous.get_game_config(game)
         return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
