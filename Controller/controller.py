@@ -27,11 +27,11 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 sea_params = EvolutionaryAlgorithmParameters(
-    pop_size=20,
+    pop_size=50,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
     ngen=1000,
-    game_batch_size=5,
+    game_batch_size=10,
     cxindpb=0.2,
     hof_size=0,
     elite=5,
@@ -73,19 +73,20 @@ de_params2 = DifferentialEvolutionParameters(
     f=1)
 
 
+def run_eva():
+    # mlp = MLP(hidden_layers=[32, 32], activation="relu")
+    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=esn, logs_every=10,
+                                      max_workers=10)
+    evolution.run()
+
+
+"""
+
 def run_reinforcement():
     q_net = QNetwork(hidden_layers=[128, 128], activations=["relu", "relu", "identity"])
     RL = Reinforcement("mario", rl_params, q_net, threads=10)
     RL.run()
-
-
-def run_eva():
-    #mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=esn, logs_every=10,
-                                      max_workers=5)
-    evolution.run()
-
 
 def run_es():
     mlp = MLP(hidden_layers=[32, 32], activation="relu")
@@ -97,7 +98,7 @@ def run_de():
     mlp = MLP(hidden_layers=[64, 64], activation="relu")
     diff = DifferentialEvolution(game="2048", evolution_params=de_params1, model=mlp, logs_every=10, max_workers=8)
     diff.run()
-
+"""
 
 if __name__ == '__main__':
     # run_reinforcement()

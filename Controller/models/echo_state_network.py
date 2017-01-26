@@ -8,6 +8,8 @@ from models.model import Model
 
 
 class EchoState(Model):
+    library_esn = None
+
     @staticmethod
     def load_from_file(file_name, game):
         # TODO
@@ -21,11 +23,11 @@ class EchoState(Model):
         activation = data["activation"]
 
         game_config = utils.miscellaneous.get_game_config(game)
-        return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
+        # return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
+        raise NotImplementedError
 
     class EchoStateNetwork():
-        def __init__(self, reservoir_net, layer_sizes, activation, weights):
-            self.reservoir_net = reservoir_net
+        def __init__(self, layer_sizes, activation, weights):
             self.layer_sizes = layer_sizes
             self.activation = utils.activations.get_activation(activation)
             self.weights = weights
@@ -45,7 +47,7 @@ class EchoState(Model):
             x = np.array(list(map(float, input)))
 
             # reservoir ESN assume (n_samples, n_features)
-            x = self.reservoir_net.transform(x.reshape(-1, len(input))).flatten() # we have only one sample
+            x = EchoState.library_esn.transform(x.reshape(-1, len(input))).flatten()  # we have only one sample
             for W in self.matrices:
                 x = np.concatenate((x, [1]), axis=0)
                 x = self.activation(np.matmul(x, W))
@@ -85,6 +87,10 @@ class EchoState(Model):
         self.weights = weights
         self.game_config = game_config
 
+        if EchoState.library_esn == None:
+            # Init only one time at the beginning (multiple reads from more threads are ok)
+            EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components)
+
         if not weights == None and not game_config == None:
             # Init the network
             phases = self.game_config["game_phases"]
@@ -95,9 +101,8 @@ class EchoState(Model):
                 input_size = self.game_config["input_sizes"][phase]
                 output_size = self.game_config["output_sizes"][phase]
                 layer_sizes = [n_readout] + output_layers + [output_size]
-                esn = lib.simple_esn.SimpleESN(n_readout, n_components)
                 if (phases == 1):
-                    self.models.append(self.EchoStateNetwork(esn, layer_sizes, activation, weights))
+                    self.models.append(self.EchoStateNetwork(layer_sizes, activation, weights))
                 else:
                     # slice all weights and use only reliable weights to the current phase
                     new_used_weights = used_weights
@@ -109,7 +114,7 @@ class EchoState(Model):
                         for i in range(len(output_layers) - 1):
                             new_used_weights += (output_layers[i] + 1) * output_layers[i + 1]
                         new_used_weights += (output_layers[-1] + 1) * output_size
-                    self.models.append(self.EchoStateNetwork(esn, layer_sizes, activation, weights))
+                    self.models.append(self.EchoStateNetwork(layer_sizes, activation, weights))
                     used_weights = new_used_weights
 
     def get_new_instance(self, weights, game_config):
@@ -150,8 +155,10 @@ class EchoState(Model):
         A string representation of the current object, that describes parameters.
         :return: A string representation of the current object.
         """
-        return "echo-state-size: {}, output_layers: {}, activation: {}".format(self.n_components, self.hidden_layers,
-                                                                               self.activation)
+        return "echo-state-size: {}, n_readouts: {}, output_layers: {}, activation: {}".format(self.n_components,
+                                                                                               self.n_readout,
+                                                                                               self.hidden_layers,
+                                                                                               self.activation)
 
     def to_dictionary(self):
         """
