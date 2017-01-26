@@ -95,10 +95,14 @@ class EchoState(Model):
         if EchoState.library_esn == None:
             # Init only one time at the beginning (multiple reads from more threads are ok)
             if EchoState.echo_state_seed == None:
-                EchoState.echo_state_seed = np.random.randint(0, 2 ** 16)
+                if echo_state_seed == None:
+                    EchoState.echo_state_seed = np.random.randint(0, 2 ** 16)
+                else:
+                    EchoState.echo_state_seed = echo_state_seed
             else:
                 raise Exception
-            EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components, random_state=EchoState.echo_state_seed)
+            EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components,
+                                                             random_state=EchoState.echo_state_seed)
 
         if not weights == None and not game_config == None:
             # Init the network
