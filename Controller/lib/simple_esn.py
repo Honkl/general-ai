@@ -89,6 +89,22 @@ class SimpleESN(BaseEstimator, TransformerMixin):
         self.readout_idx_ = None
         self.weights_ = None
 
+    def init_weights(self, n_samples, n_features):
+        if self.weights_ is None:
+            self.weights_ = self.random_state.rand(self.n_components,
+                                                   self.n_components) - 0.5
+            spectral_radius = np.max(np.abs(la.eig(self.weights_)[0]))
+            self.weights_ *= self.weight_scaling / spectral_radius
+        if self.input_weights_ is None:
+            self.input_weights_ = self.random_state.rand(self.n_components,
+                                                         1 + n_features) - 0.5
+        if self.readout_idx_ is None:
+            self.readout_idx_ = self.random_state.permutation(arange(1 + n_features,
+                                                                     1 + n_features + self.n_components))[
+                                :self.n_readout]
+        self.components_ = zeros(shape=(1 + n_features + self.n_components,
+                                        n_samples))
+
     def _fit_transform(self, X):
         n_samples, n_features = X.shape
         X = check_array(X, ensure_2d=True)
@@ -160,21 +176,6 @@ class SimpleESN(BaseEstimator, TransformerMixin):
         """
         X = check_array(X, ensure_2d=True)
         n_samples, n_features = X.shape
-
-        if self.weights_ is None:
-            self.weights_ = self.random_state.rand(self.n_components,
-                                                   self.n_components) - 0.5
-            spectral_radius = np.max(np.abs(la.eig(self.weights_)[0]))
-            self.weights_ *= self.weight_scaling / spectral_radius
-        if self.input_weights_ is None:
-            self.input_weights_ = self.random_state.rand(self.n_components,
-                                                         1 + n_features) - 0.5
-        if self.readout_idx_ is None:
-            self.readout_idx_ = self.random_state.permutation(arange(1 + n_features,
-                                                                     1 + n_features + self.n_components))[
-                                :self.n_readout]
-        self.components_ = zeros(shape=(1 + n_features + self.n_components,
-                                        n_samples))
 
         curr_ = zeros(shape=(self.n_components, 1))
         U = concatenate((ones(shape=(n_samples, 1)), X), axis=1)

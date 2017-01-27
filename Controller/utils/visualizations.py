@@ -98,7 +98,7 @@ def run_torcs_vis_on(model, evals):
 
 
 if __name__ == '__main__':
-    np.random.seed(42)
+    np.random.seed(1)
     game = "2048"
     evals = 100
 
@@ -108,13 +108,16 @@ if __name__ == '__main__':
     # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
     # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
-    file_name = "../../Controller/logs/2048/mlp/logs_2017-01-23_00-39-46/best/best_0.json"
-    file_name2 = "../../Controller/logs/2048/echo_state/logs_2017-01-26_15-22-39/best/best_0.json"
-    mlp = MLP.load_from_file(file_name, game)
-    esn = EchoState.load_from_file(file_name2, game)
+    file_name = "../../Controller/logs/2048/echo_state/logs_2017-01-27_00-31-41/best/best_0.json"
+    file_name2 = "../../Controller/logs/2048/echo_state/old/logs_2017-01-26_15-22-39/best/best_0.json"
+
+    esn = EchoState.load_from_file(file_name, game)
+    esn2 = EchoState.load_from_file(file_name2, game)
+
+    # random = Random(game)
+    # mlp = MLP.load_from_file(file_name, game)
     # q_net = LearnedQNet(logdir)
-    random = Random(game)
 
     # eval_mario_winrate(model=mlp, evals=evals)
-    compare(game, evals, mlp, esn, random)
+    compare(game, evals, esn, esn2)
     # run_torcs_vis_on(model=mlp, evals=evals)

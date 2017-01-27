@@ -3,11 +3,13 @@ import json
 import utils.activations
 import utils.miscellaneous
 import lib.simple_esn
+from threading import Lock
 
 from models.model import Model
 
 
 class EchoState(Model):
+    state_check_lock = Lock()
     library_esn = None
     echo_state_seed = None
 
@@ -28,6 +30,7 @@ class EchoState(Model):
             raise ValueError("File has wrong format.")
 
         game_config = utils.miscellaneous.get_game_config(game)
+        print("Loading Echo-State model from file {}".format(file_name))
         return EchoState(n_readouts, n_components, hidden, activation, weights, game_config, seed)
 
     class EchoStateNetwork():
@@ -92,15 +95,12 @@ class EchoState(Model):
         self.weights = weights
         self.game_config = game_config
 
-        if EchoState.library_esn == None:
-            # Init only one time at the beginning (multiple reads from more threads are ok)
-            if EchoState.echo_state_seed == None:
-                if echo_state_seed == None:
-                    EchoState.echo_state_seed = np.random.randint(0, 2 ** 16)
-                else:
-                    EchoState.echo_state_seed = echo_state_seed
+        if EchoState.library_esn == None or echo_state_seed != None:
+            if echo_state_seed == None:
+                EchoState.echo_state_seed = np.random.randint(0, 2 ** 16)
             else:
-                raise Exception
+                EchoState.echo_state_seed = echo_state_seed
+
             EchoState.library_esn = lib.simple_esn.SimpleESN(n_readout, n_components,
                                                              random_state=EchoState.echo_state_seed)
 
@@ -114,6 +114,12 @@ class EchoState(Model):
                 input_size = self.game_config["input_sizes"][phase]
                 output_size = self.game_config["output_sizes"][phase]
                 layer_sizes = [n_readout] + output_layers + [output_size]
+
+                EchoState.state_check_lock.acquire()
+                if EchoState.library_esn.weights_ is None:
+                    EchoState.library_esn.init_weights(n_samples=1, n_features=input_size)
+                EchoState.state_check_lock.release()
+
                 if (phases == 1):
                     self.models.append(self.EchoStateNetwork(layer_sizes, activation, weights))
                 else:
