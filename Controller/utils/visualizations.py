@@ -130,8 +130,7 @@ def run_random_model(game, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "torcs"
-    evals = 10
+    game = "2048"
 
     # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
@@ -139,15 +138,16 @@ if __name__ == '__main__':
     # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
     # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
-    # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
+    file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
 
-    # esn = EchoState.load_from_file(file_name, game)
+    esn = EchoState.load_from_file(file_name, game)
 
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
     # q_net = LearnedQNet(logdir)
 
-    run_random_model(game, evals)
+    #run_random_model(game, evals)
+    run_2048_extended(esn, evals)
 
     # eval_mario_winrate(model=mlp, evals=evals)
     # compare(game, evals, esn)
