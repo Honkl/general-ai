@@ -7,17 +7,23 @@ import time
 
 
 class Game2048(Game):
-    def __init__(self, model, game_batch_size, seed):
+    def __init__(self, model, game_batch_size, seed, use_advanced_tool=False):
         super(Game2048, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
 
+        self.use_advanced_tool = use_advanced_tool
+
     def init_process(self):
         """
         Initializes a subprocess with the game and returns first state of the game.
         """
-        command = "{} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size))
+        if self.use_advanced_tool:
+            command = "{} {} {}".format(GAME2048_ADVANCED_TOOL, str(self.seed), str(self.game_batch_size))
+        else:
+            command = "{} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size))
+
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...
 

@@ -30,15 +30,7 @@ def bar_plot(values, evals, game):
                         align='center')
         autolabel(rects, ax)
 
-    ylim = None
-    if game == "alhambra":
-        ylim = 200
-    if game == "torcs":
-        ylim = 10000
-    if game == "mario":
-        ylim = 1.2
-    if game == "2048":
-        ylim = 5000
+    ylim = get_y_lim_for_game(game)
 
     plt.ylim([0, ylim])
     plt.gca().axes.set_xticklabels([])
@@ -52,6 +44,19 @@ def bar_plot(values, evals, game):
     plt.tight_layout()
     plt.savefig('comparison.jpg')
     plt.show()
+
+
+def get_y_lim_for_game(game):
+    ylim = None
+    if game == "alhambra":
+        ylim = 200
+    if game == "torcs":
+        ylim = 10000
+    if game == "mario":
+        ylim = 1.2
+    if game == "2048":
+        ylim = 5000
+    return ylim
 
 
 def autolabel(rects, ax):
@@ -78,8 +83,10 @@ def eval(game, evals, model):
 
 
 def compare(game, evals, *args):
+    print("Comparing models:")
     values = []
     for model in args:
+        print(model.get_name())
         values += eval(game=game, evals=evals, model=model)
     bar_plot(values, evals, game)
 
@@ -93,14 +100,38 @@ def eval_mario_winrate(model, evals):
 
 def run_torcs_vis_on(model, evals):
     game_instance = games.torcs.Torcs(model, evals, np.random.randint(0, 2 ** 16), vis_on=True)
-    print("Torcs visualization")
+    print("Torcs visualization started.")
     results = game_instance.run(advanced_results=True)
 
 
+def run_2048_extended(model, evals):
+    game_instance = games.game2048.Game2048(model, evals, np.random.randint(0, 2 ** 16), use_advanced_tool=True)
+    results = game_instance.run(advanced_results=True)
+    print("Game 2048 with extended logs started.")
+
+
+def run_random_model(game, evals):
+    print("Generating graph of 'random' model for game {}.".format(game))
+    results = []
+    for i in range(evals):
+        print("{}/{}".format(i + 1, evals))
+        parameters = [Random(game), 1, np.random.randint(0, 2 ** 16)]
+        game_instance = utils.miscellaneous.get_game_instance(game, parameters)
+        result = game_instance.run()
+        results.append(result)
+
+    x = range(evals)
+    plt.plot(x, results, 'b', x, [np.mean(results) for _ in results], 'r--')
+    plt.title("Random - game: {} - avg: {}".format(game, np.mean(results)))
+    plt.ylim(0, get_y_lim_for_game(game))
+    plt.savefig("random_model_{}.jpg".format(game))
+    plt.show()
+
+
 if __name__ == '__main__':
-    np.random.seed(1)
-    game = "2048"
-    evals = 100
+    np.random.seed(930615)
+    game = "torcs"
+    evals = 10
 
     # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
@@ -108,16 +139,16 @@ if __name__ == '__main__':
     # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
     # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
-    file_name = "../../Controller/logs/2048/echo_state/logs_2017-01-27_00-31-41/best/best_0.json"
-    file_name2 = "../../Controller/logs/2048/echo_state/old/logs_2017-01-26_15-22-39/best/best_0.json"
+    # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
 
-    esn = EchoState.load_from_file(file_name, game)
-    esn2 = EchoState.load_from_file(file_name2, game)
+    # esn = EchoState.load_from_file(file_name, game)
 
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
     # q_net = LearnedQNet(logdir)
 
+    run_random_model(game, evals)
+
     # eval_mario_winrate(model=mlp, evals=evals)
-    compare(game, evals, esn, esn2)
+    # compare(game, evals, esn)
     # run_torcs_vis_on(model=mlp, evals=evals)
