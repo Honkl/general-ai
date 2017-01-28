@@ -25,12 +25,13 @@ class MLP(Model):
                 activation = data["activation"]
             else:
                 # new format
-                hidden = list(map(int, data["model"]["hidden_sizes"]))
+                hidden = list(map(int, data["model"]["hidden_layers"]))
                 activation = data["model"]["activation"]
         except:
             raise ValueError("File has wrong format.")
 
         game_config = utils.miscellaneous.get_game_config(game)
+        print("Loading MLP model from file {}".format(file_name))
         return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
 
     class MLPNetwork():
@@ -166,7 +167,7 @@ class MLP(Model):
         A string representation of the current object, that describes parameters.
         :return: A string representation of the current object.
         """
-        return "layers: {}, activation: {}".format(self.hidden_layers, self.activation)
+        return "MLP - layers: {}, activation: {}".format(self.hidden_layers, self.activation)
 
     def to_dictionary(self):
         """

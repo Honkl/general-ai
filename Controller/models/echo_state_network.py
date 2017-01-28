@@ -174,10 +174,10 @@ class EchoState(Model):
         A string representation of the current object, that describes parameters.
         :return: A string representation of the current object.
         """
-        return "echo-state-size: {}, n_readouts: {}, output_layers: {}, activation: {}".format(self.n_components,
-                                                                                               self.n_readout,
-                                                                                               self.output_layers,
-                                                                                               self.activation)
+        return "ESN - echo-state-size: {}, n_readouts: {}, output_layers: {}, activation: {}".format(self.n_components,
+                                                                                                     self.n_readout,
+                                                                                                     self.output_layers,
+                                                                                                     self.activation)
 
     def to_dictionary(self):
         """

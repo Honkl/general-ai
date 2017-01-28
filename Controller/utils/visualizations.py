@@ -82,7 +82,7 @@ def eval(game, evals, model):
     return values
 
 
-def compare(game, evals, *args):
+def compare_models(game, evals, *args):
     print("Comparing models:")
     values = []
     for model in args:
@@ -91,8 +91,8 @@ def compare(game, evals, *args):
     bar_plot(values, evals, game)
 
 
-def eval_mario_winrate(model, evals):
-    game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level="gombas", vis_on=True,
+def eval_mario_winrate(model, evals, vis_on):
+    game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level="gombas", vis_on=vis_on,
                                       use_visualization_tool=True)
     results = game_instance.run(advanced_results=True)
     print("Mario winrate: {}".format(results))
@@ -105,9 +105,9 @@ def run_torcs_vis_on(model, evals):
 
 
 def run_2048_extended(model, evals):
+    print("Game 2048 with extended logs started.")
     game_instance = games.game2048.Game2048(model, evals, np.random.randint(0, 2 ** 16), use_advanced_tool=True)
     results = game_instance.run(advanced_results=True)
-    print("Game 2048 with extended logs started.")
 
 
 def run_random_model(game, evals):
@@ -127,28 +127,37 @@ def run_random_model(game, evals):
     plt.savefig("random_model_{}.jpg".format(game))
     plt.show()
 
+def eval_alhambra_winrate(model, evals):
+    print("Evaluating Alhambra winrate.")
+    results = []
+    wins = 0
+    for i in range(evals):
+        print("{}/{}".format(i + 1, evals))
+        game_instance = games.alhambra.Alhambra(model, 1, np.random.randint(0, 2 ** 16))
+        result = game_instance.run(advanced_results=True)
+        if np.argmax(result) == 0:
+            wins += 1
+    print("Alhambra winrate: {} ({}/{})".format(wins / evals, wins, evals))
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "2048"
+    game = "alhambra"
+    evals = 100
 
-    # file_name = "../../Experiments/MLP+evolution_algorithm/2048/logs_2017-01-21_15-35-49/best/best_0.json"
-    # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_1.json"
-    # file_name = "../../Experiments/MLP+evolution_algorithm/torcs/logs_2017-01-16_08-37-32/best/best_1.json"
-    # file_name = "../../Experiments/MLP+evolution_algorithm/mario/logs_2017-01-22_00-46-06/best/best_0.json"
-    # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
-    # logdir = "../../Controller/logs/2048/q-network/logs_2017-01-22_17-43-54"
-    file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
-
-    esn = EchoState.load_from_file(file_name, game)
+    # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
+    # file_name2 = "../../Controller/logs/2048/mlp/logs_2017-01-27_15-34-21/best/best_0.json"
+    # file_name = "../../Experiments/ESN+evolution_algorithm/mario/logs_2017-01-27_11-18-45/best/best_0.json"
+    file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
+    # esn = EchoState.load_from_file(file_name, game)
 
     # random = Random(game)
-    # mlp = MLP.load_from_file(file_name, game)
+    mlp = MLP.load_from_file(file_name, game)
+    eval_alhambra_winrate(mlp, evals)
     # q_net = LearnedQNet(logdir)
 
-    #run_random_model(game, evals)
-    run_2048_extended(esn, evals)
+    # run_random_model(game, evals)
+    # run_2048_extended(mlp, evals)
 
-    # eval_mario_winrate(model=mlp, evals=evals)
-    # compare(game, evals, esn)
+    #eval_mario_winrate(model=esn, evals=evals, vis_on=False)
+    # compare(game, evals, esn, mlp)
     # run_torcs_vis_on(model=mlp, evals=evals)
