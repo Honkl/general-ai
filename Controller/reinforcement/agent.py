@@ -36,7 +36,8 @@ class Agent():
                 self.losses = (self.last_reward + self.gamma * self.last_estimated_reward - new_estimated_reward) ** 2
                 self.loss = tf.reduce_mean(self.losses)
                 self.optimizer = self.get_optimizer(reinfoce_params.optimizer)
-                self.training = self.optimizer(reinfoce_params.learning_rate).minimize(self.loss, global_step=self.global_step)
+                self.training = self.optimizer(reinfoce_params.learning_rate).minimize(self.loss,
+                                                                                       global_step=self.global_step)
 
                 self.session = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
                                                                 intra_op_parallelism_threads=threads,

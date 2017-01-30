@@ -12,6 +12,7 @@ class Environment(gym.Env):
         self.penalty = penalty
         self.actions_count = actions_count
         self.last_phase = 0
+        self.done = False
 
         self.observation_space = spaces.Discrete(n=observations_count)
         self.action_space = spaces.Discrete(n=sum(actions_count))
@@ -28,6 +29,10 @@ class Environment(gym.Env):
         :return: By Gym-interface, returns observation (new state), reward, done, info
         """
 
+        # If game is already completed (but rest of the games in the batch are not...)
+        if self.done:
+            return self.state, 0, True, self.game_instance.score
+
         # Need to determine proper game phase and use only specific action subset
         if len(self.actions_count) > 0:
             begin = sum(self.actions_count[:self.last_phase])
@@ -35,17 +40,12 @@ class Environment(gym.Env):
             action = action[begin:end]
 
         action_string = ""
-        # for i in range(self.actions_count):
-        #    if i == action:
-        #        action_string += "1 "
-        #    else:
-        #        action_string += "0 "
         for a in action:
             action_string += str(a) + " "
 
         new_state, self.last_phase, reward, done = self.game_instance.step(action_string)
         self.state = new_state
-
+        self.done = done
         return self.state, reward, done, self.game_instance.score
 
     def _configure(self, display=None):

@@ -1,5 +1,6 @@
 import json
 import constants
+import tensorflow as tf
 from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
@@ -45,3 +46,10 @@ def get_game_class(game_name):
     if game_name == "mario":
         game_class = Mario
     return game_class
+
+
+def get_rnn_cell(cell_type):
+    if cell_type == "lstm":
+        return tf.nn.rnn_cell.BasicLSTMCell
+    if cell_type == "gru":
+        return tf.nn.rnn_cell.GRUCell

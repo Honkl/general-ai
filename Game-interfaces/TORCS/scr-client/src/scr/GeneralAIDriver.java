@@ -141,6 +141,8 @@ public class GeneralAIDriver extends Controller {
         reward += raced - lastDistanceRaced; 
         lastDistanceRaced = raced;
         reward -= 100 * lastSensor.getDamage();
+        reward += lastSensor.getSpeed();
+        reward -= lastSensor.getAngleToTrackAxis();
         //System.err.println(lastSensor.getDistanceRaced());
         return reward;
     }

@@ -29,7 +29,7 @@ class Reinforcement():
         # we will train only one network inside the Q-network
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        q_network.set_output_size(self.actions_count_sum)
+        q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
 
         self.logdir = self.init_directories()
         self.agent = Agent(reinforce_params, q_network, self.state_size, self.logdir, threads)
@@ -120,9 +120,9 @@ class Reinforcement():
                 self.agent.saver.save(self.agent.session, checkpoint_path)
 
             # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
-            print("Epoch: {}/{}, avg score: {}, avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
 
-            if i_epoch % 100 == 0:
+            if True:
+                print("Epoch: {}/{}, avg score: {}, avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
                 t = time.time() - start
                 h = t // 3600
                 m = (t % 3600) // 60
