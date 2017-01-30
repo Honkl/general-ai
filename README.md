@@ -1,5 +1,5 @@
 # General artificial intelligence for game playing
-The project deals with general artificial intelligence (from general game playing field). We try to learn different models to play some easy games based on game data, not based on visual input. The games do not need to be similar in a term of gameplay --- they can be vastly different.
+The project deals with general artificial intelligence (from general game playing field). We try to learn different models to play some easy games based on game data, not based on visual input. The games do not need to be similar in a term of gameplay, they can be vastly different.
 
 # Project overview
 In the project we are currently using following games, models and types of learning techniques:
@@ -52,10 +52,10 @@ The project provides a general interface for different AI architectures and game
 Your class must extend `Model` class with the most important function `evaluate(self, input, current_phase)` which computes a 'forward' pass through your model with the specified input. You must also provide function `get_number_of_parameters(self, game)` so the architecture (e.q. evolution algorithm, evolution strategy..) will know the length of single individual to evolve. The `get_new_instance(self, weights, game_config)` method initializes a new instance of your model, using specified `weights` = parameters = single individual.
 ***
 Customizing of your own game has a few limits. First of all, the communication between the game and the AI (python) is done via standard I/O amongst processes.
-<center>
-<img src="https://raw.githubusercontent.com/honkl/general-ai/master/communication.png" width="600">
+<p align="center">
+<img src="https://raw.githubusercontent.com/honkl/general-ai/master/communication.png" width="600"/>
 *Simple communication representation between game process and AI process.*
-</center>
+</p>
 The AI reads standard output of the game process and expects a string in [json](https://cs.wikipedia.org/wiki/JavaScript_Object_Notation) format which must contain a few things:
 * state: current state of the game, an array of floats
 * current_phase: current phase of the game (games can have multiple phases; we train for each phase a separate network in some of the models); int
@@ -65,7 +65,7 @@ The AI reads standard output of the game process and expects a string in [json](
  
 Then AI performs an evaluation and writes to game process computed result. The result is simple string with floats separated by whitespace. Described process repeats until game has come to an end.
 
-Game also must provide a configuration file (also written in json) which must contain following three variables: `game_phases` --- and integer, says how many phases game has, `input_sizes` --- array of integers, saying how big is output from the game (i.e. size of the state of the game) for each phase and `output_sizes` saying how many outputs should AI generate.
+Game also must provide a configuration file (also written in json) which must contain following three variables: `game_phases` - and integer, says how many phases game has, `input_sizes` - array of integers, saying how big is output from the game (i.e. size of the state of the game) for each phase and `output_sizes` saying how many outputs should AI generate.
 
 On the 'python-side' of games, you should extend `Game` class. Take a look on some already implemented classes in [`./Controller/games/`](https://github.com/Honkl/general-ai/tree/master/Controller/games) directory.
 
@@ -90,8 +90,8 @@ Everything runs on Windows (Linux has not been tested yet). For an AI itself, wr
 * tensorflow (0.12.1)
 
 Games are written in different languages, so your needs depends on the current game:
-* Alhambra + 2048 --- C#
-* Torcs + Mario --- Java
+* Alhambra + 2048 - C#
+* Torcs + Mario - Java
 
 # References
 TODO
