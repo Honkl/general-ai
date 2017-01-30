@@ -1,2 +1,0 @@
-runtime: 6h 31m 7.985579252243042s
-input scale: log (default is div by 2048)

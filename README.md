@@ -54,7 +54,6 @@ Your class must extend `Model` class with the most important function `evaluate(
 Customizing of your own game has a few limits. First of all, the communication between the game and the AI (python) is done via standard I/O amongst processes.
 <p align="center">
 <img src="https://raw.githubusercontent.com/honkl/general-ai/master/communication.png" width="600"/>
-*Simple communication representation between game process and AI process.*
 </p>
 The AI reads standard output of the game process and expects a string in [json](https://cs.wikipedia.org/wiki/JavaScript_Object_Notation) format which must contain a few things:
 * state: current state of the game, an array of floats
