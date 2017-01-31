@@ -143,15 +143,15 @@ def eval_alhambra_winrate(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "mario"
+    game = "alhambra"
     evals = 250
 
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name2 = "../../Controller/logs/2048/mlp/logs_2017-01-27_15-34-21/best/best_0.json"
-    file_name = "../../Experiments/ESN+evolution_algorithm/mario/logs_2017-01-28_16-10-43/best/best_0.json"
+    # file_name = "../../Experiments/ESN+evolution_algorithm/mario/logs_2017-01-28_16-10-43/best/best_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
-    # file_name = "../../Experiments/MLP+evolution_strategy/torcs/logs_2017-01-20_00-23-47/best/best_0.json"
-    # file_name = "../../Experiments/ESN+evolution_algorithm/alhambra/logs_2017-01-29_01-05-49/best/best_0.json"
+    # file_name = "../../Experiments/ESN+evolution_algorithm/torcs/logs_2017-01-31_01-15-06/best/best_1.json"
+    file_name = "../../Experiments/ESN+evolution_strategy/alhambra/logs_2017-01-30_13-24-16/best/best_1.json"
 
     esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
@@ -162,6 +162,6 @@ if __name__ == '__main__':
     # run_random_model(game, evals)
     # run_2048_extended(mlp, evals)
 
-    eval_mario_winrate(model=esn, evals=evals, level="spikes", vis_on=False)
-    # compare_models(game, evals, esn)
-    # run_torcs_vis_on(model=mlp, evals=evals)
+    # eval_mario_winrate(model=esn, evals=evals, level="spikes", vis_on=False)
+    compare_models(game, evals, esn)
+    # run_torcs_vis_on(model=esn, evals=evals)

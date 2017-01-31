@@ -17,6 +17,7 @@ from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
 from games.game2048 import Game2048
+from utils.miscellaneous import get_game_config, get_game_instance
 
 
 class Evolution():
@@ -29,18 +30,7 @@ class Evolution():
         self.max_workers = max_workers
         self.logs_every = logs_every
 
-        game_config_file = ""
-        if game == "alhambra":
-            game_config_file = constants.ALHAMBRA_CONFIG_FILE
-        if game == "2048":
-            game_config_file = constants.GAME2048_CONFIG_FILE
-        if game == "mario":
-            game_config_file = constants.MARIO_CONFIG_FILE
-        if game == "torcs":
-            game_config_file = constants.TORCS_CONFIG_FILE
-
-        with open(game_config_file, "r") as f:
-            self.game_config = json.load(f)
+        self.game_config = get_game_config(game)
 
     def write_to_file(self, individual, filename):
         """
@@ -66,16 +56,7 @@ class Evolution():
         model = self.model.get_new_instance(weights=individual, game_config=self.game_config)
         params = [model, self.evolution_params._game_batch_size, seed]
 
-        game = None
-        if self.current_game == "alhambra":
-            game = Alhambra(*params)
-        if self.current_game == "2048":
-            game = Game2048(*params)
-        if self.current_game == "mario":
-            game = Mario(*params)
-        if self.current_game == "torcs":
-            game = Torcs(*params)
-
+        game = get_game_instance(self.current_game, params)
         result = game.run()
 
         return result,

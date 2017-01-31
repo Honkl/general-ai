@@ -1,0 +1,1 @@
+{"model_params": {"n_readouts": 32, "echo_state_seed": 56422, "activation": "relu", "n_components": 256, "output_layers": []}, "evolution_params": {"ngen": 1000, "cxpb": 0.75, "game_batch_size": 1, "elite": 2, "mut": ["uniform", 0.1, 0.1], "hof_size": 0, "pop_size": 15, "cxindpb": 0.2, "selection": ["tournament", 3]}}

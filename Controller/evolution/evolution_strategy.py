@@ -6,7 +6,7 @@ import concurrent.futures
 
 
 class EvolutionStrategy(Evolution):
-    def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
+    def __init__(self, game, evolution_params, model, max_workers=2, logs_every=50):
         super(EvolutionStrategy, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
     def run(self, file_name=None):
