@@ -41,7 +41,7 @@ params = EvolutionaryAlgorithmParameters(
 Create model and run:
 ```python
     mlp = MLP(hidden_layers=[256, 256], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=params, model=esn)
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=params, model=mlp)
     evolution.run()
 ```
 We have just learned MLP network for game 2048 using simple evolution algorithm. You can combine different games and different architectures.
@@ -82,7 +82,7 @@ Interfaces for every game used. Either here or in a separate repository.
 
 # Requirements
 Everything runs on Windows (Linux has not been tested yet). For an AI itself, written in python, you will need:
-* python 3
+* python 3.5
 * numpy
 * deap
 * gym
@@ -93,4 +93,14 @@ Games are written in different languages, so your needs depends on the current g
 * Torcs + Mario - Java
 
 # References
-TODO
+- The Open Racing Car Simulator:
+    - Overview: http://torcs.sourceforge.net/index.php
+    - Manual: https://pdfs.semanticscholar.org/9b1d/e5d93854d9dc364a4bc6a462193ccc3ea895.pdf
+- Alhambra:
+    - [MFF UK Thesis Repository](https://is.cuni.cz/webapps/zzp/detail/152723/23205131/?q=%7B%22______searchform___search%22%3A%22alhambra%22%2C%22______searchform___butsearch%22%3A%22Vyhledat%22%2C%22PNzzpSearchListbasic%22%3A1%7D&lang=cs)
+- Echo-State Network mini-lib:
+    - https://github.com/sylvchev/simple_esn/blob/master/simple_esn.py
+- Some useful links:
+    - [Deep reinforcement learning](https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf)
+    - [Deep Learning in Neural Networks: An Overview](https://arxiv.org/pdf/1404.7828v4.pdf)
+    - [Covariance Matrix Adaptation Evolution Strategy](https://en.wikipedia.org/wiki/CMA-ES)
