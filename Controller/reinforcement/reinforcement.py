@@ -126,7 +126,7 @@ class Reinforcement():
                 self.agent.saver.save(self.agent.session, checkpoint_path)
 
             now = time.time()
-            if now - last > 1:
+            if now - last > 0:
                 last = now
                 t = now - start
                 h = t // 3600

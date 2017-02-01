@@ -29,11 +29,8 @@ class LearnedQNet(Model):
     def evaluate(self, input, current_phase):
         action, estimated_reward = self.rl.agent.play(input)
         action_string = ""
-        for i in range(self.rl.actions_count):
-            if i == action:
-                action_string += "1 "
-            else:
-                action_string += "0 "
+        for a in action:
+            action_string += str(a) + " "
         return action_string
 
     def get_name(self):

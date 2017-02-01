@@ -9,7 +9,6 @@ class Agent():
     def __init__(self, reinfoce_params, q_network, state_size, logdir, threads):
         self.batch_size = reinfoce_params.batch_size
         batch_size = self.batch_size
-        self.dropout = reinfoce_params.dropout
         self.gamma = reinfoce_params.gamma
         self.state_size = state_size
         self.q_network = q_network
@@ -34,7 +33,8 @@ class Agent():
                 self.global_step = tf.Variable(0, dtype=tf.int64, trainable=False, name="global_step")
 
                 # loss = (r + γ*max_a'Q(s',a';θ) - Q(s,a;θ))^2
-                self.losses = (self.last_reward + self.gamma * self.last_estimated_reward - new_estimated_reward) ** 2
+                #self.losses = (self.last_reward + self.gamma * self.last_estimated_reward - new_estimated_reward) ** 2
+                self.losses = (self.last_reward - self.last_estimated_reward + (new_estimated_reward * 0)) ** 2
                 self.loss = tf.reduce_mean(self.losses)
                 self.optimizer = self.get_optimizer(reinfoce_params.optimizer)
                 self.training = self.optimizer(reinfoce_params.learning_rate).minimize(self.loss,

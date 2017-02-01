@@ -5,33 +5,38 @@ from utils.miscellaneous import get_rnn_cell
 
 
 class QNetwork():
-    def __init__(self, hidden_layers, activations):
+    def __init__(self, hidden_layers, activation, dropout_keep=None):
         self.hidden_layers = hidden_layers
-        self.activations = activations
+        self.activation = activation
         self.output_size = None
         self.batch_size = None
+        self.dropout = dropout_keep
 
     def init(self, output_size, batch_size):
         self.output_size = output_size
         self.batch_size = batch_size
 
     def forward_pass(self, x):
-        print(x)
-        dimensions = self.hidden_layers + [self.output_size]
-        for i, (dim, activation) in enumerate(zip(dimensions, [get_activation_tf(x) for x in self.activations])):
-            W = tf.get_variable(name="W_{}".format(i),
-                                shape=[x.get_shape()[1], dim],
-                                initializer=tf.random_normal_initializer(mean=0, stddev=1))
-            h = tf.get_variable(name="h_{}".format(i),
-                                shape=[dim],
-                                initializer=tf.constant_initializer(0.0))
-            x = activation(tf.matmul(x, W) + h)
-        return x
+        # Hidden fully connected layers
+        for i, dim in enumerate(self.hidden_layers):
+            x = tf_layers.fully_connected(inputs=x,
+                                          num_outputs=dim,
+                                          activation_fn=get_activation_tf(self.activation),
+                                          scope="fully_connected_{}".format(i))
+            if self.dropout != None:
+                x = tf_layers.dropout(x, keep_prob=self.dropout)
+        # Output logits
+        logits = tf_layers.fully_connected(inputs=x,
+                                           num_outputs=self.output_size,
+                                           activation_fn=None,
+                                           scope="output_layer")
+
+        return logits
 
     def to_dictionary(self):
         data = {}
         data["hidden_layers"] = self.hidden_layers
-        data["activations"] = self.activations
+        data["activation"] = self.activation
         return data
 
 

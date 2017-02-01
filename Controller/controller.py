@@ -46,10 +46,9 @@ es_params = EvolutionStrategyParameters(
     sigma=1.0)
 
 rl_params = ReinforcementParameters(
-    batch_size=100,
-    epochs=1000,
+    batch_size=50,
+    epochs=100000,
     gamma=0.7,
-    dropout=None,
     optimizer="adam")
 
 
@@ -62,7 +61,8 @@ def run_eva():
 
 
 def run_reinforcement():
-    q_net = QNetwork(hidden_layers=[64, 64], activations=["relu", "relu", "identity"])
+    print(rl_params.to_string())
+    q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=0.5)
     # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
     RL = Reinforcement("2048", rl_params, q_net, threads=10)
     RL.run()
