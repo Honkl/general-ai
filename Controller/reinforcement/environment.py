@@ -5,11 +5,9 @@ from gym.utils import seeding
 
 
 class Environment(gym.Env):
-    def __init__(self, game_class, base_reward, penalty, seed, observations_count, actions_count):
+    def __init__(self, game_class, seed, observations_count, actions_count):
         self.game_class = game_class
         self.state = None
-        self.base_reward = base_reward
-        self.penalty = penalty
         self.actions_count = actions_count
         self.last_phase = 0
         self.done = False

@@ -64,71 +64,79 @@ class Reinforcement():
         max_score = 0.0
 
         start = time.time()
+        last = 0
+
+        states = []
+        rewards = []
+        estimated_rewards = []
+
+        # One epoch = One episode = One game played
         for i_epoch in range(1, epochs + 1):
 
             # Gym Environment
-            envs = [Environment(self.game_class,
-                                self.reinforce_params.base_reward,
-                                self.reinforce_params.penalty,
-                                np.random.randint(0, 2 ** 16),
-                                self.state_size,
-                                self.actions_count) for _ in range(self.reinforce_params.batch_size)]
+            env = Environment(self.game_class, np.random.randint(0, 2 ** 16), self.state_size, self.actions_count)
 
             epoch_loss = 0.0
             epoch_reward = 0.0
             epoch_score = 0.0
             epoch_estimated_reward = 0.0
-            max_reward = 0
-            step_id = 0
+            game_steps = 0
 
+            # Running the game until it is not done
             while True:
-                step_id += 1
-                # TODO: Set step limit?
+                game_steps += 1
+
                 # Evaluate action (forward pass in Q-net) and apply it
-                selected_actions, estimated_rewards = self.agent.play([env.state for env in envs])
-                epoch_estimated_reward += estimated_rewards.mean()
+                selected_action, estimated_reward = self.agent.play(env.state)
+                epoch_estimated_reward += estimated_reward
 
-                _, rewards, dones, scores = zip(*[env.step(action) for env, action in zip(envs, selected_actions)])
-                epoch_reward += np.array(rewards).mean()
+                # Perform the action
+                _, reward, done, score = env.step(selected_action)
+                epoch_reward += reward
 
-                # Train Q-net
-                epoch_loss += self.agent.learn([env.state for env in envs], selected_actions, rewards,
-                                               estimated_rewards)
-                max_reward = max(max_reward, np.max(rewards))
+                states.append(env.state)
+                rewards.append(reward)
+                estimated_rewards.append(estimated_reward)
 
-                if sum(dones):
-                    epoch_score = max(scores)[0]  # Max score from batch
+                if len(states) == self.reinforce_params.batch_size:
+                    epoch_loss += self.agent.learn(states, rewards, estimated_rewards)
+                    states = []
+                    rewards = []
+                    estimated_rewards = []
+
+                if done:
+                    epoch_score = score[0]
                     break
 
             report_measures = ([tf.Summary.Value(tag='loss_total', simple_value=epoch_loss),
-                                tf.Summary.Value(tag='loss_average', simple_value=float(epoch_loss) / step_id),
+                                tf.Summary.Value(tag='loss_average', simple_value=float(epoch_loss) / game_steps),
                                 tf.Summary.Value(tag='score', simple_value=epoch_score),
                                 tf.Summary.Value(tag='reward_total', simple_value=epoch_reward),
-                                tf.Summary.Value(tag='reward_average', simple_value=float(epoch_reward) / step_id),
+                                tf.Summary.Value(tag='reward_average', simple_value=float(epoch_reward) / game_steps),
                                 tf.Summary.Value(tag='estimated_reward_total', simple_value=epoch_estimated_reward),
                                 tf.Summary.Value(tag='estimated_reward_average',
-                                                 simple_value=float(epoch_estimated_reward) / step_id),
-                                tf.Summary.Value(tag='number_of_turns', simple_value=step_id),
-                                tf.Summary.Value(tag='max_reward', simple_value=max_reward)])
+                                                 simple_value=float(epoch_estimated_reward) / game_steps),
+                                tf.Summary.Value(tag='number_of_turns', simple_value=game_steps)])
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_epoch)
 
-            for env in envs:
-                env.shut_down()
+            env.shut_down()
 
             if epoch_score >= max_score:
                 checkpoint_path = os.path.join(self.logdir, "q-net-model.ckpt")
                 self.agent.saver.save(self.agent.session, checkpoint_path)
 
-            # print("Epoch: {}/{} Avg loss: {}".format(i_epoch, epochs, float(epoch_loss) / step_id))
-
-            if True:
-                print("Epoch: {}/{}, avg score: {}, avg loss:{}".format(i_epoch, epochs, epoch_score, epoch_loss))
-                t = time.time() - start
+            now = time.time()
+            if now - last > 1:
+                last = now
+                t = now - start
                 h = t // 3600
                 m = (t % 3600) // 60
                 s = t - (h * 3600) - (m * 60)
                 elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
-                print("Time: {}".format(elapsed_time))
+                print(
+                    "Epoch: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_epoch, epochs, epoch_score,
+                                                                               "{0:.2f}".format(epoch_loss),
+                                                                               elapsed_time))
 
         # TODO: Make better
         """

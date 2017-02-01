@@ -16,9 +16,8 @@ class QNetwork():
         self.batch_size = batch_size
 
     def forward_pass(self, x):
-        x = tf.contrib.layers.flatten(x)
+        print(x)
         dimensions = self.hidden_layers + [self.output_size]
-
         for i, (dim, activation) in enumerate(zip(dimensions, [get_activation_tf(x) for x in self.activations])):
             W = tf.get_variable(name="W_{}".format(i),
                                 shape=[x.get_shape()[1], dim],
@@ -57,7 +56,8 @@ class QNetworkRnn():
             print("x.flatten shape: {}".format(x.get_shape()))
             x, self.state = self.rnn_cell(x, self.state)
             print("rnn_output: {}, state: {}".format(x.get_shape(), self.state))
-            x = tf_layers.fully_connected(x, self.output_size, activation_fn=get_activation_tf("identity"), scope="FC_1")
+            x = tf_layers.fully_connected(x, self.output_size, activation_fn=get_activation_tf("identity"),
+                                          scope="FC_1")
         return x
 
     def to_dictionary(self):

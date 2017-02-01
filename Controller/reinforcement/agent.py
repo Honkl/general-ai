@@ -18,16 +18,17 @@ class Agent():
 
         with tf.device('/cpu:0'):
             with tf.variable_scope('agent') as scope:
-                self.state = tf.placeholder(shape=[batch_size, state_size], dtype=tf.float32, name="state")
-                self.estimated_rewards = self.Q(self.state)
+                self.state = tf.placeholder(shape=[None, state_size], dtype=tf.float32, name="state")
+                self.selected_action, self.estimated_reward = self.select_best_action(self.state)
+                self.selected_action = tf.squeeze(self.selected_action)
+                self.estimated_reward = tf.squeeze(self.estimated_reward)
                 scope.reuse_variables()
 
-                self.selected_action, self.estimated_reward = self.select_best_action(self.state)
                 self.new_state = tf.placeholder(shape=[batch_size, state_size], dtype=tf.float32, name="new_state")
-                # self.last_action = tf.placeholder(shape=[batch_size], dtype=tf.int32, name="last_action")
                 self.last_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32, name="last_reward")
                 self.last_estimated_reward = tf.placeholder(shape=[batch_size], dtype=tf.float32,
-                                                            name="last_estm_reward")
+                                                            name="last_estimated_reward")
+
                 _, new_estimated_reward = self.select_best_action(self.new_state)
 
                 self.global_step = tf.Variable(0, dtype=tf.int64, trainable=False, name="global_step")
@@ -57,10 +58,9 @@ class Agent():
             return tf.train.RMSPropOptimizer
         raise NotImplementedError
 
-    def play(self, env_states):
+    def play(self, env_state):
         selected_action, estimated_reward = self.session.run([self.selected_action, self.estimated_reward],
-                                                             {self.state: np.array(env_states).reshape(self.batch_size,
-                                                                                                       self.state_size)})
+                                                             {self.state: [env_state]})
         return selected_action, estimated_reward
 
     def select_best_action(self, state):
@@ -73,11 +73,10 @@ class Agent():
     def Q(self, state):
         return self.q_network.forward_pass(state)
 
-    def learn(self, env_states, last_action, last_reward, last_estimated_reward):
-        # print("{} + {} * {} - {}".format(last_reward , self.gamma, last_estimated_reward, "unknown"))
+    # def learn(self, env_states, last_action, last_reward, last_estimated_reward):
+    def learn(self, states, rewards, estimated_rewards):
         _, loss = self.session.run([self.training, self.loss],
-                                   {self.new_state: np.array(env_states).reshape(self.batch_size, self.state_size),
-                                    # self.last_action: last_action,
-                                    self.last_reward: last_reward,
-                                    self.last_estimated_reward: last_estimated_reward})
+                                   {self.new_state: np.array(states).reshape(self.batch_size, self.state_size),
+                                    self.last_reward: np.array(rewards),
+                                    self.last_estimated_reward: np.array(estimated_rewards).reshape(self.batch_size)})
         return loss
