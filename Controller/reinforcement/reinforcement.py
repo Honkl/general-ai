@@ -82,12 +82,13 @@ class Reinforcement():
             epoch_estimated_reward = 0.0
             game_steps = 0
 
-            # Running the game until it is not done
-            while True:
+            # Running the game until it is not done (big step limit for safety)
+            STEP_LIMIT = 100000
+            while game_steps < STEP_LIMIT:
                 game_steps += 1
 
                 # Evaluate action (forward pass in Q-net) and apply it
-                selected_action, estimated_reward = self.agent.play(env.state)
+                selected_action, estimated_reward = self.agent.play(env.state, i_epoch)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
@@ -103,6 +104,7 @@ class Reinforcement():
                     states = []
                     rewards = []
                     estimated_rewards = []
+                    scores = []
 
                 if done:
                     epoch_score = score[0]
@@ -116,7 +118,7 @@ class Reinforcement():
                                 tf.Summary.Value(tag='estimated_reward_total', simple_value=epoch_estimated_reward),
                                 tf.Summary.Value(tag='estimated_reward_average',
                                                  simple_value=float(epoch_estimated_reward) / game_steps),
-                                tf.Summary.Value(tag='number_of_turns', simple_value=game_steps)])
+                                tf.Summary.Value(tag='number_of_steps', simple_value=game_steps)])
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_epoch)
 
             env.shut_down()

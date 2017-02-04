@@ -10,7 +10,9 @@ class ReinforcementParameters():
             data["epochs"],
             data["gamma"],
             data["optimizer"],
+            data["rand_action_prob"],
             data["learning_rate"])
+
         return params
 
     def __init__(self,
@@ -18,11 +20,13 @@ class ReinforcementParameters():
                  epochs,
                  gamma,
                  optimizer,
+                 rand_action_prob,
                  learning_rate=0.001):
         self.batch_size = batch_size
         self.epochs = epochs
         self.gamma = gamma
         self.optimizer = optimizer
+        self.rand_action_prob = rand_action_prob
         self.learning_rate = learning_rate
 
     def to_dictionary(self):
@@ -31,9 +35,10 @@ class ReinforcementParameters():
         data["epochs"] = self.epochs
         data["gamma"] = self.gamma
         data["optimizer"] = self.optimizer
+        data["rand_action_prob"] = self.rand_action_prob
         data["learning_rate"] = self.learning_rate
         return data
 
     def to_string(self):
-        return "gamma: {}, optimizer: {}, learning rate: {}, batch_size: {}, epochs: {}".format(
-            self.gamma, self.optimizer, self.learning_rate, self.batch_size, self.epochs)
+        return "gamma: {}, optimizer: {}, learning rate: {}, rand action prob: {}, batch_size: {}, epochs: {}".format(
+            self.gamma, self.optimizer, self.learning_rate, self.rand_action_prob, self.batch_size, self.epochs)

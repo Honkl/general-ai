@@ -46,10 +46,20 @@ es_params = EvolutionStrategyParameters(
     sigma=1.0)
 
 rl_params = ReinforcementParameters(
-    batch_size=50,
-    epochs=100000,
+    batch_size=1,
+    epochs=10000,
     gamma=0.7,
-    optimizer="adam")
+    optimizer="adam",
+    rand_action_prob=0.9)
+
+de_params = DifferentialEvolutionParameters(
+    pop_size=25,
+    ngen=5000,
+    game_batch_size=100,
+    hof_size=5,
+    elite=0,
+    cr=0.25,
+    f=1)
 
 
 def run_eva():
@@ -62,8 +72,8 @@ def run_eva():
 
 def run_reinforcement():
     print(rl_params.to_string())
-    q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=0.5)
-    # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
+    # q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=0.5)
+    q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
     RL = Reinforcement("2048", rl_params, q_net, threads=10)
     RL.run()
 
@@ -75,7 +85,14 @@ def run_es():
     strategy.run()
 
 
+def run_de():
+    mlp = MLP(hidden_layers=[64, 64], activation="relu")
+    diff = DifferentialEvolution("2048", de_params, mlp, max_workers=25, logs_every=10)
+    diff.run()
+
+
 if __name__ == '__main__':
     run_reinforcement()
     # run_es()
     # run_eva()
+    # run_de()

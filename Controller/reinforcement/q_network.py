@@ -46,23 +46,20 @@ class QNetworkRnn():
         self.rnn_cell_str = rnn_cell_type
         self.num_units = num_units
         self.rnn_cell = get_rnn_cell(rnn_cell_type)(num_units)
-        self.state = tf.placeholder(shape=[None], dtype=tf.float32, name="state_rnn")
+        #self.state = tf.placeholder(shape=[None], dtype=tf.float32, name="state_rnn")
         self.reuse = False
 
     def init(self, output_size, batch_size):
         self.output_size = output_size
         self.batch_size = batch_size
-        self.state = self.rnn_cell.zero_state(self.batch_size, dtype=tf.float32)
+        if batch_size != 1:
+            raise ValueError("Batch size of 1 required. LSTM needs to compute 'predict' of one sample.")
+        self.rnn_state = self.rnn_cell.zero_state(batch_size, dtype=tf.float32)
 
     def forward_pass(self, x):
-        with tf.variable_scope("rnn", reuse=True):
-            print("Forward pass. x={}".format(x))
-            x = tf.contrib.layers.flatten(x)
-            print("x.flatten shape: {}".format(x.get_shape()))
-            x, self.state = self.rnn_cell(x, self.state)
-            print("rnn_output: {}, state: {}".format(x.get_shape(), self.state))
-            x = tf_layers.fully_connected(x, self.output_size, activation_fn=get_activation_tf("identity"),
-                                          scope="FC_1")
+        x, self.rnn_state = self.rnn_cell(x, self.rnn_state, scope="rnn")
+        x = tf_layers.fully_connected(x, self.output_size, activation_fn=None,
+                                          scope="fully_connected")
         return x
 
     def to_dictionary(self):
