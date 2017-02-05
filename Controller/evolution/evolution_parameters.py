@@ -181,7 +181,6 @@ class DifferentialEvolutionParameters(EvolutionParameters):
             data["ngen"],
             data["game_batch_size"],
             data["hof_size"],
-            data["elite"],
             data["cr"],
             data["f"])
         return params
@@ -191,14 +190,12 @@ class DifferentialEvolutionParameters(EvolutionParameters):
                  ngen,
                  game_batch_size,
                  hof_size,
-                 elite,
                  cr,
                  f):
         self._pop_size = pop_size
         self._ngen = ngen
         self._game_batch_size = game_batch_size
         self._hof_size = hof_size
-        self._elite = elite
         self._cr = cr
         self._f = f
 
@@ -219,10 +216,6 @@ class DifferentialEvolutionParameters(EvolutionParameters):
         return self._hof_size
 
     @property
-    def elite(self):
-        return self._elite
-
-    @property
     def cr(self):
         return self._cr
 
@@ -236,14 +229,12 @@ class DifferentialEvolutionParameters(EvolutionParameters):
         data["ngen"] = self._ngen
         data["game_batch_size"] = self._game_batch_size
         data["hof_size"] = self._hof_size
-        data["elite"] = self._elite
         data["cr"] = self._cr
         data["f"] = self._f
         return data
 
     def to_string(self):
-        return "Differential Evolution - pop_size: {}, hof: {}, elite: {}, cr: {}, f: {}".format(self.pop_size,
-                                                                                                 self.hof_size,
-                                                                                                 self.elite,
-                                                                                                 self.cr,
-                                                                                                 self.f)
+        return "Differential Evolution - pop_size: {}, hof: {}, cr: {}, f: {}".format(self.pop_size,
+                                                                                      self.hof_size,
+                                                                                      self.cr,
+                                                                                      self.f)

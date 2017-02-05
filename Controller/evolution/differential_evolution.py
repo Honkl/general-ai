@@ -89,7 +89,6 @@ class DifferentialEvolution(Evolution):
             for ind, fit in zip(population, fitnesses):
                 ind.fitness.values = fit
             """
-
             if halloffame is not None:
                 halloffame.update(population)
 
