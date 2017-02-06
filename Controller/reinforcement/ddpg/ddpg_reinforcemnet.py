@@ -5,23 +5,12 @@ import utils.miscellaneous
 import tensorflow as tf
 import gc
 import os
-import matplotlib.pyplot as plt
 import numpy as np
 import constants
 import time
 import json
 
 gc.enable()
-
-
-def logs(scores):
-    plt.figure()
-    if len(scores) <= 100:
-        plt.title("AVG (last 100): {}".format(np.mean(scores)))
-    else:
-        plt.title("AVG (last 100): {}".format(np.mean(scores[-100:])))
-    plt.plot(scores, label="score")
-    plt.savefig("plot.jpg")
 
 
 class DDPGReinforcement():
@@ -43,7 +32,7 @@ class DDPGReinforcement():
                                seed=np.random.randint(0, 2 ** 16),
                                observations_count=self.state_size,
                                actions_in_phases=actions_count)
-        self.agent = DDPGAgent(self.env, batch_size, self.state_size, self.actions_count_sum)
+        self.agent = DDPGAgent(self.env, batch_size, self.state_size, self.actions_count_sum, self.logdir)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/deep_deterministic_gradient_policy"
@@ -70,24 +59,28 @@ class DDPGReinforcement():
             f.write(json.dumps(data))
 
     def run(self):
-        game_config = utils.miscellaneous.get_game_config(self.game)
-        game_class = utils.miscellaneous.get_game_class(self.game)
+        self.log_metadata()
 
         with tf.device('/gpu:0'):
-            scores = []
+
+            max_score = 0
             for episode in range(self.episodes):
                 state = self.env.reset()
-                # print "episode:",episode
-                # Train
                 for step in range(100000):
                     action = self.agent.play(state, episode)
                     next_state, reward, done, score = self.env.step(action)
+                    score = score[0]
                     self.agent.perceive(state, action, reward, next_state, done)
                     state = next_state
                     if done:
                         break
-                scores.append(score)
+
+                report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
+                                    tf.Summary.Value(tag='number_of_steps', simple_value=step)])
+                self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
+
+                #if score >= max_score:
+                    #checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
+                    #self.agent.saver.save(self.agent.sess, checkpoint_path)
                 print("Episode {}, Score: {}, Steps: {}".format(episode, score, step))
-                if episode % 10:
-                    logs(scores)
             self.env.close()

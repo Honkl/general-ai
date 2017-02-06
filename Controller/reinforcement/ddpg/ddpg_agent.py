@@ -21,7 +21,7 @@ GAMMA = 0.99
 class DDPGAgent():
     """docstring for DDPG"""
 
-    def __init__(self, env, batch_size, state_size, actions_count):
+    def __init__(self, env, batch_size, state_size, actions_count, logdir):
         self.name = 'DDPG'  # name for uploading results
         self.environment = env
         # Randomly initialize actor network and critic network
@@ -42,6 +42,11 @@ class DDPGAgent():
 
         # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
         self.exploration_noise = OUNoise(self.action_dim)
+
+        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=None)
+        self.summary_writer = tf.summary.FileWriter(logdir,
+                                                    graph=self.sess.graph,
+                                                    flush_secs=10)
 
     def train(self):
         # print "train step",self.time_step
