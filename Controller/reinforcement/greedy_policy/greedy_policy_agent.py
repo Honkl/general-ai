@@ -5,7 +5,7 @@ from gym.utils import seeding
 import tensorflow as tf
 
 
-class Agent():
+class GreedyPolicyAgent():
     def __init__(self, reinfoce_params, q_network, state_size, logdir, threads):
         self.batch_size = reinfoce_params.batch_size
         batch_size = self.batch_size

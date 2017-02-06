@@ -5,15 +5,20 @@ from gym.utils import seeding
 
 
 class Environment(gym.Env):
-    def __init__(self, game_class, seed, observations_count, actions_count):
+    def __init__(self, discrete, game_class, seed, observations_count, actions_count):
         self.game_class = game_class
+        self.game_instance = None
         self.state = None
         self.actions_count = actions_count
         self.last_phase = 0
         self.done = False
 
-        self.observation_space = spaces.Discrete(n=observations_count)
-        self.action_space = spaces.Discrete(n=sum(actions_count))
+        if discrete:
+            self.observation_space = spaces.Discrete(n=observations_count)
+            self.action_space = spaces.Discrete(n=sum(actions_count))
+        else:
+            self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
+            self.action_space = spaces.Box(low=-1, high=1, shape=(actions_count,))
 
         self._seed(seed)
         self.reset()
@@ -32,7 +37,8 @@ class Environment(gym.Env):
             return self.state, 0, True, self.game_instance.score
 
         # Need to determine proper game phase and use only specific action subset
-        if len(self.actions_count) > 0:
+        if len(self.actions_count) > 1:
+            print(self.actions_count)
             begin = sum(self.actions_count[:self.last_phase])
             end = begin + self.actions_count[self.last_phase]
             action = action[begin:end]
@@ -54,10 +60,14 @@ class Environment(gym.Env):
         return s
 
     def _reset(self):
+        if self.game_instance:
+            self.game_instance.finalize()
         model = None
         game_batch = 1
         seed = np.random.randint(0, 2 ** 16)
         self.game_instance = self.game_class(model, game_batch, seed)
+        self.done = False
+        self.last_phase = 0
         self.state, _ = self.game_instance.init_process()  # First state of the game
         return self.state
 

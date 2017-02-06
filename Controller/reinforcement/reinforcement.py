@@ -1,38 +1,51 @@
-import numpy as np
-import constants
 import json
 import os
 import time
-from reinforcement.agent import Agent
-from reinforcement.environment import Environment
+
+import numpy as np
 import tensorflow as tf
 
+import constants
 import utils.miscellaneous
-from games.alhambra import Alhambra
-from games.torcs import Torcs
-from games.mario import Mario
-from games.game2048 import Game2048
+from reinforcement.ddpg.ddpgagent import DDPGAgent
+from reinforcement.environment import Environment
+from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 
 
 class Reinforcement():
-    def __init__(self, game, reinforce_params, q_network, threads):
+    def __init__(self, game, reinforce_params, greedy_policy=True, q_network=None, threads=8):
         self.game = game
         self.reinforce_params = reinforce_params
-        self.q_network = q_network
+        self.policy = q_network
         self.threads = threads
+        self.greedy_policy = greedy_policy
 
         self.game_config = utils.miscellaneous.get_game_config(game)
         self.game_class = utils.miscellaneous.get_game_class(game)
         self.agents = []
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
 
-        # we will train only one network inside the Q-network
-        self.actions_count = self.game_config["output_sizes"]
-        self.actions_count_sum = sum(self.actions_count)
-        q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
-
+        # we will train only one network inside the "Q-network" (not different networks, each for each game phase)
+        actions_count = self.game_config["output_sizes"]
+        self.actions_count_sum = sum(actions_count)
         self.logdir = self.init_directories()
-        self.agent = Agent(reinforce_params, q_network, self.state_size, self.logdir, threads)
+
+        if greedy_policy:
+            q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
+            self.agent = GreedyPolicyAgent(reinforce_params, q_network, self.state_size, self.logdir, threads)
+            self.env = Environment(discrete=True,
+                                   game_class=self.game_class,
+                                   seed=np.random.randint(0, 2 ** 16),
+                                   observations_count=self.state_size,
+                                   actions_count=self.actions_count_sum)
+        else:
+            # DDPG (deep deterministic gradient policy)
+            self.env = Environment(discrete=False,
+                                   game_class=self.game_class,
+                                   seed=np.random.randint(0, 2 ** 16),
+                                   observations_count=self.state_size,
+                                   actions_count=self.actions_count_sum)
+            self.agent = DDPGAgent(self.env)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/q-network"
@@ -52,9 +65,9 @@ class Reinforcement():
     def log_metadata(self):
         with open(os.path.join(self.logdir, "metadata.json"), "w") as f:
             data = {}
-            data["model_name"] = "Q-Network"
+            data["model_name"] = "reinforcement_learning"
             data["game"] = self.game
-            data["q_network"] = self.q_network.to_dictionary()
+            data["policy"] = self.policy.to_dictionary()
             data["reinforce_params"] = self.reinforce_params.to_dictionary()
             f.write(json.dumps(data))
 
@@ -73,8 +86,7 @@ class Reinforcement():
         # One epoch = One episode = One game played
         for i_epoch in range(1, epochs + 1):
 
-            # Gym Environment
-            env = Environment(self.game_class, np.random.randint(0, 2 ** 16), self.state_size, self.actions_count)
+            self.env.reset()
 
             epoch_loss = 0.0
             epoch_reward = 0.0
@@ -83,12 +95,11 @@ class Reinforcement():
             game_steps = 0
 
             # Running the game until it is not done (big step limit for safety)
-            STEP_LIMIT = 100000
+            STEP_LIMIT = 1000000 # 1M
             while game_steps < STEP_LIMIT:
                 game_steps += 1
 
-                # Evaluate action (forward pass in Q-net) and apply it
-                selected_action, estimated_reward = self.agent.play(env.state, i_epoch)
+                selected_action, estimated_reward = self.agent.play(self.env.state, i_epoch)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
