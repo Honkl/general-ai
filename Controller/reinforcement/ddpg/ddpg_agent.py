@@ -18,7 +18,7 @@ REPLAY_START_SIZE = 500
 GAMMA = 0.99
 
 
-class DDPGAgent:
+class DDPGAgent():
     """docstring for DDPG"""
 
     def __init__(self, env, batch_size, state_size, actions_count):
@@ -80,7 +80,7 @@ class DDPGAgent:
         self.actor_network.update_target()
         self.critic_network.update_target()
 
-    def noise_action(self, state):
+    def play(self, state, i_episode):
         # Select action a_t according to the current policy and exploration noise
         action = self.actor_network.action(state)
         return action + self.exploration_noise.noise()

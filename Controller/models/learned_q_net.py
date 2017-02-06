@@ -2,8 +2,8 @@ import json
 import os
 
 from models.model import Model
+from reinforcement.greedy_policy.greedy_policy_reinforcement import Reinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
-from reinforcement.reinforcement import Reinforcement
 from reinforcement.reinforcement_parameters import ReinforcementParameters
 
 

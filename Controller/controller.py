@@ -1,26 +1,22 @@
 # Basic wrapper to start process with any game that has proper interface.
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 
-import time
-import numpy as np
-import matplotlib.pyplot as plt
 import random
 
-from deap import tools
-from evolution.evolution import Evolution
-from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
-from evolution.evolution_strategy import EvolutionStrategy
+import numpy as np
+
 from evolution.differential_evolution import DifferentialEvolution
 from evolution.evolution_parameters import EvolutionaryAlgorithmParameters, EvolutionStrategyParameters, \
     DifferentialEvolutionParameters
-from models.mlp import MLP
+from evolution.evolution_strategy import EvolutionStrategy
+from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
 from models.echo_state_network import EchoState
-
-from utils.activations import relu, tanh, logsig
-from reinforcement.reinforcement import Reinforcement
+from models.mlp import MLP
+from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
+from reinforcement.ddpg.ddpg_reinforcemnet import DPGG
+from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import ReinforcementParameters
-from reinforcement.q_network import QNetwork, QNetworkRnn
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
@@ -30,7 +26,7 @@ sea_params = EvolutionaryAlgorithmParameters(
     pop_size=15,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
-    ngen=500,
+    ngen=1500,
     game_batch_size=1,
     cxindpb=0.2,
     hof_size=0,
@@ -62,18 +58,21 @@ de_params = DifferentialEvolutionParameters(
 
 
 def run_eva():
-    # mlp = MLP(hidden_layers=[256, 256], activation="relu")
-    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=esn, logs_every=10,
-                                      max_workers=3)
+    mlp = MLP(hidden_layers=[300, 600], activation="relu")
+    # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=mlp, logs_every=10,
+                                      max_workers=5)
     evolution.run()
 
 
 def run_reinforcement():
-    print(rl_params.to_string())
-    # q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=0.5)
-    q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
-    RL = Reinforcement("mario", rl_params, q_net, threads=10)
+    q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=0.5)
+    # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
+    RL = Reinforcement(game="2048",
+                       reinforce_params=rl_params,
+                       greedy_policy=False,
+                       q_network=q_net,
+                       threads=10)
     RL.run()
 
 
@@ -91,7 +90,7 @@ def run_de():
 
 
 if __name__ == '__main__':
-    # run_reinforcement()
+    run_reinforcement()
     # run_es()
     # run_eva()
-    run_de()
+    # run_de()

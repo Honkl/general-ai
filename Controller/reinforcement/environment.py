@@ -5,20 +5,21 @@ from gym.utils import seeding
 
 
 class Environment(gym.Env):
-    def __init__(self, discrete, game_class, seed, observations_count, actions_count):
+    def __init__(self, discrete, game_class, seed, observations_count, actions_in_phases):
         self.game_class = game_class
         self.game_instance = None
         self.state = None
-        self.actions_count = actions_count
+        self.actions_in_phases = actions_in_phases
         self.last_phase = 0
         self.done = False
 
+        actions_total = sum(actions_in_phases)
         if discrete:
             self.observation_space = spaces.Discrete(n=observations_count)
-            self.action_space = spaces.Discrete(n=sum(actions_count))
+            self.action_space = spaces.Discrete(n=actions_total)
         else:
             self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
-            self.action_space = spaces.Box(low=-1, high=1, shape=(actions_count,))
+            self.action_space = spaces.Box(low=-1, high=1, shape=(actions_total,))
 
         self._seed(seed)
         self.reset()
@@ -37,10 +38,10 @@ class Environment(gym.Env):
             return self.state, 0, True, self.game_instance.score
 
         # Need to determine proper game phase and use only specific action subset
-        if len(self.actions_count) > 1:
-            print(self.actions_count)
-            begin = sum(self.actions_count[:self.last_phase])
-            end = begin + self.actions_count[self.last_phase]
+        if len(self.actions_in_phases) > 1:
+            print(self.actions_in_phases)
+            begin = sum(self.actions_in_phases[:self.last_phase])
+            end = begin + self.actions_in_phases[self.last_phase]
             action = action[begin:end]
 
         action_string = ""
@@ -75,7 +76,7 @@ class Environment(gym.Env):
         pass
 
     def _close(self):
-        pass
+        self.shut_down()
 
     def shut_down(self):
         self.game_instance.finalize()
