@@ -518,6 +518,10 @@ namespace AlhambraInterface
 
             // Reads python script standard output as a result of AI move
             string output = reader.ReadLine();
+            if (output == null)
+            {
+                Console.Error.WriteLine("WRONG AI RESULT (null)");
+            }
             double[] results = jmo.Decode(output);
             int resultIndex = 0;
             double sum = 0;

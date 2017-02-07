@@ -39,11 +39,11 @@ public class JsonMessageObject {
         result.add(sensors.getZSpeed());
 
         for (double value : sensors.getTrackEdgeSensors()) {
-            result.add(1 - (value / 200));
+            result.add(value / 200);
         }
 
         for (double value : sensors.getWheelSpinVelocity()) {
-            result.add(value);
+            result.add(Math.log(value + 1));
         }
 
         // Debug print
