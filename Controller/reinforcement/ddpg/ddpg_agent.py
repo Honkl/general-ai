@@ -7,7 +7,7 @@ import gym
 import tensorflow as tf
 import numpy as np
 from reinforcement.ddpg.ou_noise import OUNoise
-from reinforcement.ddpg.critic_network import CriticNetwork
+from reinforcement.ddpg.critic_network_bn import CriticNetwork
 from reinforcement.ddpg.actor_network_bn import ActorNetwork
 from reinforcement.ddpg.replay_buffer import ReplayBuffer
 

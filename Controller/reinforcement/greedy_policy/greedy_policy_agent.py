@@ -60,7 +60,7 @@ class GreedyPolicyAgent():
 
     def play(self, env_state, i_episode):
         # Probability of random action selection will decay in time
-        if np.random.random() < self.random_action_prob ** i_episode:
+        if i_episode != None and np.random.random() < self.random_action_prob ** i_episode:
             estimated_reward = self.sess.run(self.estimated_reward, {self.state: [env_state]})
             n_actions = self.q_network.output_size
             selected_action = []

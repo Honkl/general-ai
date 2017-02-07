@@ -14,13 +14,14 @@ gc.enable()
 
 
 class DDPGReinforcement():
-    def __init__(self, game, episodes, batch_size):
+    def __init__(self, game, episodes, batch_size, logs_every=10):
         self.game = game
         self.episodes = episodes
         self.batch_size = batch_size
         self.game_config = utils.miscellaneous.get_game_config(game)
         self.game_class = utils.miscellaneous.get_game_class(game)
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
+        self.logs_every = logs_every
 
         actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(actions_count)
@@ -61,7 +62,7 @@ class DDPGReinforcement():
     def run(self):
         self.log_metadata()
 
-        with tf.device('/gpu:0'):
+        with tf.device('/cpu:0'):
 
             max_score = 0
             for episode in range(self.episodes):
@@ -79,8 +80,8 @@ class DDPGReinforcement():
                                     tf.Summary.Value(tag='number_of_steps', simple_value=step)])
                 self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
 
-                #if score >= max_score:
-                    #checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
-                    #self.agent.saver.save(self.agent.sess, checkpoint_path)
+                if episode % self.logs_every == 0:
+                    checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
+                    self.agent.saver.save(self.agent.sess, checkpoint_path)
                 print("Episode {}, Score: {}, Steps: {}".format(episode, score, step))
             self.env.close()

@@ -1,19 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-import os
-import constants
+
 import games
 import utils.miscellaneous
-
-from enum import Enum
-from reinforcement.reinforcement import Reinforcement
-from reinforcement.reinforcement_parameters import ReinforcementParameters
-from reinforcement.q_network import QNetwork
 from models.mlp import MLP
-from models.learned_q_net import LearnedQNet
 from models.random import Random
-from models.echo_state_network import EchoState
+from models.learned_greedy_rl import LearnedGreedyRL
 
 
 def bar_plot(values, evals, game):
@@ -92,6 +84,14 @@ def compare_models(game, evals, *args):
 
 
 def eval_mario_winrate(model, evals, level, vis_on):
+    """
+    Evaluates mario winrate on specified level.
+    :param model:
+    :param evals:
+    :param level: gombas or spikes
+    :param vis_on:
+    :return:
+    """
     game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level=level, vis_on=vis_on,
                                       use_visualization_tool=True)
     results = game_instance.run(advanced_results=True)
@@ -143,28 +143,28 @@ def eval_alhambra_winrate(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "torcs"
+    game = "2048"
     evals = 250
 
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
-    file_name = "../../Controller/logs/torcs/echo_state/logs_2017-02-05_12-03-42/best/best_1.json"
-    # file_name = "../../Experiments/ESN+evolution_algorithm/mario/logs_2017-01-28_16-10-43/best/best_0.json"
+    # file_name = "../../Controller/logs/torcs/mlp/logs_2017-02-06_00-45-50/best/best_0.json"
+    # file_name = "../../Experiments/MLP+differential_evolution/mario/logs_2017-02-04_00-30-52/last/last_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
     # file_name = "../../Experiments/ESN+evolution_algorithm/torcs/logs_2017-02-01_01-13-38/best/best_0.json"
     # file_name = "../../Experiments/MLP+differential_evolution/alhambra/logs_2017-01-23_03-20-57/last/last_0.json"
-    # logdir = "../../Controller/logs/2048/q-network/logs_2017-02-01_14-40-02"
+    logdir = "../../Controller/logs/2048/greedy_policy/logs_2017-02-06_18-04-03"
 
 
-    esn = EchoState.load_from_file(file_name, game)
+    # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(esn, evals)
-    # q_net = LearnedQNet(logdir)
+    q_net = LearnedGreedyRL(logdir)
 
     # run_random_model(game, evals)
-    # run_2048_extended(mlp, evals)
+    run_2048_extended(q_net, evals)
 
-    # eval_mario_winrate(model=esn, evals=evals, level="spikes", vis_on=False)
+    # eval_mario_winrate(model=mlp, evals=evals, level="gombas", vis_on=False)
     # compare_models(game, evals, mlp)
-    run_torcs_vis_on(model=esn, evals=evals)
+    # run_torcs_vis_on(model=mlp, evals=evals)

@@ -14,7 +14,7 @@ from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
 from models.echo_state_network import EchoState
 from models.mlp import MLP
 from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
-from reinforcement.ddpg.ddpg_reinforcemnet import DPGG
+from reinforcement.ddpg.ddpg_reinforcemnet import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import ReinforcementParameters
 
@@ -43,7 +43,7 @@ es_params = EvolutionStrategyParameters(
 
 rl_params = ReinforcementParameters(
     batch_size=1,
-    epochs=10000,
+    episodes=10000,
     gamma=0.7,
     optimizer="adam",
     rand_action_prob=0.9)
@@ -68,11 +68,8 @@ def run_eva():
 def run_reinforcement():
     q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=0.5)
     # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
-    RL = Reinforcement(game="2048",
-                       reinforce_params=rl_params,
-                       greedy_policy=False,
-                       q_network=q_net,
-                       threads=10)
+    # RL = GreedyPolicyReinforcement(game="2048", reinforce_params=rl_params, q_network=q_net, threads=10)
+    RL = DDPGReinforcement(game="2048", episodes=100000, batch_size=500, logs_every=2)
     RL.run()
 
 

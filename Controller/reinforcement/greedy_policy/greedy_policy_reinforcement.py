@@ -62,7 +62,7 @@ class GreedyPolicyReinforcement():
 
     def run(self):
         self.log_metadata()
-        epochs = self.reinforce_params.epochs
+        episodes = self.reinforce_params.episodes
         max_score = 0.0
 
         start = time.time()
@@ -73,7 +73,7 @@ class GreedyPolicyReinforcement():
         estimated_rewards = []
 
         # One epoch = One episode = One game played
-        for i_epoch in range(1, epochs + 1):
+        for i_episode in range(1, episodes + 1):
 
             self.env.reset()
 
@@ -88,7 +88,7 @@ class GreedyPolicyReinforcement():
             while game_steps < STEP_LIMIT:
                 game_steps += 1
 
-                selected_action, estimated_reward = self.agent.play(self.env.state, i_epoch)
+                selected_action, estimated_reward = self.agent.play(self.env.state, i_episode)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
@@ -119,7 +119,7 @@ class GreedyPolicyReinforcement():
                                 tf.Summary.Value(tag='estimated_reward_average',
                                                  simple_value=float(epoch_estimated_reward) / game_steps),
                                 tf.Summary.Value(tag='number_of_steps', simple_value=game_steps)])
-            self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_epoch)
+            self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
 
             if epoch_score >= max_score:
                 checkpoint_path = os.path.join(self.logdir, "q-net-model.ckpt")
@@ -134,7 +134,7 @@ class GreedyPolicyReinforcement():
                 s = t - (h * 3600) - (m * 60)
                 elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
                 print(
-                    "Epoch: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_epoch, epochs, epoch_score,
+                    "Epoch: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
                                                                                "{0:.2f}".format(epoch_loss),
                                                                                elapsed_time))
         self.env.shut_down()
@@ -145,6 +145,6 @@ class GreedyPolicyReinforcement():
         ckpt = tf.train.get_checkpoint_state(checkpoint)
         if ckpt and ckpt.model_checkpoint_path:
             print('Restoring model: {}'.format(ckpt.model_checkpoint_path))
-            saver.restore(self.agent.session, ckpt.model_checkpoint_path)
+            saver.restore(self.agent.sess, ckpt.model_checkpoint_path)
         else:
             raise IOError('No model found in {}.'.format(checkpoint))
