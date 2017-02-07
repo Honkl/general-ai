@@ -13,9 +13,9 @@ from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 
 
 class GreedyPolicyReinforcement():
-    def __init__(self, game, reinforce_params, q_network, threads=8):
+    def __init__(self, game, parameters, q_network, threads=8):
         self.game = game
-        self.reinforce_params = reinforce_params
+        self.reinforce_params = parameters
         self.q_network = q_network
         self.threads = threads
 
@@ -34,7 +34,7 @@ class GreedyPolicyReinforcement():
                                seed=np.random.randint(0, 2 ** 16),
                                observations_count=self.state_size,
                                actions_in_phases=actions_count)
-        self.agent = GreedyPolicyAgent(reinforce_params, q_network, self.state_size, self.logdir, threads)
+        self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.logdir, threads)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/greedy_policy"

@@ -4,7 +4,7 @@ import os
 from models.model import Model
 from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
-from reinforcement.reinforcement_parameters import ReinforcementParameters
+from reinforcement.reinforcement_parameters import GreedyPolicyParameters
 
 
 class LearnedGreedyRL(Model):
@@ -17,11 +17,11 @@ class LearnedGreedyRL(Model):
                     break
 
         q_net_params = self.metadata["q-network"]
-        rl_params = self.metadata["reinforcement_params"]
+        rl_params = self.metadata["parameters"]
         self.game = self.metadata["game"]
         self.q_network = QNetwork(q_net_params["hidden_layers"], q_net_params["activation"])
 
-        self.rl = GreedyPolicyReinforcement(self.game, ReinforcementParameters.from_dict(rl_params), self.q_network, threads=1)
+        self.rl = GreedyPolicyReinforcement(self.game, GreedyPolicyParameters.from_dict(rl_params), self.q_network, threads=1)
         self.rl.load_checkpoint(logdir)
 
     def get_new_instance(self, weights, game_config):

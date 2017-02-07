@@ -14,10 +14,10 @@ gc.enable()
 
 
 class DDPGReinforcement():
-    def __init__(self, game, episodes, batch_size, logs_every=10):
+    def __init__(self, game, parameters, logs_every=10):
         self.game = game
-        self.episodes = episodes
-        self.batch_size = batch_size
+        self.episodes = parameters.episodes
+        self.batch_size = parameters.batch_size
         self.game_config = utils.miscellaneous.get_game_config(game)
         self.game_class = utils.miscellaneous.get_game_class(game)
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
@@ -33,7 +33,7 @@ class DDPGReinforcement():
                                seed=np.random.randint(0, 2 ** 16),
                                observations_count=self.state_size,
                                actions_in_phases=actions_count)
-        self.agent = DDPGAgent(self.env, batch_size, self.state_size, self.actions_count_sum, self.logdir)
+        self.agent = DDPGAgent(self.env, self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/deep_deterministic_gradient_policy"

@@ -3,6 +3,7 @@ import os
 
 from models.model import Model
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
+from reinforcement.reinforcement_parameters import DDPGParameters
 
 
 class LearnedDDPG(Model):
@@ -15,10 +16,8 @@ class LearnedDDPG(Model):
                     break
 
         self.game = self.metadata["game"]
-        self.batch_size = self.metadata["batch_size"]
-        self.episodes = self.metadata["episodes"]
-
-        self.ddpg = DDPGReinforcement(self.game, self.episodes, self.batch_size)
+        self.parameters = DDPGParameters.from_dict(self.metadata["parameters"])
+        self.ddpg = DDPGReinforcement(self.game, self.parameters)
         self.ddpg.load_checkpoint(logdir)
 
     def get_new_instance(self, weights, game_config):
