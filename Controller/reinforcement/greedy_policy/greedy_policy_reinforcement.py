@@ -24,16 +24,11 @@ class GreedyPolicyReinforcement():
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
 
         # we will train only one network inside the "Q-network" (not different networks, each for each game phase)
-        actions_count = self.game_config["output_sizes"]
-        self.actions_count_sum = sum(actions_count)
+        self.actions_count = self.game_config["output_sizes"]
+        self.actions_count_sum = sum(self.actions_count)
         self.logdir = self.init_directories()
 
         q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
-        self.env = Environment(discrete=True,
-                               game_class=self.game_class,
-                               seed=np.random.randint(0, 2 ** 16),
-                               observations_count=self.state_size,
-                               actions_in_phases=actions_count)
         self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.logdir, threads)
 
     def init_directories(self):
@@ -75,7 +70,11 @@ class GreedyPolicyReinforcement():
         # One epoch = One episode = One game played
         for i_episode in range(1, episodes + 1):
 
-            self.env.reset()
+            self.env = Environment(discrete=True,
+                                   game_class=self.game_class,
+                                   seed=np.random.randint(0, 2 ** 16),
+                                   observations_count=self.state_size,
+                                   actions_in_phases=self.actions_count)
 
             epoch_loss = 0.0
             epoch_reward = 0.0
@@ -126,15 +125,12 @@ class GreedyPolicyReinforcement():
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
 
             now = time.time()
-            if now - last > 0:
-                last = now
-                t = now - start
-                h = t // 3600
-                m = (t % 3600) // 60
-                s = t - (h * 3600) - (m * 60)
-                elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
-                print(
-                    "Epoch: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
+            t = now - start
+            h = t // 3600
+            m = (t % 3600) // 60
+            s = t - (h * 3600) - (m * 60)
+            elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+            print("Episode: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
                                                                                "{0:.2f}".format(epoch_loss),
                                                                                elapsed_time))
         self.env.shut_down()

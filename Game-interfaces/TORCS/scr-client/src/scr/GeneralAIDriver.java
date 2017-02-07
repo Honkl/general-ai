@@ -99,31 +99,36 @@ public class GeneralAIDriver extends Controller {
             //for (int i = 0; i < 20; i++) {
             //    System.err.println(reader.readLine());
             //}
-            String[] output = reader.readLine().split(" ");
-            double[] values = new double[output.length];
-            for (int i = 0; i < output.length; i++) {
-                values[i] = Double.parseDouble(output[i]);
+            String output = reader.readLine();
+            if (output == null) {
+                System.err.println("WRONG AI RESULT");
+            }
+
+            String[] parts = output.split(" ");
+            if (parts.length != 3) {
+                System.err.println("Incorrect number of results from AI. Expecting 3, got " + parts.length);
+            }
+            double[] values = new double[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                values[i] = Double.parseDouble(parts[i]);
             }
 
             // AI results
             act = new Action();
             act.accelerate = values[0];
             act.brake = values[1];
-            act.clutch = values[2];
-            act.focus = getFocus(values[3]);
-            act.steering = getSteer(values[5]);
+            act.steering = getSteer(values[2]);
 
             // Non-AI results
             act.gear = getGear(sensors);
+            act.clutch = 0;
+            act.focus = 0;
             act.restartRace = false;
 
-            /**
-             * if (last == 0) { last = System.currentTimeMillis(); } else { long
-             * current = System.currentTimeMillis(); if (current - last >= 1000)
-             * { last = current; act.restartRace = true; } } /*
-             */
             lastSensor = sensors;
-            score = lastSensor.getDistanceRaced();
+            if (lastSensor.getCurrentLapTime() != 0) {
+                score = lastSensor.getDistanceRaced();
+            }
 
             return act;
         } catch (IOException e) {
@@ -136,14 +141,7 @@ public class GeneralAIDriver extends Controller {
         if (lastSensor == null) {
             return 0;
         }
-        double raced = lastSensor.getDistanceRaced();
-        double reward = 0;
-        reward += raced - lastDistanceRaced; 
-        lastDistanceRaced = raced;
-        reward -= 100 * lastSensor.getDamage();
-        reward += lastSensor.getSpeed();
-        reward -= lastSensor.getAngleToTrackAxis();
-        //System.err.println(lastSensor.getDistanceRaced());
+        double reward = lastSensor.getSpeed() - Math.abs(lastSensor.getTrackPosition());
         return reward;
     }
 
@@ -158,17 +156,6 @@ public class GeneralAIDriver extends Controller {
         return (2 * outputFromAi) - 1;
     }
 
-    /**
-     * Transforms AI's output in interval [0, 1] to proper gear integer.
-     *
-     * @param outputFromAi Ouput of the AI.
-     */
-    /**
-     * private int getGear(double outputFromAi) { // Gear is in {-1, 0, ..., 6}
-     * for (int i = 0; i < intervals.length; i++) {
-     * if (outputFromAi >= intervals[i].lowerBound && outputFromAi <=
-     * intervals[i].upperBound) { return i - 1; } } return 0; } /*
-     */
     /**
      * Reused method from SimpleDriver.java.
      *
@@ -196,16 +183,6 @@ public class GeneralAIDriver extends Controller {
             {
                 return gear;
             }
-    }
-
-    /**
-     * Transforms AI's output in interval [0, 1] to proper focus integer.
-     *
-     * @param outputFromAi Ouput of the AI.
-     */
-    private int getFocus(double outputFromAi) {
-        // Focus must be in interval [-90, 90]
-        return (int) ((outputFromAi * 180) - 90);
     }
 
     @Override

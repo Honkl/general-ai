@@ -61,7 +61,7 @@ class Environment(gym.Env):
         return s
 
     def _reset(self):
-        if self.game_instance:
+        if self.game_instance != None:
             self.game_instance.finalize()
         model = None
         game_batch = 1

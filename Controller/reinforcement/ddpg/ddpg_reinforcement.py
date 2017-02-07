@@ -23,17 +23,12 @@ class DDPGReinforcement():
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
         self.logs_every = logs_every
 
-        actions_count = self.game_config["output_sizes"]
-        self.actions_count_sum = sum(actions_count)
+        self.actions_count = self.game_config["output_sizes"]
+        self.actions_count_sum = sum(self.actions_count)
         self.logdir = self.init_directories()
 
         # DDPG (deep deterministic gradient policy)
-        self.env = Environment(discrete=False,
-                               game_class=self.game_class,
-                               seed=np.random.randint(0, 2 ** 16),
-                               observations_count=self.state_size,
-                               actions_in_phases=actions_count)
-        self.agent = DDPGAgent(self.env, self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
+        self.agent = DDPGAgent(self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/deep_deterministic_gradient_policy"
@@ -63,15 +58,22 @@ class DDPGReinforcement():
         self.log_metadata()
 
         with tf.device('/cpu:0'):
-
             max_score = 0
+            start = time.time()
             for episode in range(self.episodes):
-                state = self.env.reset()
+
+                self.env = Environment(discrete=False,
+                                       game_class=self.game_class,
+                                       seed=np.random.randint(0, 2 ** 16),
+                                       observations_count=self.state_size,
+                                       actions_in_phases=self.actions_count)
+
                 for step in range(100000):
-                    action = self.agent.play(state, episode)
+                    action = self.agent.play(self.env.state, episode)
+                    print(action)
                     next_state, reward, done, score = self.env.step(action)
                     score = score[0]
-                    self.agent.perceive(state, action, reward, next_state, done)
+                    self.agent.perceive(self.env.state, action, reward, next_state, done)
                     state = next_state
                     if done:
                         break
@@ -83,7 +85,15 @@ class DDPGReinforcement():
                 if episode % self.logs_every == 0:
                     checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
                     self.agent.saver.save(self.agent.sess, checkpoint_path)
-                print("Episode {}, Score: {}, Steps: {}".format(episode, score, step))
+
+                now = time.time()
+                t = now - start
+                h = t // 3600
+                m = (t % 3600) // 60
+                s = t - (h * 3600) - (m * 60)
+                elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+                print("Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
+                                                                                   elapsed_time))
             self.env.close()
 
     def load_checkpoint(self, checkpoint):
