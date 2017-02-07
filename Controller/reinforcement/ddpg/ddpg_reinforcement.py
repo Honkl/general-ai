@@ -85,3 +85,12 @@ class DDPGReinforcement():
                     self.agent.saver.save(self.agent.sess, checkpoint_path)
                 print("Episode {}, Score: {}, Steps: {}".format(episode, score, step))
             self.env.close()
+
+    def load_checkpoint(self, checkpoint):
+        saver = tf.train.Saver(tf.all_variables())
+        ckpt = tf.train.get_checkpoint_state(checkpoint)
+        if ckpt and ckpt.model_checkpoint_path:
+            print('Restoring model: {}'.format(ckpt.model_checkpoint_path))
+            saver.restore(self.agent.sess, ckpt.model_checkpoint_path)
+        else:
+            raise IOError('No model found in {}.'.format(checkpoint))

@@ -14,7 +14,7 @@ from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
 from models.echo_state_network import EchoState
 from models.mlp import MLP
 from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
-from reinforcement.ddpg.ddpg_reinforcemnet import DDPGReinforcement
+from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import ReinforcementParameters
 
