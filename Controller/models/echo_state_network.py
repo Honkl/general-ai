@@ -9,12 +9,21 @@ from models.model import Model
 
 
 class EchoState(Model):
+    """
+    Represents Echo-State Network model. Can contain multiple networks (echo state models).
+    """
     state_check_lock = Lock()
     library_esn = None
     echo_state_seed = None
 
     @staticmethod
     def load_from_file(file_name, game):
+        """
+        Loads EchoState model from the specified file.
+        :param file_name: File with stored model.
+        :param game: Game to be used for.
+        :return: Instance of EchoState model.
+        """
         try:
             with open(file_name, "r") as f:
                 data = json.load(f)
@@ -34,7 +43,17 @@ class EchoState(Model):
         return EchoState(n_readouts, n_components, hidden, activation, weights, game_config, seed)
 
     class EchoStateNetwork():
+        """
+        Represents Echo-State network model (internally). Single Network.
+        """
+
         def __init__(self, layer_sizes, activation, weights):
+            """
+            Initializes a new instance of EchoStateNetwork (internal representation; single network).
+            :param layer_sizes: Sizes of output layers.
+            :param activation: Activation for output layers.
+            :param weights: Weights of the output layers.
+            """
             self.layer_sizes = layer_sizes
             self.activation = utils.activations.get_activation(activation)
             self.weights = weights
@@ -51,6 +70,11 @@ class EchoState(Model):
                 l_bound = r_bound
 
         def predict(self, input):
+            """
+            Predicts output for the specified input.
+            :param input: Input to the network.
+            :return:
+            """
             x = np.array(list(map(float, input)))
 
             # reservoir ESN assume (n_samples, n_features)
@@ -81,13 +105,29 @@ class EchoState(Model):
             return np.array([((x_i - min_val) / (max_val - min_val)) for x_i in x])
 
     def get_name(self):
+        """
+        Returns a name of the current model.
+        """
         return "echo_state"
 
     def get_class_name(self):
+        """
+        Returns a class name of the current model.
+        """
         return "EchoState"
 
     def __init__(self, n_readout, n_components, output_layers, activation, weights=None, game_config=None,
                  echo_state_seed=None):
+        """
+        Initializes a new instance of Echo-State network model.
+        :param n_readout: Number of readout neurons, chosen randomly in the reservoir.
+        :param n_components: Number of neurons in the reservoir
+        :param output_layers: Sizes of output layers.
+        :param activation: Activation for output layers.
+        :param weights: Weights of output layers.
+        :param game_config: Game configuration file.
+        :param echo_state_seed: Seed for echo state network library.
+        """
         self.n_readout = n_readout
         self.n_components = n_components
         self.output_layers = output_layers
@@ -137,6 +177,12 @@ class EchoState(Model):
                     used_weights = new_used_weights
 
     def get_new_instance(self, weights, game_config):
+        """
+        Creates a new instance of current model, using the specified weights and game configuration.
+        :param weights: Weights for the new instance model.
+        :param game_config: Game configuration file.
+        :return: a new instance of current model.
+        """
         instance = EchoState(self.n_readout, self.n_components, self.output_layers, self.activation, weights,
                              game_config)
         return instance

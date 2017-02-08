@@ -21,6 +21,9 @@ from utils.miscellaneous import get_game_config, get_game_instance
 
 
 class Evolution():
+    """
+    Interface for different types of evolutions (differential, standard, strategy).
+    """
     all_time_best = []
 
     def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
@@ -74,11 +77,26 @@ class Evolution():
         return individual,
 
     def init_individual(self, icls, length, content=None):
+        """
+        Initializes an evolutionary individual.
+        :param icls: Class of the individual.
+        :param length: Length of the individul.
+        :param content: Content of the individual (or None).
+        :return: Randomly initialized individual.
+        """
         if content == None:
             return icls([np.random.random() for _ in range(length)])
         return icls(content)
 
     def init_population(self, pop_size, container, ind_init, file_name=None):
+        """
+        Initializes population for evolution.
+        :param pop_size: Population size.
+        :param container: Class (container) for population (list, numpy.array...).
+        :param ind_init: Function for an initialization of one individual.
+        :param file_name: File name to load population (or None).
+        :return: Randomly initialized population or initialized from the specified file.
+        """
         if file_name == None:
             return container(ind_init() for _ in range(pop_size))
 
@@ -128,6 +146,13 @@ class Evolution():
         return toolbox
 
     def create_log_files(self, dir, pop, log, elapsed_time):
+        """
+        Creates a log files of the current population. Also creates a plot.
+        :param dir: Directory where store files.
+        :param pop: Population to log.
+        :param log: Logbook data.
+        :param elapsed_time: Total time elapsed.
+        """
         if not os.path.exists(dir):
             os.makedirs(dir)
 
@@ -165,6 +190,10 @@ class Evolution():
         plt.savefig(dir + "\\plot.jpg")
 
     def init_directories(self):
+        """
+        Initializes directories where logs will be stored.
+        :return: Newly created log folder (with date and time).
+        """
         self.dir = constants.loc + "\\logs\\" + self.current_game + "\\" + self.model.get_name()
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
@@ -217,4 +246,8 @@ class Evolution():
             self.write_to_file(self.all_time_best[i], best_dir + "\\best_" + str(i) + ".json")
 
     def run(self, file_name=None):
+        """
+        Runs the evolution. Override in differential evolution, strategy (...) classes.
+        :param file_name: File to load population or None.
+        """
         raise NotImplementedError("Evolution class called. Maybe you should call one of the child classes.")

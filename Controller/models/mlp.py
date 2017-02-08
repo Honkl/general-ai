@@ -8,12 +8,18 @@ from utils import activations
 
 class MLP(Model):
     """
-    Represents a simple feedforward MLP neural network model.
+    Represents a simple feed forward  MLP neural network model.
     Can contain multiple networks, each one for each game phase. Contains instances of 'MLPNetwork'.
     """
 
     @staticmethod
     def load_from_file(file_name, game):
+        """
+        Loads a MLP model from the specified file.
+        :param file_name: File to load from.
+        :param game: Game for the current model.
+        :return: Instance of MLP model.
+        """
         try:
             with open(file_name, "r") as f:
                 data = json.load(f)
@@ -35,6 +41,9 @@ class MLP(Model):
         return MLP(hidden_layers=hidden, activation=activation, weights=weights, game_config=game_config)
 
     class MLPNetwork():
+        """
+        Represents MLP network model (internally). Single Network.
+        """
         def __init__(self, layer_sizes, activation, weights):
             self.layer_sizes = layer_sizes
             self.activation = activations.get_activation(activation)
@@ -84,9 +93,15 @@ class MLP(Model):
             return np.array([((x_i - min_val) / (max_val - min_val)) for x_i in x])
 
     def get_name(self):
+        """
+        Returns a name of the current model.
+        """
         return "mlp"
 
     def get_class_name(self):
+        """
+        Returns a class name of the current model.
+        """
         return "MLP"
 
     def __init__(self, hidden_layers, activation, weights=None, game_config=None):
@@ -132,6 +147,12 @@ class MLP(Model):
                     used_weights = new_used_weights
 
     def get_new_instance(self, weights, game_config):
+        """
+        Creates a new instance of MLP model, using specified weights and game config.
+        :param weights: Weights to be used in newly created model.
+        :param game_config: Game configuration file.
+        :return: newly created instance of MLP.
+        """
         instance = MLP(self.hidden_layers, self.activation, weights, game_config)
         return instance
 

@@ -7,7 +7,15 @@ from reinforcement.reinforcement_parameters import DDPGParameters
 
 
 class LearnedDDPG(Model):
+    """
+    Represents a learned DDPG model. This is only an interface wrapper. Uses tensorflow internally.
+    """
+
     def __init__(self, logdir):
+        """
+        Initializes tensorflow DDPG model, using specified directory.
+        :param logdir: Directory to tensorflow checkpoint.
+        """
         self.metadata = None
         for file in os.listdir(logdir):
             if file.endswith(".json"):
@@ -24,6 +32,12 @@ class LearnedDDPG(Model):
         raise NotImplementedError
 
     def evaluate(self, input, current_phase):
+        """
+        Evaluates the model result, using the specified input and current game phase.
+        :param input: Input for the model.
+        :param current_phase: Current game phase.
+        :return: Action.
+        """
         action = self.ddpg.agent.play(input, None)
         action_string = ""
         for a in action:
@@ -31,7 +45,15 @@ class LearnedDDPG(Model):
         return action_string
 
     def get_name(self):
+        """
+        Returns a string representation of the current model.
+        :return: a string representation of hte current model.
+        """
         return "Learned DDPG Agent (Reinforcement Learning)"
 
     def get_class_name(self):
+        """
+        Returns a class name of the current model.
+        :return: a class name of the current model.
+        """
         return "LearnedDDPG"

@@ -12,7 +12,7 @@ class Game():
     def run(self, advanced_results=False):
         """
         Runs a whole game and returns result.
-        :return:
+        :return: Game result.
         """
         state, current_phase = self.init_process()
         while True:

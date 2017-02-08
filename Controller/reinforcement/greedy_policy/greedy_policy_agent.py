@@ -6,7 +6,19 @@ import tensorflow as tf
 
 
 class GreedyPolicyAgent():
+    """
+    Greedy-policy reinforcemnet learning agent.
+    """
+
     def __init__(self, reinfoce_params, q_network, state_size, logdir, threads):
+        """
+        Initializes a new agent.
+        :param reinfoce_params: GreedyPolicyPrameters.
+        :param q_network: Q-network to be used.
+        :param state_size: Size of the environment state.
+        :param logdir: Logdir where to store logs.
+        :param threads: Number of threads to use (in tensorflow).
+        """
         self.batch_size = reinfoce_params.batch_size
         batch_size = self.batch_size
         self.gamma = reinfoce_params.gamma
@@ -16,9 +28,11 @@ class GreedyPolicyAgent():
         self.logdir = logdir
         self.saver = None
 
-        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
-                                                     intra_op_parallelism_threads=threads,
-                                                     allow_soft_placement=True))
+        graph = tf.Graph()
+        graph.seed = np.random.randint(low=0, high=2 ** 16)
+        self.sess = tf.Session(graph=graph, config=tf.ConfigProto(inter_op_parallelism_threads=threads,
+                                                                  intra_op_parallelism_threads=threads,
+                                                                  allow_soft_placement=True))
         with tf.device('/cpu:0'):
             with tf.variable_scope('agent') as scope:
                 self.state = tf.placeholder(shape=[None, state_size], dtype=tf.float32, name="state")

@@ -6,10 +6,18 @@ import concurrent.futures
 
 
 class DifferentialEvolution(Evolution):
+    """
+    Provides a differential evolution functions.
+    """
+
     def __init__(self, game, evolution_params, model, max_workers, logs_every=50):
         super(DifferentialEvolution, self).__init__(game, evolution_params, model, max_workers, logs_every)
 
     def deap_toolbox_init(self):
+        """
+        Initializes toolbox from DEAP library.
+        :return: An initialized toolbox.
+        """
         self.individual_len = self.model.get_number_of_parameters(self.current_game)
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -30,7 +38,7 @@ class DifferentialEvolution(Evolution):
 
     def run(self, file_name=None):
         """
-        Starts simple evolutionary algorithm.
+        Starts differential evolution.
         :param file_name: Previously saved population file.
         """
         start_time = time.time()

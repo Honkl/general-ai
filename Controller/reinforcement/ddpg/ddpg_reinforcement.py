@@ -14,7 +14,17 @@ gc.enable()
 
 
 class DDPGReinforcement():
+    """
+    Represents a DDPG model.
+    """
+
     def __init__(self, game, parameters, logs_every=10):
+        """
+        Initializes a new DDPG model using specified parameters.
+        :param game: Game that will be played.
+        :param parameters: Parameters of the model. (DDPGParameters)
+        :param logs_every: At each n-th episode model will be saved.
+        """
         self.game = game
         self.episodes = parameters.episodes
         self.batch_size = parameters.batch_size
@@ -31,6 +41,10 @@ class DDPGReinforcement():
         self.agent = DDPGAgent(self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
 
     def init_directories(self):
+        """
+        Initializes a directories for log files.
+        :return: Current logdir.
+        """
         self.dir = constants.loc + "/logs/" + self.game + "/deep_deterministic_gradient_policy"
         # create name for directory to store logs
         current = time.localtime()
@@ -46,6 +60,9 @@ class DDPGReinforcement():
         return logdir
 
     def log_metadata(self):
+        """
+        Saves model metadata into a logdir.
+        """
         with open(os.path.join(self.logdir, "metadata.json"), "w") as f:
             data = {}
             data["model_name"] = "reinforcement_learning_ddpg"
@@ -55,11 +72,15 @@ class DDPGReinforcement():
             f.write(json.dumps(data))
 
     def run(self):
+        """
+        Starts an evaluation of DDPG model.
+        """
         self.log_metadata()
 
         with tf.device('/cpu:0'):
             max_score = 0
             start = time.time()
+            data = []
             for episode in range(self.episodes):
 
                 self.env = Environment(discrete=False,
@@ -70,11 +91,9 @@ class DDPGReinforcement():
 
                 for step in range(100000):
                     action = self.agent.play(self.env.state, episode)
-                    print(action)
                     next_state, reward, done, score = self.env.step(action)
                     score = score[0]
                     self.agent.perceive(self.env.state, action, reward, next_state, done)
-                    state = next_state
                     if done:
                         break
 
@@ -85,6 +104,8 @@ class DDPGReinforcement():
                 if episode % self.logs_every == 0:
                     checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
                     self.agent.saver.save(self.agent.sess, checkpoint_path)
+                    with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
+                        f.writelines(data)
 
                 now = time.time()
                 t = now - start
@@ -92,11 +113,18 @@ class DDPGReinforcement():
                 m = (t % 3600) // 60
                 s = t - (h * 3600) - (m * 60)
                 elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
-                print("Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
-                                                                                   elapsed_time))
+                line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
+                                                                                    elapsed_time)
+                print(line)
+                data.append(line + "\n")
+
             self.env.close()
 
     def load_checkpoint(self, checkpoint):
+        """
+        Loads tensorflow checkpoint.
+        :param checkpoint: Checkpoint to be loaded.
+        """
         saver = tf.train.Saver(tf.all_variables())
         ckpt = tf.train.get_checkpoint_state(checkpoint)
         if ckpt and ckpt.model_checkpoint_path:

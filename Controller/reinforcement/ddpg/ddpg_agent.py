@@ -13,14 +13,16 @@ from reinforcement.ddpg.replay_buffer import ReplayBuffer
 
 # Hyper Parameters:
 
-REPLAY_BUFFER_SIZE = 1000000
+REPLAY_BUFFER_SIZE = 10000
 REPLAY_START_SIZE = 500
 GAMMA = 0.99
-LEARN_EVERY = 100
+LEARN_EVERY = 1
 
 
 class DDPGAgent():
-    """docstring for DDPG"""
+    """
+    DDPG Agent.
+    """
 
     def __init__(self, batch_size, state_size, actions_count, logdir):
         self.name = 'DDPG'  # name for uploading results
@@ -31,23 +33,25 @@ class DDPGAgent():
         self.batch_size = batch_size
         self.total_steps = 0
 
-        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
-                                                     intra_op_parallelism_threads=8,
-                                                     allow_soft_placement=True))
+        graph = tf.Graph()
+        graph.seed = np.random.randint(low=0, high=2 ** 16)
+        self.sess = tf.Session(graph=graph, config=tf.ConfigProto(inter_op_parallelism_threads=8,
+                                                                  intra_op_parallelism_threads=8,
+                                                                  allow_soft_placement=True))
+        with self.sess.graph.as_default():
+            self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim)
+            self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim)
 
-        self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim)
-        self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim)
+            # initialize replay buffer
+            self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
 
-        # initialize replay buffer
-        self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
+            # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
+            self.exploration_noise = OUNoise(self.action_dim)
 
-        # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
-        self.exploration_noise = OUNoise(self.action_dim)
-
-        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=None)
-        self.summary_writer = tf.summary.FileWriter(logdir,
-                                                    graph=self.sess.graph,
-                                                    flush_secs=10)
+            self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=None)
+            self.summary_writer = tf.summary.FileWriter(logdir,
+                                                        graph=self.sess.graph,
+                                                        flush_secs=10)
 
     def train(self):
         # print "train step",self.time_step
@@ -101,13 +105,13 @@ class DDPGAgent():
 
         # Store transitions to replay start size then start training
         if self.replay_buffer.count() > REPLAY_START_SIZE:
+            self.total_steps += 1
             if self.total_steps % LEARN_EVERY == 0:
                 self.train()
-                self.total_steps += 1
 
-            # if self.time_step % 10000 == 0:
-            # self.actor_network.save_network(self.time_step)
-            # self.critic_network.save_network(self.time_step)
+                # if self.time_step % 10000 == 0:
+                # self.actor_network.save_network(self.time_step)
+                # self.critic_network.save_network(self.time_step)
 
         # Re-iniitialize the random process when an episode ends
         if done:

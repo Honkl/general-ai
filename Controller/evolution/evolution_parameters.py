@@ -1,4 +1,8 @@
 class EvolutionParameters():
+    """
+    Interface for evolution parameters encapsulation.
+    """
+
     def to_dictionary(self):
         raise NotImplementedError
 
@@ -13,6 +17,11 @@ class EvolutionaryAlgorithmParameters(EvolutionParameters):
 
     @staticmethod
     def from_dict(data):
+        """
+        Loads parameters from json data into class instance.
+        :param data: Data to be loaded.
+        :return: Instance of EvolutionaryAlgorithmParameters using specified data.
+        """
         params = EvolutionaryAlgorithmParameters(
             data["pop_size"],
             data["cxpb"],
@@ -82,6 +91,10 @@ class EvolutionaryAlgorithmParameters(EvolutionParameters):
         return self._selection
 
     def to_dictionary(self):
+        """
+        Converts current object to json-style dictionary.
+        :return: A dictionary with current object data.
+        """
         data = {}
         data["pop_size"] = self._pop_size
         data["cxpb"] = self._cxpb
@@ -95,6 +108,10 @@ class EvolutionaryAlgorithmParameters(EvolutionParameters):
         return data
 
     def to_string(self):
+        """
+        Returns a string representation of the current object.
+        :return: a string representation of the current object.
+        """
         return "pop_size: {}, xover: {}/{}, mut: {}, hof: {}, elite: {}, sel: {}".format(self.pop_size, self.cxpb,
                                                                                          self.cxindpb,
                                                                                          self.mut, self.hof_size,
@@ -108,6 +125,11 @@ class EvolutionStrategyParameters(EvolutionParameters):
 
     @staticmethod
     def from_dict(data):
+        """
+        Loads parameters from json data into class instance.
+        :param data: Data to be loaded.
+        :return: Instance of EvolutionStrategyParameters using specified data.
+        """
         params = EvolutionStrategyParameters(
             data["pop_size"],
             data["ngen"],
@@ -156,6 +178,10 @@ class EvolutionStrategyParameters(EvolutionParameters):
         return self._sigma
 
     def to_dictionary(self):
+        """
+        Converts current object to json-style dictionary.
+        :return: A dictionary with current object data.
+        """
         data = {}
         data["pop_size"] = self._pop_size
         data["ngen"] = self._ngen
@@ -165,6 +191,10 @@ class EvolutionStrategyParameters(EvolutionParameters):
         return data
 
     def to_string(self):
+        """
+        Returns a string representation of the current object.
+        :return: a string representation of the current object.
+        """
         return "Evolution Strategy - pop_size: {}, hof: {}, elite: {}, sigma: {}".format(self.pop_size, self.hof_size,
                                                                                          self.elite, self.sigma)
 
@@ -176,6 +206,11 @@ class DifferentialEvolutionParameters(EvolutionParameters):
 
     @staticmethod
     def from_dict(data):
+        """
+        Loads parameters from json data into class instance.
+        :param data: Data to be loaded.
+        :return: Instance of DifferentialEvolutionParameters using specified data.
+        """
         params = DifferentialEvolutionParameters(
             data["pop_size"],
             data["ngen"],
@@ -224,6 +259,10 @@ class DifferentialEvolutionParameters(EvolutionParameters):
         return self._f
 
     def to_dictionary(self):
+        """
+        Converts current object to json-style dictionary.
+        :return: A dictionary with current object data.
+        """
         data = {}
         data["pop_size"] = self._pop_size
         data["ngen"] = self._ngen
@@ -234,6 +273,10 @@ class DifferentialEvolutionParameters(EvolutionParameters):
         return data
 
     def to_string(self):
+        """
+        Returns a string representation of the current object.
+        :return: a string representation of the current object.
+        """
         return "Differential Evolution - pop_size: {}, hof: {}, cr: {}, f: {}".format(self.pop_size,
                                                                                       self.hof_size,
                                                                                       self.cr,

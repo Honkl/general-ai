@@ -5,7 +5,23 @@ import json
 
 
 class Mario(Game):
+    """
+    Represents a single Mario game.
+    """
+
     def __init__(self, model, game_batch_size, seed, level=None, vis_on=False, use_visualization_tool=False):
+        """
+        Initializes a new instance of Mario game.
+        :param model: Model which will be playing this game.
+        :param game_batch_size: Number of games that will be played immediately (one after one) within the single game
+        instance. Result is averaged.
+        :param seed: A random seed for random generator within the game.
+        :param level: Level for mario game. Can be 'gombas' or 'spikes' for example; this is used in combination with
+        use_visualization_tool set to true.
+        :param vis_on: Determines whether the Mario will has a visual output. Used in combination with
+        use_visualization_tool set to true.
+        :param use_visualization_tool: Determines whether use specific visualization tool. Starts different subprocess.
+        """
         super(Mario, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
@@ -33,6 +49,10 @@ class Mario(Game):
         return data["state"], data["current_phase"]
 
     def get_process_data(self):
+        """
+        Gets a subprocess next data (line).
+        :return: a subprocess next data (line).
+        """
         line = " "
 
         # Skip non-json file outputs from mario

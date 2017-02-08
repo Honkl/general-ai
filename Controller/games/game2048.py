@@ -7,7 +7,19 @@ import time
 
 
 class Game2048(Game):
+    """
+    Represents a single 2048 game.
+    """
+
     def __init__(self, model, game_batch_size, seed, use_advanced_tool=False):
+        """
+        Initializes a new instance of 2048 game.
+        :param model: Model which will be playing this game.
+        :param game_batch_size: Number of games that will be played immediately (one after one) within the single game
+        instance. Result is averaged.
+        :param seed: A random seed for random generator within the game.
+        :param use_advanced_tool: True if some advanced results are wanted (using different process).
+        """
         super(Game2048, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
@@ -31,6 +43,10 @@ class Game2048(Game):
         return data["state"], data["current_phase"]
 
     def get_process_data(self):
+        """
+        Gets a subprocess next data (line).
+        :return: a subprocess next data (line).
+        """
         line = self.process.stdout.readline().decode('ascii')
         return json.loads(line)
 
