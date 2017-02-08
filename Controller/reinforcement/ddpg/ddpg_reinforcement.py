@@ -116,7 +116,7 @@ class DDPGReinforcement():
                 line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
                                                                                     elapsed_time)
                 print(line)
-                data.append(line + "\n")
+                data.append(line + os.linesep)
 
             self.env.close()
 
