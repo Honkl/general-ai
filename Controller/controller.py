@@ -49,7 +49,7 @@ rl_params = GreedyPolicyParameters(
     rand_action_prob=0.9)
 
 ddpg_params = DDPGParameters(
-    batch_size=1000,
+    batch_size=500,
     episodes=100000)
 
 de_params = DifferentialEvolutionParameters(
@@ -91,7 +91,7 @@ def run_de():
 
 
 if __name__ == '__main__':
-    # run_reinforcement()
+    run_reinforcement()
     # run_es()
-    run_eva()
+    # run_eva()
     # run_de()
