@@ -1,6 +1,7 @@
 from games.game import Game
 import subprocess
 from constants import *
+import platform
 import json
 
 
@@ -26,7 +27,12 @@ class Alhambra(Game):
         """
         Initializes a subprocess with the game and returns first state of the game.
         """
-        command = "{} {} {}".format(ALHAMBRA, str(self.seed), str(self.game_batch_size))
+        windows = platform.system() == "Windows"
+        params = [ALHAMBRA, str(self.seed), str(self.game_batch_size)]
+        if windows:
+            command = "{} {} {}".format(*params)
+        else:
+            command = ["mono"] + params
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...
 

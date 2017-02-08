@@ -13,8 +13,8 @@ from reinforcement.ddpg.replay_buffer import ReplayBuffer
 
 # Hyper Parameters:
 
-REPLAY_BUFFER_SIZE = 10000
-REPLAY_START_SIZE = 500
+REPLAY_BUFFER_SIZE = 100000
+REPLAY_START_SIZE = 1000
 GAMMA = 0.99
 LEARN_EVERY = 1
 
@@ -33,11 +33,9 @@ class DDPGAgent():
         self.batch_size = batch_size
         self.total_steps = 0
 
-        graph = tf.Graph()
-        graph.seed = np.random.randint(low=0, high=2 ** 16)
-        self.sess = tf.Session(graph=graph, config=tf.ConfigProto(inter_op_parallelism_threads=8,
-                                                                  intra_op_parallelism_threads=8,
-                                                                  allow_soft_placement=True))
+        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
+                                                     intra_op_parallelism_threads=8,
+                                                     allow_soft_placement=True))
         with self.sess.graph.as_default():
             self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim)
             self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim)
@@ -113,6 +111,6 @@ class DDPGAgent():
                 # self.actor_network.save_network(self.time_step)
                 # self.critic_network.save_network(self.time_step)
 
-        # Re-iniitialize the random process when an episode ends
+        # Re-initialize the random process when an episode ends
         if done:
             self.exploration_noise.reset()

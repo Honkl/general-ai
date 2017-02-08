@@ -2,6 +2,7 @@ from games.game import Game
 from constants import *
 import json
 import subprocess
+import platform
 import socket
 import time
 
@@ -31,10 +32,19 @@ class Game2048(Game):
         """
         Initializes a subprocess with the game and returns first state of the game.
         """
+        windows = platform.system() == "Windows"
         if self.use_advanced_tool:
-            command = "{} {} {}".format(GAME2048_ADVANCED_TOOL, str(self.seed), str(self.game_batch_size))
+            params = [GAME2048_ADVANCED_TOOL, str(self.seed), str(self.game_batch_size)]
+            if windows:
+                command = "{} {} {}".format(*params)
+            else:
+                command = ["mono"] + params
         else:
-            command = "{} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size))
+            params = [GAME2048, str(self.seed), str(self.game_batch_size)]
+            if windows:
+                command = "{} {} {}".format(*params)
+            else:
+                command = ["mono"] + params
 
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...

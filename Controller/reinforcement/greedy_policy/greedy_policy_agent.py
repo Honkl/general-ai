@@ -28,11 +28,9 @@ class GreedyPolicyAgent():
         self.logdir = logdir
         self.saver = None
 
-        graph = tf.Graph()
-        graph.seed = np.random.randint(low=0, high=2 ** 16)
-        self.sess = tf.Session(graph=graph, config=tf.ConfigProto(inter_op_parallelism_threads=threads,
-                                                                  intra_op_parallelism_threads=threads,
-                                                                  allow_soft_placement=True))
+        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
+                                                     intra_op_parallelism_threads=threads,
+                                                     allow_soft_placement=True))
         with tf.device('/cpu:0'):
             with tf.variable_scope('agent') as scope:
                 self.state = tf.placeholder(shape=[None, state_size], dtype=tf.float32, name="state")

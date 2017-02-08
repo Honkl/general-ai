@@ -23,7 +23,7 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 sea_params = EvolutionaryAlgorithmParameters(
-    pop_size=10,
+    pop_size=15,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
     ngen=1500,
@@ -49,7 +49,7 @@ rl_params = GreedyPolicyParameters(
     rand_action_prob=0.9)
 
 ddpg_params = DDPGParameters(
-    batch_size=500,
+    batch_size=1000,
     episodes=100000)
 
 de_params = DifferentialEvolutionParameters(
@@ -64,7 +64,7 @@ de_params = DifferentialEvolutionParameters(
 def run_eva():
     mlp = MLP(hidden_layers=[128, 128], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=mlp, logs_every=10,
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=mlp, logs_every=10,
                                       max_workers=5)
     evolution.run()
 
@@ -91,7 +91,7 @@ def run_de():
 
 
 if __name__ == '__main__':
-    run_reinforcement()
+    # run_reinforcement()
     # run_es()
-    # run_eva()
+    run_eva()
     # run_de()

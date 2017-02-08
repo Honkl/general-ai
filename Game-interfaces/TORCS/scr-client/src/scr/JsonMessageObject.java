@@ -31,6 +31,13 @@ public class JsonMessageObject {
         List<Double> result = new ArrayList<>();
 
         result.add(sensors.getAngleToTrackAxis());
+        
+        double trackPos = sensors.getTrackPosition();
+        if (trackPos < -1){
+            trackPos = -1;
+        } else if (trackPos > 1) {
+            trackPos = 1;
+        }
         result.add(sensors.getTrackPosition());
         result.add(Math.log(sensors.getRPM() + 1));
 
