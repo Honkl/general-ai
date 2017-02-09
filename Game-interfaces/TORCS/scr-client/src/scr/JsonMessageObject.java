@@ -31,11 +31,11 @@ public class JsonMessageObject {
         List<Double> result = new ArrayList<>();
 
         result.add(sensors.getAngleToTrackAxis());
-        
+
         double trackPos = sensors.getTrackPosition();
-        if (trackPos < -1){
+        if (trackPos == Double.NEGATIVE_INFINITY) {
             trackPos = -1;
-        } else if (trackPos > 1) {
+        } else if (trackPos > Double.POSITIVE_INFINITY) {
             trackPos = 1;
         }
         result.add(sensors.getTrackPosition());
@@ -50,7 +50,11 @@ public class JsonMessageObject {
         }
 
         for (double value : sensors.getWheelSpinVelocity()) {
-            result.add(Math.log(value + 1));
+            if (value < 0) {
+                result.add(-Math.log(Math.abs(value) + 1));
+            } else {
+                result.add(Math.log(value + 1));
+            }
         }
 
         // Debug print
