@@ -86,13 +86,13 @@ class DDPGReinforcement():
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
-
+            state = self.env.state
             for step in range(100000):
-                state = self.env.state
                 action = self.agent.play(state, episode)
                 next_state, reward, done, score = self.env.step(action)
                 score = score[0]
                 self.agent.perceive(state, action, reward, next_state, done)
+                state = next_state
                 if done:
                     break
 
