@@ -14,7 +14,7 @@ from reinforcement.ddpg.replay_buffer import ReplayBuffer
 # Hyper Parameters:
 
 REPLAY_BUFFER_SIZE = 100000
-REPLAY_START_SIZE = 500
+REPLAY_START_SIZE = 1000
 GAMMA = 0.99
 LEARN_EVERY = 1
 

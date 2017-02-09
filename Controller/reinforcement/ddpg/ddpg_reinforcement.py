@@ -77,48 +77,47 @@ class DDPGReinforcement():
         """
         self.log_metadata()
 
-        with tf.device('/cpu:0'):
-            max_score = 0
-            start = time.time()
-            data = []
-            for episode in range(self.episodes):
+        start = time.time()
+        data = []
+        for episode in range(self.episodes):
 
-                self.env = Environment(discrete=False,
-                                       game_class=self.game_class,
-                                       seed=np.random.randint(0, 2 ** 16),
-                                       observations_count=self.state_size,
-                                       actions_in_phases=self.actions_count)
+            self.env = Environment(discrete=False,
+                                   game_class=self.game_class,
+                                   seed=np.random.randint(0, 2 ** 16),
+                                   observations_count=self.state_size,
+                                   actions_in_phases=self.actions_count)
 
-                for step in range(100000):
-                    action = self.agent.play(self.env.state, episode)
-                    next_state, reward, done, score = self.env.step(action)
-                    score = score[0]
-                    self.agent.perceive(self.env.state, action, reward, next_state, done)
-                    if done:
-                        break
+            for step in range(100000):
+                state = self.env.state
+                action = self.agent.play(state, episode)
+                next_state, reward, done, score = self.env.step(action)
+                score = score[0]
+                self.agent.perceive(state, action, reward, next_state, done)
+                if done:
+                    break
 
-                report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
-                                    tf.Summary.Value(tag='number_of_steps', simple_value=step)])
-                self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
+            report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
+                                tf.Summary.Value(tag='number_of_steps', simple_value=step)])
+            self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
 
-                if episode % self.logs_every == 0:
-                    checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
-                    self.agent.saver.save(self.agent.sess, checkpoint_path)
-                    with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
-                        f.writelines(data)
+            if episode % self.logs_every == 0:
+                checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
+                self.agent.saver.save(self.agent.sess, checkpoint_path)
+                with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
+                    f.writelines(data)
 
-                now = time.time()
-                t = now - start
-                h = t // 3600
-                m = (t % 3600) // 60
-                s = t - (h * 3600) - (m * 60)
-                elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
-                line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
-                                                                                    elapsed_time)
-                print(line)
-                data.append(line + os.linesep)
+            now = time.time()
+            t = now - start
+            h = t // 3600
+            m = (t % 3600) // 60
+            s = t - (h * 3600) - (m * 60)
+            elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+            line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
+                                                                                elapsed_time)
+            print(line)
+            data.append(line + os.linesep)
 
-            self.env.close()
+        self.env.close()
 
     def load_checkpoint(self, checkpoint):
         """

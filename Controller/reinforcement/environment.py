@@ -18,7 +18,7 @@ class Environment(gym.Env):
             self.observation_space = spaces.Discrete(n=observations_count)
             self.action_space = spaces.Discrete(n=actions_total)
         else:
-            self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(observations_count,))
+            self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
             self.action_space = spaces.Box(low=-1, high=1, shape=(actions_total,))
 
         self._seed(seed)
@@ -79,4 +79,5 @@ class Environment(gym.Env):
         self.shut_down()
 
     def shut_down(self):
-        self.game_instance.finalize()
+        if self.game_instance:
+            self.game_instance.finalize()
