@@ -126,7 +126,7 @@ public class GeneralAIDriver extends Controller {
             act.restartRace = false;
 
             lastSensor = sensors;
-            if (lastSensor.getCurrentLapTime() != 0) {
+            if (lastSensor.getDamage() == 0) {
                 score = lastSensor.getDistanceRaced();
             }
 
@@ -153,7 +153,8 @@ public class GeneralAIDriver extends Controller {
      */
     private double getSteer(double outputFromAi) {
         // Steer must be in [-1, 1] interval
-        return (2 * outputFromAi) - 1;
+        double steer = (2 * outputFromAi) - 1;
+        return steer;
     }
 
     /**
