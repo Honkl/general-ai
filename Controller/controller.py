@@ -23,10 +23,10 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 sea_params = EvolutionaryAlgorithmParameters(
-    pop_size=15,
+    pop_size=10,
     cxpb=0.75,
     mut=("uniform", 0.1, 0.1),
-    ngen=1500,
+    ngen=2000,
     game_batch_size=1,
     cxindpb=0.2,
     hof_size=0,
@@ -42,8 +42,8 @@ es_params = EvolutionStrategyParameters(
     sigma=1.0)
 
 rl_params = GreedyPolicyParameters(
-    batch_size=1,
-    episodes=10000,
+    batch_size=500,
+    episodes=100000,
     gamma=0.7,
     optimizer="adam",
     rand_action_prob=0.9)
@@ -64,16 +64,16 @@ de_params = DifferentialEvolutionParameters(
 def run_eva():
     mlp = MLP(hidden_layers=[128, 128], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=sea_params, model=mlp, logs_every=10,
+    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=sea_params, model=mlp, logs_every=10,
                                       max_workers=5)
     evolution.run()
 
 
 def run_reinforcement():
-    # q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=0.5)
+    q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=0.5)
     # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
-    # RL = GreedyPolicyReinforcement(game="torcs", parameters=rl_params, q_network=q_net, threads=10)
-    RL = DDPGReinforcement(game="2048", parameters=ddpg_params, logs_every=100)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=rl_params, q_network=q_net, threads=10, logs_every=100)
+    # RL = DDPGReinforcement(game="2048", parameters=ddpg_params, logs_every=100)
     RL.run()
 
 

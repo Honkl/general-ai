@@ -5,7 +5,7 @@ from gym.utils import seeding
 
 
 class Environment(gym.Env):
-    def __init__(self, discrete, game_class, seed, observations_count, actions_in_phases):
+    def __init__(self, game_class, seed, observations_count, actions_in_phases):
         self.game_class = game_class
         self.game_instance = None
         self.state = None
@@ -14,12 +14,8 @@ class Environment(gym.Env):
         self.done = False
 
         actions_total = sum(actions_in_phases)
-        if discrete:
-            self.observation_space = spaces.Discrete(n=observations_count)
-            self.action_space = spaces.Discrete(n=actions_total)
-        else:
-            self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
-            self.action_space = spaces.Box(low=-1, high=1, shape=(actions_total,))
+        self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
+        self.action_space = spaces.Box(low=-1, high=1, shape=(actions_total,))
 
         self._seed(seed)
         self.reset()

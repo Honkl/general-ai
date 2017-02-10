@@ -13,11 +13,12 @@ from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 
 
 class GreedyPolicyReinforcement():
-    def __init__(self, game, parameters, q_network, threads=8):
+    def __init__(self, game, parameters, q_network, threads=8, logs_every=10):
         self.game = game
         self.reinforce_params = parameters
         self.q_network = q_network
         self.threads = threads
+        self.logs_every = logs_every
 
         self.game_config = utils.miscellaneous.get_game_config(game)
         self.game_class = utils.miscellaneous.get_game_class(game)
@@ -66,12 +67,12 @@ class GreedyPolicyReinforcement():
         states = []
         rewards = []
         estimated_rewards = []
+        data = []
 
         # One epoch = One episode = One game played
         for i_episode in range(1, episodes + 1):
 
-            self.env = Environment(discrete=True,
-                                   game_class=self.game_class,
+            self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
@@ -91,10 +92,11 @@ class GreedyPolicyReinforcement():
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
-                _, reward, done, score = self.env.step(selected_action)
+                old_state = self.env.state
+                new_state, reward, done, score = self.env.step(selected_action)
                 epoch_reward += reward
 
-                states.append(self.env.state)
+                states.append(old_state)
                 rewards.append(reward)
                 estimated_rewards.append(estimated_reward)
 
@@ -120,9 +122,13 @@ class GreedyPolicyReinforcement():
                                 tf.Summary.Value(tag='number_of_steps', simple_value=game_steps)])
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
 
-            if epoch_score >= max_score:
-                checkpoint_path = os.path.join(self.logdir, "q-net-model.ckpt")
+            if i_episode % self.logs_every == 0:
+                checkpoint_path = os.path.join(self.logdir, "greedy_policy.ckpt")
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
+                with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
+                    for line in data:
+                        f.write(line)
+                        f.write('\n')
 
             now = time.time()
             t = now - start
@@ -130,9 +136,12 @@ class GreedyPolicyReinforcement():
             m = (t % 3600) // 60
             s = t - (h * 3600) - (m * 60)
             elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
-            print("Episode: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
-                                                                               "{0:.2f}".format(epoch_loss),
-                                                                               elapsed_time))
+            line = "Episode: {}/{}, Score: {}, Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
+                                                                                "{0:.2f}".format(epoch_loss),
+                                                                                elapsed_time)
+            print(line)
+            data.append(line)
+
         self.env.shut_down()
 
     def load_checkpoint(self, checkpoint):

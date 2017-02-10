@@ -81,8 +81,7 @@ class DDPGReinforcement():
         data = []
         for episode in range(self.episodes):
 
-            self.env = Environment(discrete=False,
-                                   game_class=self.game_class,
+            self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
@@ -104,7 +103,9 @@ class DDPGReinforcement():
                 checkpoint_path = os.path.join(self.logdir, "ddpg.ckpt")
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
                 with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
-                    f.writelines(data)
+                    for line in data:
+                        f.write(line)
+                        f.write('\n')
 
             now = time.time()
             t = now - start
@@ -115,7 +116,7 @@ class DDPGReinforcement():
             line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
                                                                                 elapsed_time)
             print(line)
-            data.append(line + os.linesep)
+            data.append(line)
 
         self.env.close()
 
