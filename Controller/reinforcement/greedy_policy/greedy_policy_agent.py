@@ -1,8 +1,8 @@
 import numpy as np
-import gym
-from gym import spaces
-from gym.utils import seeding
 import tensorflow as tf
+from reinforcement.greedy_policy.replay_buffer import ReplayBuffer
+
+REPLAY_BUFFER_SIZE = 100000
 
 
 class GreedyPolicyAgent():
@@ -13,7 +13,7 @@ class GreedyPolicyAgent():
     def __init__(self, reinfoce_params, q_network, state_size, logdir, threads):
         """
         Initializes a new agent.
-        :param reinfoce_params: GreedyPolicyPrameters.
+        :param reinfoce_params: GreedyPolicyParameters.
         :param q_network: Q-network to be used.
         :param state_size: Size of the environment state.
         :param logdir: Logdir where to store logs.
@@ -27,11 +27,12 @@ class GreedyPolicyAgent():
         self.q_network = q_network
         self.logdir = logdir
         self.saver = None
+        self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
 
         self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
                                                      intra_op_parallelism_threads=threads,
                                                      allow_soft_placement=True))
-        with tf.device('/cpu:0'):
+        with tf.device('/gpu:0'):
             with tf.variable_scope('agent') as scope:
                 self.state = tf.placeholder(shape=[None, state_size], dtype=tf.float32, name="state")
 
@@ -94,10 +95,22 @@ class GreedyPolicyAgent():
         return self.q_network.forward_pass(state)
 
     # def learn(self, env_states, last_action, last_reward, last_estimated_reward):
-    def learn(self, states, rewards, estimated_rewards):
-        _, loss = self.sess.run([self.training, self.loss],
-                                {self.new_state: np.array(states).reshape(self.batch_size, self.state_size),
-                                 self.last_reward: np.array(rewards),
-                                 self.state: np.array(states).reshape(self.batch_size, self.state_size),
-                                 self.last_estimated_reward: np.array(estimated_rewards).reshape(self.batch_size)})
+    def learn(self, old_state, new_state, reward, estimated_reward):
+        self.replay_buffer.add(old_state, new_state, reward, estimated_reward)
+        loss = None
+        if (self.replay_buffer.count() >= self.batch_size):
+            minibatch = self.replay_buffer.get_batch(self.batch_size)
+
+            old_state_batch = np.asarray([data[0] for data in minibatch])
+            new_state_batch = np.asarray([data[1] for data in minibatch])
+            reward_batch = np.asarray([data[2] for data in minibatch])
+            estimated_reward_batch = np.asarray([data[3] for data in minibatch])
+
+            _, loss = self.sess.run([self.training, self.loss],
+                                    {self.new_state: np.array(new_state_batch).reshape(self.batch_size,
+                                                                                       self.state_size),
+                                     self.last_reward: np.array(reward_batch),
+                                     self.state: np.array(old_state_batch).reshape(self.batch_size, self.state_size),
+                                     self.last_estimated_reward: np.array(estimated_reward_batch).reshape(
+                                         self.batch_size)})
         return loss

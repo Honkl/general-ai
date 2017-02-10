@@ -59,14 +59,8 @@ class GreedyPolicyReinforcement():
     def run(self):
         self.log_metadata()
         episodes = self.reinforce_params.episodes
-        max_score = 0.0
 
         start = time.time()
-        last = 0
-
-        states = []
-        rewards = []
-        estimated_rewards = []
         data = []
 
         # One epoch = One episode = One game played
@@ -88,24 +82,18 @@ class GreedyPolicyReinforcement():
             while game_steps < STEP_LIMIT:
                 game_steps += 1
 
+                old_state = self.env.state
                 selected_action, estimated_reward = self.agent.play(self.env.state, i_episode)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
-                old_state = self.env.state
                 new_state, reward, done, score = self.env.step(selected_action)
                 epoch_reward += reward
 
-                states.append(old_state)
-                rewards.append(reward)
-                estimated_rewards.append(estimated_reward)
-
-                if len(states) == self.reinforce_params.batch_size:
-                    epoch_loss += self.agent.learn(states, rewards, estimated_rewards)
-                    states = []
-                    rewards = []
-                    estimated_rewards = []
-                    scores = []
+                loss = self.agent.learn(old_state, new_state, reward, estimated_reward)
+                if loss:
+                    # Waiting until we'll get enough experiences in replay buffer
+                    epoch_loss += loss
 
                 if done:
                     epoch_score = score[0]
