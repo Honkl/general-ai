@@ -125,7 +125,7 @@ class GreedyPolicyReinforcement():
             s = t - (h * 3600) - (m * 60)
             elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
             line = "Episode: {}/{}, Score: {}, Avg Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
-                                                                                "{0:.2f}".format(epoch_loss / game_steps),
+                                                                                "{0:.5f}".format(epoch_loss / game_steps),
                                                                                 elapsed_time)
             print(line)
             data.append(line)

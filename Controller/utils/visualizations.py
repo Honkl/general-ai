@@ -149,12 +149,13 @@ if __name__ == '__main__':
 
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
-    file_name = "../../Controller/logs/torcs/mlp/logs_2017-02-07_21-49-43/best/best_1.json"
+    # file_name = "../../Controller/logs/torcs/mlp/logs_2017-02-07_21-49-43/best/best_1.json"
     # file_name = "../../Experiments/MLP+differential_evolution/mario/logs_2017-02-04_00-30-52/last/last_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
     # file_name = "../../Experiments/ESN+evolution_algorithm/torcs/logs_2017-02-01_01-13-38/best/best_0.json"
+    file_name = "../../Controller/logs/torcs/mlp/logs_2017-02-10_12-31-44/best/best_0.json"
     # file_name = "../../Experiments/MLP+differential_evolution/alhambra/logs_2017-01-23_03-20-57/last/last_0.json"
-    logdir = "../../Controller/logs/2048/deep_deterministic_gradient_policy/logs_2017-02-07_15-14-52"
+    # logdir = "../../Controller/logs/2048/deep_deterministic_gradient_policy/logs_2017-02-07_15-14-52"
 
 
     # esn = EchoState.load_from_file(file_name, game)

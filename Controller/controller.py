@@ -51,7 +51,7 @@ def run_greedy():
         epsilon=0.01)
 
     q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="torcs", parameters=greedy_policy_params, q_network=q_net, threads=10,
+    RL = GreedyPolicyReinforcement(game="mario", parameters=greedy_policy_params, q_network=q_net, threads=10,
                                    logs_every=100)
     # RL = DDPGReinforcement(game="2048", parameters=ddpg_params, logs_every=100)
     RL.run()
