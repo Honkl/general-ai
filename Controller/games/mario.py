@@ -40,15 +40,15 @@ class Mario(Game):
         """
         windows = platform.system() == "Windows"
         if self.use_visualization_tool:
-            params = [MARIO_VISUALISATION, str(self.game_batch_size), str(self.level), str(self.vis_on)]
+            params = ["java -cp", MARIO_VISUALISATION, str(self.game_batch_size), str(self.level), str(self.vis_on)]
             if windows:
-                command = "{} {} {} {}".format(*params)
+                command = "{} {} {} {} {}".format(*params)
             else:
                 command = params
         else:
-            params = [MARIO, str(self.seed), str(self.game_batch_size)]
+            params = ["java -cp", MARIO, str(self.seed), str(self.game_batch_size)]
             if windows:
-                command = "{} {} {}".format(*params)
+                command = "{} {} {} {}".format(*params)
             else:
                 command = params
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

@@ -7,8 +7,8 @@ prefix = os.path.dirname(os.path.dirname(loc)) + "/"  # cut two last directories
 
 delimiter = ";" if (platform.system() == "Windows") else ":"
 
-MARIO = "java -cp \"" + prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.GeneralAgent"
-MARIO_VISUALISATION = "java -cp \"" + prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.VisualizationTool"
+MARIO = " \"" + prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.GeneralAgent"
+MARIO_VISUALISATION = " \"" + prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*\" mario.VisualizationTool"
 
 GAME2048 = prefix + "2048/2048/bin/Release/2048.exe"
 GAME2048_ADVANCED_TOOL = prefix + "2048/Visualization/bin/Release/Visualization.exe"
