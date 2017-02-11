@@ -2,6 +2,7 @@ from games.game import Game
 import subprocess
 from constants import *
 import json
+import platform
 
 
 class Mario(Game):
@@ -37,11 +38,19 @@ class Mario(Game):
         """
         Initializes a subprocess with the game and returns first state of the game.
         """
+        windows = platform.system() == "Windows"
         if self.use_visualization_tool:
-            command = "{} {} {} {}".format(MARIO_VISUALISATION, str(self.game_batch_size), str(self.level),
-                                           str(self.vis_on))
+            params = [MARIO_VISUALISATION, str(self.game_batch_size), str(self.level), str(self.vis_on)]
+            if windows:
+                command = "{} {} {} {}".format(*params)
+            else:
+                command = params
         else:
-            command = "{} {} {}".format(MARIO, str(self.seed), str(self.game_batch_size))
+            params = [MARIO, str(self.seed), str(self.game_batch_size)]
+            if windows:
+                command = "{} {} {}".format(*params)
+            else:
+                command = params
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         bufsize=-1)  # Using PIPEs is not the best solution...
 
