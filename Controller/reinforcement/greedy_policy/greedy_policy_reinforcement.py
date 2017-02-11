@@ -7,7 +7,6 @@ import tensorflow as tf
 
 import constants
 import utils.miscellaneous
-from reinforcement.ddpg.ddpg_agent import DDPGAgent
 from reinforcement.environment import Environment
 from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 
@@ -30,7 +29,7 @@ class GreedyPolicyReinforcement():
         self.logdir = self.init_directories()
 
         q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
-        self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.logdir, threads)
+        self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.actions_count_sum, self.logdir, threads)
 
     def init_directories(self):
         self.dir = constants.loc + "/logs/" + self.game + "/greedy_policy"
@@ -83,14 +82,15 @@ class GreedyPolicyReinforcement():
                 game_steps += 1
 
                 old_state = self.env.state
-                selected_action, estimated_reward = self.agent.play(self.env.state, i_episode)
+                selected_action, estimated_reward = self.agent.play(self.env.state)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
                 new_state, reward, done, score = self.env.step(selected_action)
                 epoch_reward += reward
 
-                loss = self.agent.learn(old_state, new_state, reward, estimated_reward)
+                loss = self.agent.learn(old_state, selected_action, reward, new_state, done)
+
                 if loss:
                     # Waiting until we'll get enough experiences in replay buffer
                     epoch_loss += loss

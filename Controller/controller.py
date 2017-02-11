@@ -41,12 +41,12 @@ es_params = EvolutionStrategyParameters(
     elite=2,
     sigma=1.0)
 
-rl_params = GreedyPolicyParameters(
-    batch_size=500,
+greedy_policy_params = GreedyPolicyParameters(
+    batch_size=100,
     episodes=100000,
     gamma=0.7,
     optimizer="adam",
-    rand_action_prob=0.9)
+    epsilon=0.01)
 
 ddpg_params = DDPGParameters(
     batch_size=500,
@@ -70,9 +70,9 @@ def run_eva():
 
 
 def run_reinforcement():
-    q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=0.5)
+    q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=0.5)
     # q_net = QNetworkRnn(rnn_cell_type="lstm", num_units=256)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=rl_params, q_network=q_net, threads=10, logs_every=100)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, threads=10, logs_every=100)
     # RL = DDPGReinforcement(game="2048", parameters=ddpg_params, logs_every=100)
     RL.run()
 
