@@ -44,7 +44,7 @@ es_params = EvolutionStrategyParameters(
 greedy_policy_params = GreedyPolicyParameters(
     batch_size=100,
     episodes=100000,
-    gamma=0.7,
+    gamma=0.9,
     optimizer="adam",
     epsilon=0.01)
 
