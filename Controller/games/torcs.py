@@ -90,8 +90,7 @@ class Torcs(Game):
                 params = [TORCS_SH, xml, TORCS_JAVA_CP, port, torcs_install_dir]
                 command = ["sh"] + params
 
-        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        bufsize=-1)  # Using PIPEs is not the best solution...
+        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=-1)
 
         data = self.get_process_data()
         return data["state"], data["current_phase"]

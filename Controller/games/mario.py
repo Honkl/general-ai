@@ -40,19 +40,19 @@ class Mario(Game):
         """
         windows = platform.system() == "Windows"
         if self.use_visualization_tool:
-            params = ["java -cp", MARIO_VISUALISATION, str(self.game_batch_size), str(self.level), str(self.vis_on)]
+            params = ["java", "-cp", MARIO_VISUALISATION, str(self.game_batch_size), str(self.level), str(self.vis_on)]
+            if windows:
+                command = "{} {} {} {} {} {}".format(*params)
+            else:
+                command = params
+        else:
+            params = ["java", "-cp", MARIO, str(self.seed), str(self.game_batch_size)]
             if windows:
                 command = "{} {} {} {} {}".format(*params)
             else:
                 command = params
-        else:
-            params = ["java -cp", MARIO, str(self.seed), str(self.game_batch_size)]
-            if windows:
-                command = "{} {} {} {}".format(*params)
-            else:
-                command = params
-        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        bufsize=-1)  # Using PIPEs is not the best solution...
+
+        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=-1)
 
         data = self.get_process_data()
         return data["state"], data["current_phase"]
