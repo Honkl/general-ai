@@ -26,6 +26,7 @@ class DDPGReinforcement():
         :param logs_every: At each n-th episode model will be saved.
         """
         self.game = game
+        self.parameters = parameters
         self.episodes = parameters.episodes
         self.batch_size = parameters.batch_size
         self.game_config = utils.miscellaneous.get_game_config(game)
@@ -67,8 +68,7 @@ class DDPGReinforcement():
             data = {}
             data["model_name"] = "reinforcement_learning_ddpg"
             data["game"] = self.game
-            data["batch_size"] = self.batch_size
-            data["episodes"] = self.episodes
+            data["parameters"] = self.parameters.to_dictionary()
             f.write(json.dumps(data))
 
     def run(self):

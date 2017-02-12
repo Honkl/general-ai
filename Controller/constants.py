@@ -7,7 +7,7 @@ prefix = os.path.dirname(os.path.dirname(loc)) + "/"  # cut two last directories
 
 delimiter = ";" if (platform.system() == "Windows") else ":"
 
-MARIO_CP = " \"" + prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*\""
+MARIO_CP = prefix + "MarioAI/MarioAI4J/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/bin" + delimiter + prefix + "MarioAI/MarioAI4J-Playground/lib/*"
 MARIO_CLASS = "mario.GeneralAgent"
 MARIO_VISUALISATION_CLASS = "mario.VisualizationTool"
 
