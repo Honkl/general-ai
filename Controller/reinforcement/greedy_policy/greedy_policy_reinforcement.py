@@ -10,6 +10,7 @@ import utils.miscellaneous
 from reinforcement.environment import Environment
 from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 
+CHECKPOINT_NAME = "greedy_policy.ckpt"
 
 class GreedyPolicyReinforcement():
     def __init__(self, game, parameters, q_network, threads=8, logs_every=10):
@@ -111,7 +112,7 @@ class GreedyPolicyReinforcement():
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
 
             if i_episode % self.logs_every == 0:
-                checkpoint_path = os.path.join(self.logdir, "greedy_policy.ckpt")
+                checkpoint_path = os.path.join(self.logdir, CHECKPOINT_NAME)
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
                 with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
                     for line in data:
@@ -137,7 +138,7 @@ class GreedyPolicyReinforcement():
         saver = tf.train.Saver(tf.all_variables())
         ckpt = tf.train.get_checkpoint_state(checkpoint)
         if ckpt and ckpt.model_checkpoint_path:
-            print('Restoring model: {}'.format(ckpt.model_checkpoint_path))
-            saver.restore(self.agent.sess, ckpt.model_checkpoint_path)
+            print('Restoring model: {}'.format(checkpoint))
+            saver.restore(self.agent.sess, os.path.join(checkpoint, CHECKPOINT_NAME))
         else:
             raise IOError('No model found in {}.'.format(checkpoint))

@@ -141,7 +141,8 @@ public class GeneralAIDriver extends Controller {
         if (lastSensor == null) {
             return 0;
         }
-        double reward = lastSensor.getSpeed() - Math.abs(lastSensor.getTrackPosition());
+        double speed = lastSensor.getSpeed();
+        double reward = speed - (speed * lastSensor.getLateralSpeed()) - (speed * Math.abs(lastSensor.getTrackPosition()));
         return reward;
     }
 
@@ -178,12 +179,14 @@ public class GeneralAIDriver extends Controller {
             return gear + 1;
         } else // check if the RPM value of car is lower than the one suggested 
         // to shift down the gear from the current one
-         if (gear > 1 && rpm <= gearDown[gear - 1]) {
+        {
+            if (gear > 1 && rpm <= gearDown[gear - 1]) {
                 return gear - 1;
             } else // otherwhise keep current gear
             {
                 return gear;
             }
+        }
     }
 
     @Override
