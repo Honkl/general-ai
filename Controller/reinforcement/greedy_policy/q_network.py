@@ -3,6 +3,8 @@ import tensorflow.contrib.layers as tf_layers
 from utils.activations import get_activation_tf
 from utils.miscellaneous import get_rnn_cell
 
+STD = 0.001
+
 
 class QNetwork():
     def __init__(self, hidden_layers, activation, dropout_keep=None):
@@ -22,6 +24,8 @@ class QNetwork():
             x = tf_layers.fully_connected(inputs=x,
                                           num_outputs=dim,
                                           activation_fn=get_activation_tf(self.activation),
+                                          weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
+                                          biases_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
                                           scope="fully_connected_{}".format(i))
             if self.dropout != None:
                 x = tf_layers.dropout(x, keep_prob=self.dropout)
@@ -29,6 +33,8 @@ class QNetwork():
         logits = tf_layers.fully_connected(inputs=x,
                                            num_outputs=self.output_size,
                                            activation_fn=None,
+                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
+                                           biases_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
                                            scope="output_layer")
 
         return logits
@@ -46,7 +52,7 @@ class QNetworkRnn():
         self.rnn_cell_str = rnn_cell_type
         self.num_units = num_units
         self.rnn_cell = get_rnn_cell(rnn_cell_type)(num_units)
-        #self.state = tf.placeholder(shape=[None], dtype=tf.float32, name="state_rnn")
+        # self.state = tf.placeholder(shape=[None], dtype=tf.float32, name="state_rnn")
         self.reuse = False
 
     def init(self, output_size, batch_size):
@@ -59,7 +65,7 @@ class QNetworkRnn():
     def forward_pass(self, x):
         x, self.rnn_state = self.rnn_cell(x, self.rnn_state, scope="rnn")
         x = tf_layers.fully_connected(x, self.output_size, activation_fn=None,
-                                          scope="fully_connected")
+                                      scope="fully_connected")
         return x
 
     def to_dictionary(self):

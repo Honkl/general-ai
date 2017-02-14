@@ -156,7 +156,7 @@ if __name__ == '__main__':
     # file_name = "../../Controller/logs/torcs/mlp/logs_2017-02-10_12-31-44/best/best_0.json"
     # file_name = "../../Experiments/MLP+differential_evolution/alhambra/logs_2017-01-23_03-20-57/last/last_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_11-30-08"
+    logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-13_11-15-26"
 
 
     # esn = EchoState.load_from_file(file_name, game)

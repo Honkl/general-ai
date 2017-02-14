@@ -45,15 +45,15 @@ def run_eva():
 def run_greedy():
     greedy_policy_params = GreedyPolicyParameters(
         batch_size=100,
-        episodes=100000,
-        gamma=0.9,
+        episodes=1000000,
+        gamma=0.1,
         optimizer="adam",
         epsilon=0.01,
-        test_size = 10,
+        test_size = 100,
         learning_rate=0.001)
 
     q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=5)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
     RL.run()
 
 
