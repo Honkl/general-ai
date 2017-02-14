@@ -60,25 +60,6 @@ class Reinforcement():
             raise IOError('No model found in {}.'.format(checkpoint))
 
     def test(self, n_iterations):
-        avg_test_score = 0
-        for i in range(n_iterations):
-            env = Environment(game_class=self.game_class,
-                              seed=np.random.randint(0, 2 ** 16),
-                              observations_count=self.state_size,
-                              actions_in_phases=self.actions_count)
-            game_steps = 0
-            while game_steps < self.STEP_LIMIT:
-                game_steps += 1
+        raise NotImplementedError
 
-                old_state = env.state
-                selected_action, estimated_reward = self.agent.play(env.state)
 
-                # Perform the action
-                new_state, reward, done, score = env.step(selected_action)
-
-                if done:
-                    avg_test_score += score[0]
-                    break
-
-        avg_test_score /= n_iterations
-        return avg_test_score

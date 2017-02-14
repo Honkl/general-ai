@@ -85,7 +85,7 @@ class DDPGAgent():
         self.actor_network.update_target()
         self.critic_network.update_target()
 
-    def play(self, state, i_episode):
+    def play(self, state):
         # Select action a_t according to the current policy and exploration noise
         action = self.actor_network.action(state)
         return action + self.exploration_noise.noise()

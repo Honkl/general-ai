@@ -62,7 +62,9 @@ class DDPGReinforcement(Reinforcement):
 
         start = time.time()
         data = []
-        for episode in range(self.episodes):
+        best_test_score = -np.Inf
+
+        for i_episode in range(1, self.episodes + 1):
 
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
@@ -70,7 +72,7 @@ class DDPGReinforcement(Reinforcement):
                                    actions_in_phases=self.actions_count)
             state = self.env.state
             for step in range(100000):
-                action = self.agent.play(state, episode)
+                action = self.agent.play(state)
                 next_state, reward, done, score = self.env.step(action)
                 score = score[0]
                 self.agent.perceive(state, action, reward, next_state, done)
@@ -78,22 +80,56 @@ class DDPGReinforcement(Reinforcement):
                 if done:
                     break
 
-            report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
-                                tf.Summary.Value(tag='number_of_steps', simple_value=step)])
-            self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
+            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
+            line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(i_episode, self.episodes, score, step,
+                                                                                elapsed_time)
+            print(line)
+            data.append(line)
 
-            if episode % self.logs_every == 0:
-                checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
-                self.agent.saver.save(self.agent.sess, checkpoint_path)
+            if i_episode % self.logs_every == 0:
+                print("Testing model... [{} runs]".format(self.parameters.test_size))
+                current_score = self.test(self.parameters.test_size)
+                print("Current score: {}, Best score: {}".format(current_score, best_test_score))
+                if (current_score > best_test_score):
+                    print("Saving model...")
+                    checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
+                    self.agent.saver.save(self.agent.sess, checkpoint_path)
+                    best_test_score = current_score
+
                 with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
                     for line in data:
                         f.write(line)
                         f.write('\n')
 
-            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
-            line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
-                                                                                elapsed_time)
-            print(line)
-            data.append(line)
+                test_measure = ([tf.Summary.Value(tag='score_test', simple_value=current_score)])
+                self.agent.summary_writer.add_summary(tf.Summary(value=test_measure), i_episode)
+
+            report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
+                                tf.Summary.Value(tag='number_of_steps', simple_value=step)])
+            self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
 
         self.env.close()
+
+    def test(self, n_iterations):
+        avg_test_score = 0
+        for i in range(n_iterations):
+            env = Environment(game_class=self.game_class,
+                              seed=np.random.randint(0, 2 ** 16),
+                              observations_count=self.state_size,
+                              actions_in_phases=self.actions_count)
+            game_steps = 0
+            while game_steps < self.STEP_LIMIT:
+                game_steps += 1
+
+                old_state = env.state
+                selected_action = self.agent.play(env.state)
+
+                # Perform the action
+                new_state, reward, done, score = env.step(selected_action)
+
+                if done:
+                    avg_test_score += score[0]
+                    break
+
+        avg_test_score /= n_iterations
+        return avg_test_score

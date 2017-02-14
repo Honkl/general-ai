@@ -68,7 +68,7 @@ class Torcs(Game):
         Torcs.master_lock.release()
 
         port_num = 3001 + index
-        xml = " \"" + prefix + "general-ai\\Game-interfaces\\TORCS\\race_config_" + str(port_num) + ".xml\""
+        xml = " \"" + prefix + "general-ai/Game-interfaces/TORCS//race_config_" + str(port_num) + ".xml\""
         port = " \"" + str(port_num) + "\""
 
         with open(TORCS_INSTALL_DIRECTORY_REF, "r") as f:
@@ -76,7 +76,7 @@ class Torcs(Game):
 
         windows = platform.system() == "Windows"
         if not windows:
-            raise NotImplemented("TORCS is supported only on Windows at this time.")
+            raise NotImplementedError("TORCS is supported only on Windows at the moment.")
 
         if self.vis_on:
             params = [TORCS_VIS_ON_BAT, xml, TORCS_JAVA_CP, port, torcs_install_dir]

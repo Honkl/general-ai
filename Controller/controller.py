@@ -48,21 +48,22 @@ def run_greedy():
         episodes=100000,
         gamma=0.9,
         optimizer="adam",
-        epsilon=0.01)
+        epsilon=0.01,
+        test_size = 10,
+        learning_rate=0.001)
 
     q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="mario", parameters=greedy_policy_params, q_network=q_net, threads=10,
-                                   logs_every=100)
-    # RL = DDPGReinforcement(game="2048", parameters=ddpg_params, logs_every=100)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=10)
     RL.run()
 
 
 def run_ddpg():
     ddpg_parameters = DDPGParameters(
-        batch_size=500,
-        episodes=100000)
+        batch_size=100,
+        episodes=1000000,
+        test_size=10)
 
-    RL = DDPGReinforcement(game="2048", parameters=ddpg_parameters, logs_every=100)
+    RL = DDPGReinforcement(game="2048", parameters=ddpg_parameters, logs_every=10)
     RL.run()
 
 
