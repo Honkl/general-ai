@@ -75,20 +75,15 @@ class Torcs(Game):
             torcs_install_dir = f.readline()
 
         windows = platform.system() == "Windows"
+        if not windows:
+            raise NotImplemented("TORCS is supported only on Windows at this time.")
+
         if self.vis_on:
-            if windows:
-                params = [TORCS_VIS_ON_BAT, xml, TORCS_JAVA_CP, port, torcs_install_dir]
-                command = "{} {} {} {} {}".format(*params)
-            else:
-                params = [TORCS_VIS_ON_SH, xml, TORCS_JAVA_CP, port, torcs_install_dir]
-                command = ["sh"] + params
+            params = [TORCS_VIS_ON_BAT, xml, TORCS_JAVA_CP, port, torcs_install_dir]
+            command = "{} {} {} {} {}".format(*params)
         else:
-            if windows:
-                params = [TORCS_BAT, xml, TORCS_JAVA_CP, port, torcs_install_dir]
-                command = "{} {} {} {} {}".format(*params)
-            else:
-                params = [TORCS_SH, xml, TORCS_JAVA_CP, port, torcs_install_dir]
-                command = ["sh"] + params
+            params = [TORCS_BAT, xml, TORCS_JAVA_CP, port, torcs_install_dir]
+            command = "{} {} {} {} {}".format(*params)
 
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=-1)
 

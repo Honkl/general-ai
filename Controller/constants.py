@@ -18,8 +18,6 @@ ALHAMBRA = prefix + "general-ai/Game-interfaces/Alhambra/AlhambraInterface/Alham
 
 TORCS_BAT = "\"" + prefix + "general-ai/Game-interfaces/TORCS/torcs_starter.bat\""
 TORCS_VIS_ON_BAT = "\"" + prefix + "general-ai/Game-interfaces/TORCS/torcs_starter_vis_on.bat\""
-TORCS_SH = "\"" + prefix + "general-ai/Game-interfaces/TORCS/torcs_starter.sh\""
-TORCS_VIS_ON_SH = "\"" + prefix + "general-ai/Game-interfaces/TORCS/torcs_starter_vis_on.sh\""
 TORCS_XML = " \"" + prefix + "general-ai/Game-interfaces/TORCS/race_config.xml\""
 TORCS_JAVA_CP = " \"" + prefix + "general-ai/Game-interfaces/TORCS/scr-client/classes;" + prefix + "general-ai/Game-interfaces/TORCS/scr-client/lib/*\""
 TORCS_INSTALL_DIRECTORY_REF = prefix + "general-ai/Game-interfaces/TORCS/install_directory.txt"

@@ -9,10 +9,10 @@ import constants
 import utils.miscellaneous
 from reinforcement.environment import Environment
 from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
+from reinforcement.reinforcement import Reinforcement
 
-CHECKPOINT_NAME = "greedy_policy.ckpt"
 
-class GreedyPolicyReinforcement():
+class GreedyPolicyReinforcement(Reinforcement):
     def __init__(self, game, parameters, q_network, threads=8, logs_every=10):
         self.game = game
         self.reinforce_params = parameters
@@ -27,25 +27,12 @@ class GreedyPolicyReinforcement():
         # we will train only one network inside the "Q-network" (not different networks, each for each game phase)
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        self.logdir = self.init_directories()
+        self.logdir = self.init_directories(dir_name="greedy_policy")
+        self.checkpoint_name = "greedy_policy.ckpt"
 
         q_network.init(self.actions_count_sum, self.reinforce_params.batch_size)
-        self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.actions_count_sum, self.logdir, threads)
-
-    def init_directories(self):
-        self.dir = constants.loc + "/logs/" + self.game + "/greedy_policy"
-        # create name for directory to store logs
-        current = time.localtime()
-        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
-                                              str(current.tm_mon).zfill(2),
-                                              str(current.tm_mday).zfill(2),
-                                              str(current.tm_hour).zfill(2),
-                                              str(current.tm_min).zfill(2),
-                                              str(current.tm_sec).zfill(2))
-        logdir = self.dir + "/logs_" + t_string
-        if not os.path.exists(logdir):
-            os.makedirs(logdir)
-        return logdir
+        self.agent = GreedyPolicyAgent(parameters, q_network, self.state_size, self.actions_count_sum, self.logdir,
+                                       threads)
 
     def log_metadata(self):
         with open(os.path.join(self.logdir, "metadata.json"), "w") as f:
@@ -78,8 +65,7 @@ class GreedyPolicyReinforcement():
             game_steps = 0
 
             # Running the game until it is not done (big step limit for safety)
-            STEP_LIMIT = 1000000  # 1M
-            while game_steps < STEP_LIMIT:
+            while game_steps < self.STEP_LIMIT:
                 game_steps += 1
 
                 old_state = self.env.state
@@ -112,33 +98,19 @@ class GreedyPolicyReinforcement():
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
 
             if i_episode % self.logs_every == 0:
-                checkpoint_path = os.path.join(self.logdir, CHECKPOINT_NAME)
+                checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
                 with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
                     for line in data:
                         f.write(line)
                         f.write('\n')
 
-            now = time.time()
-            t = now - start
-            h = t // 3600
-            m = (t % 3600) // 60
-            s = t - (h * 3600) - (m * 60)
-            elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
             line = "Episode: {}/{}, Score: {}, Avg Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
-                                                                                "{0:.5f}".format(epoch_loss / game_steps),
-                                                                                elapsed_time)
+                                                                                    "{0:.5f}".format(
+                                                                                        epoch_loss / game_steps),
+                                                                                    elapsed_time)
             print(line)
             data.append(line)
 
         self.env.shut_down()
-
-    def load_checkpoint(self, checkpoint):
-        # tf.initialize_all_variables().run()
-        saver = tf.train.Saver(tf.all_variables())
-        ckpt = tf.train.get_checkpoint_state(checkpoint)
-        if ckpt and ckpt.model_checkpoint_path:
-            print('Restoring model: {}'.format(checkpoint))
-            saver.restore(self.agent.sess, os.path.join(checkpoint, CHECKPOINT_NAME))
-        else:
-            raise IOError('No model found in {}.'.format(checkpoint))

@@ -1,6 +1,7 @@
 from  reinforcement.ddpg.filter_env import *
 from reinforcement.ddpg.ddpg_agent import DDPGAgent
 from reinforcement.environment import Environment
+from reinforcement.reinforcement import Reinforcement
 import utils.miscellaneous
 import tensorflow as tf
 import gc
@@ -11,10 +12,9 @@ import time
 import json
 
 gc.enable()
-CHECKPOINT_NAME = "ddpg.ckpt"
 
 
-class DDPGReinforcement():
+class DDPGReinforcement(Reinforcement):
     """
     Represents a DDPG model.
     """
@@ -34,32 +34,14 @@ class DDPGReinforcement():
         self.game_class = utils.miscellaneous.get_game_class(game)
         self.state_size = self.game_config["input_sizes"][0]  # inputs for all phases are the same in our games
         self.logs_every = logs_every
+        self.checkpoint_name = "ddpg.ckpt"
 
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        self.logdir = self.init_directories()
+        self.logdir = self.init_directories(dir_name="deep_deterministic_policy_gradient")
 
         # DDPG (deep deterministic gradient policy)
         self.agent = DDPGAgent(self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
-
-    def init_directories(self):
-        """
-        Initializes a directories for log files.
-        :return: Current logdir.
-        """
-        self.dir = constants.loc + "/logs/" + self.game + "/deep_deterministic_gradient_policy"
-        # create name for directory to store logs
-        current = time.localtime()
-        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
-                                              str(current.tm_mon).zfill(2),
-                                              str(current.tm_mday).zfill(2),
-                                              str(current.tm_hour).zfill(2),
-                                              str(current.tm_min).zfill(2),
-                                              str(current.tm_sec).zfill(2))
-        logdir = self.dir + "/logs_" + t_string
-        if not os.path.exists(logdir):
-            os.makedirs(logdir)
-        return logdir
 
     def log_metadata(self):
         """
@@ -101,35 +83,17 @@ class DDPGReinforcement():
             self.agent.summary_writer.add_summary(tf.Summary(value=report_measures), episode)
 
             if episode % self.logs_every == 0:
-                checkpoint_path = os.path.join(self.logdir, CHECKPOINT_NAME)
+                checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
                 self.agent.saver.save(self.agent.sess, checkpoint_path)
                 with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
                     for line in data:
                         f.write(line)
                         f.write('\n')
 
-            now = time.time()
-            t = now - start
-            h = t // 3600
-            m = (t % 3600) // 60
-            s = t - (h * 3600) - (m * 60)
-            elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
             line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(episode, self.episodes, score, step,
                                                                                 elapsed_time)
             print(line)
             data.append(line)
 
         self.env.close()
-
-    def load_checkpoint(self, checkpoint):
-        """
-        Loads tensorflow checkpoint.
-        :param checkpoint: Checkpoint to be loaded.
-        """
-        saver = tf.train.Saver(tf.all_variables())
-        ckpt = tf.train.get_checkpoint_state(checkpoint)
-        if ckpt and ckpt.model_checkpoint_path:
-            print('Restoring model: {}'.format(checkpoint))
-            saver.restore(self.agent.sess, os.path.join(checkpoint, CHECKPOINT_NAME))
-        else:
-            raise IOError('No model found in {}.'.format(checkpoint))

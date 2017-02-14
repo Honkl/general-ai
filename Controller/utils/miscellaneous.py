@@ -1,6 +1,10 @@
+"""
+Some miscellaneous and useful functions that not belongs to some specific class.
+"""
 import json
 import constants
 import tensorflow as tf
+import time
 from games.alhambra import Alhambra
 from games.torcs import Torcs
 from games.mario import Mario
@@ -53,3 +57,13 @@ def get_rnn_cell(cell_type):
         return tf.nn.rnn_cell.BasicLSTMCell
     if cell_type == "gru":
         return tf.nn.rnn_cell.GRUCell
+
+
+def get_elapsed_time(start):
+    now = time.time()
+    t = now - start
+    h = t // 3600
+    m = (t % 3600) // 60
+    s = t - (h * 3600) - (m * 60)
+    elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
+    return elapsed_time

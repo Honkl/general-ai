@@ -14,9 +14,7 @@ from reinforcement.replay_buffer import ReplayBuffer
 # Hyper Parameters:
 
 REPLAY_BUFFER_SIZE = 100000
-REPLAY_START_SIZE = 1000
 GAMMA = 0.99
-LEARN_EVERY = 1
 
 
 class DDPGAgent():
@@ -31,7 +29,6 @@ class DDPGAgent():
         self.state_dim = state_size
         self.action_dim = actions_count
         self.batch_size = batch_size
-        self.total_steps = 0
 
         self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
                                                      intra_op_parallelism_threads=8,
@@ -102,14 +99,12 @@ class DDPGAgent():
         self.replay_buffer.add(state, action, reward, next_state, done)
 
         # Store transitions to replay start size then start training
-        if self.replay_buffer.count() > REPLAY_START_SIZE:
-            self.total_steps += 1
-            if self.total_steps % LEARN_EVERY == 0:
-                self.train()
+        if self.replay_buffer.count() > self.batch_size:
+            self.train()
 
-                # if self.time_step % 10000 == 0:
-                # self.actor_network.save_network(self.time_step)
-                # self.critic_network.save_network(self.time_step)
+            # if self.time_step % 10000 == 0:
+            # self.actor_network.save_network(self.time_step)
+            # self.critic_network.save_network(self.time_step)
 
         # Re-initialize the random process when an episode ends
         if done:
