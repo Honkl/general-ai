@@ -1,12 +1,10 @@
-import json
 import os
 import time
-
 import numpy as np
 import tensorflow as tf
 
 import constants
-from reinforcement.environment import Environment
+import utils.miscellaneous
 
 
 class Reinforcement():
@@ -23,6 +21,10 @@ class Reinforcement():
     actions_count = None
     state_size = None
     agent = None
+    parameters = None
+    logdir = None
+
+    best_test_score = -np.Inf
 
     def init_directories(self, dir_name):
         """
@@ -59,7 +61,30 @@ class Reinforcement():
         else:
             raise IOError('No model found in {}.'.format(checkpoint))
 
+    def test_and_save(self, log_data, start_time, i_episode):
+        print("Testing model... [{} runs]".format(self.parameters.test_size))
+        current_score = self.test(self.parameters.test_size)
+        line = "Current score: {}, Best score: {}".format(current_score, self.best_test_score)
+        print(line)
+        log_data.append(line)
+        if (current_score > self.best_test_score):
+            print("Saving model...")
+            checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
+            self.agent.saver.save(self.agent.sess, checkpoint_path)
+            self.best_test_score = current_score
+
+        elapsed_time = utils.miscellaneous.get_elapsed_time(start_time)
+        t = "Total time: {}".format(elapsed_time)
+        print(t)
+        log_data.append(t)
+
+        with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
+            for line in log_data:
+                f.write(line)
+                f.write('\n')
+
+        test_measure = ([tf.Summary.Value(tag='score_test', simple_value=current_score)])
+        self.agent.summary_writer.add_summary(tf.Summary(value=test_measure), i_episode)
+
     def test(self, n_iterations):
         raise NotImplementedError
-
-

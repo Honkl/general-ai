@@ -53,7 +53,7 @@ def run_greedy():
         learning_rate=0.001)
 
     q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=10)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=5)
     RL.run()
 
 

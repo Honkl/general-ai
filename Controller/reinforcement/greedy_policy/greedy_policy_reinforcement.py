@@ -49,7 +49,6 @@ class GreedyPolicyReinforcement(Reinforcement):
 
         start = time.time()
         data = []
-        best_test_score = -np.Inf
 
         # One epoch = One episode = One game played
         for i_episode in range(1, episodes + 1):
@@ -64,6 +63,7 @@ class GreedyPolicyReinforcement(Reinforcement):
             epoch_score = 0.0
             epoch_estimated_reward = 0.0
             game_steps = 0
+            episode_start_time = time.time()
 
             # Running the game until it is not done (big step limit for safety)
             while game_steps < self.STEP_LIMIT:
@@ -87,31 +87,16 @@ class GreedyPolicyReinforcement(Reinforcement):
                     epoch_score = score[0]
                     break
 
-            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
-            line = "Episode: {}/{}, Score: {}, Avg Loss: {}, Total time: {}".format(i_episode, episodes, epoch_score,
-                                                                                    "{0:.5f}".format(
-                                                                                        epoch_loss / game_steps),
-                                                                                    elapsed_time)
+            episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
+            line = "Episode: {}/{}, Score: {}, Avg Loss: {}, Episode Time: {}".format(i_episode, episodes, epoch_score,
+                                                                                      "{0:.5f}".format(
+                                                                                          epoch_loss / game_steps),
+                                                                                      episode_time)
             print(line)
             data.append(line)
 
             if i_episode % self.logs_every == 0:
-                print("Testing model... [{} runs]".format(self.parameters.test_size))
-                current_score = self.test(self.parameters.test_size)
-                print("Current score: {}, Best score: {}".format(current_score, best_test_score))
-                if (current_score > best_test_score):
-                    print("Saving model...")
-                    checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
-                    self.agent.saver.save(self.agent.sess, checkpoint_path)
-                    best_test_score = current_score
-
-                with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
-                    for line in data:
-                        f.write(line)
-                        f.write('\n')
-
-                test_measure = ([tf.Summary.Value(tag='score_test', simple_value=current_score)])
-                self.agent.summary_writer.add_summary(tf.Summary(value=test_measure), i_episode)
+                self.test_and_save(log_data=data, start_time=start, i_episode=i_episode)
 
             report_measures = ([tf.Summary.Value(tag='loss_total', simple_value=epoch_loss),
                                 tf.Summary.Value(tag='loss_average', simple_value=float(epoch_loss) / game_steps),

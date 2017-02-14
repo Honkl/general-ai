@@ -62,14 +62,15 @@ class DDPGReinforcement(Reinforcement):
 
         start = time.time()
         data = []
-        best_test_score = -np.Inf
 
         for i_episode in range(1, self.episodes + 1):
 
+            episode_start_time = time.time()
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
+
             state = self.env.state
             for step in range(100000):
                 action = self.agent.play(state)
@@ -80,29 +81,14 @@ class DDPGReinforcement(Reinforcement):
                 if done:
                     break
 
-            elapsed_time = utils.miscellaneous.get_elapsed_time(start)
-            line = "Episode {}/{}, Score: {}, Steps: {}, Total Time: {}".format(i_episode, self.episodes, score, step,
-                                                                                elapsed_time)
+            episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
+            line = "Episode {}/{}, Score: {}, Steps: {}, Episode Time: {}".format(i_episode, self.episodes, score, step,
+                                                                                  episode_time)
             print(line)
             data.append(line)
 
             if i_episode % self.logs_every == 0:
-                print("Testing model... [{} runs]".format(self.parameters.test_size))
-                current_score = self.test(self.parameters.test_size)
-                print("Current score: {}, Best score: {}".format(current_score, best_test_score))
-                if (current_score > best_test_score):
-                    print("Saving model...")
-                    checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
-                    self.agent.saver.save(self.agent.sess, checkpoint_path)
-                    best_test_score = current_score
-
-                with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
-                    for line in data:
-                        f.write(line)
-                        f.write('\n')
-
-                test_measure = ([tf.Summary.Value(tag='score_test', simple_value=current_score)])
-                self.agent.summary_writer.add_summary(tf.Summary(value=test_measure), i_episode)
+                self.test_and_save(log_data=data, start_time=start, i_episode=i_episode)
 
             report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
                                 tf.Summary.Value(tag='number_of_steps', simple_value=step)])
