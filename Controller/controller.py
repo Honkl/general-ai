@@ -25,8 +25,8 @@ np.random.seed(MASTER_SEED)
 
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=10,
-        cxpb=0.75,
+        pop_size=15,
+        cxpb=0.8,
         mut=("uniform", 0.1, 0.1),
         ngen=2000,
         game_batch_size=1,
@@ -35,7 +35,7 @@ def run_eva():
         elite=2,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[128, 128], activation="relu")
+    mlp = MLP(hidden_layers=[256, 256], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=eva_parameters, model=mlp, logs_every=10,
                                       max_workers=5)
@@ -48,12 +48,12 @@ def run_greedy():
         episodes=1000000,
         gamma=0.1,
         optimizer="adam",
-        epsilon=0.01,
+        epsilon=0.1,
         test_size = 100,
-        learning_rate=0.001)
+        learning_rate=0.0001)
 
-    q_net = QNetwork(hidden_layers=[256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
+    q_net = QNetwork(hidden_layers=[256, 256, 256, 256, 256, 256], activation="relu", dropout_keep=None)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=20)
     RL.run()
 
 
@@ -61,9 +61,9 @@ def run_ddpg():
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         episodes=1000000,
-        test_size=10)
+        test_size=100)
 
-    RL = DDPGReinforcement(game="2048", parameters=ddpg_parameters, logs_every=10)
+    RL = DDPGReinforcement(game="2048", parameters=ddpg_parameters, logs_every=100)
     RL.run()
 
 
@@ -97,8 +97,8 @@ def run_de():
 
 
 if __name__ == '__main__':
-    run_greedy()
-    # run_ddpg()
+    # run_greedy()
+    run_ddpg()
     # run_es()
     # run_eva()
     # run_de()
