@@ -35,7 +35,6 @@ class Environment(gym.Env):
 
         # Need to determine proper game phase and use only specific action subset
         if len(self.actions_in_phases) > 1:
-            print(self.actions_in_phases)
             begin = sum(self.actions_in_phases[:self.last_phase])
             end = begin + self.actions_in_phases[self.last_phase]
             action = action[begin:end]

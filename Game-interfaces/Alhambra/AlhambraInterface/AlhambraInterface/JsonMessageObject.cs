@@ -42,6 +42,8 @@ namespace AlhambraInterface
 
         private static List<Card> allCards = null;
         private static List<Building> allBuildings = null;
+        private static int lastReward = 0;
+
         /// <summary>
         /// Number of card colors.
         /// </summary>
@@ -66,7 +68,6 @@ namespace AlhambraInterface
         /// Max value of building in whole game.
         /// </summary>
         private const int MaxBuildingValue = 13;
-
 
         public static void InitStaticValues()
         {
@@ -108,17 +109,21 @@ namespace AlhambraInterface
             this.current_phase = gamePhase;
         }
 
+        /// <summary>
+        /// Evaluates immediate reward for AI player.
+        /// </summary>
+        /// <param name="player">Reward of this players will be computed.</param>
+        /// <returns>Reward for the specified player.</returns>
         private int EvaluateReward(Player player)
         {
             int sum = 0;
-            foreach (Card c in player.cards)
-            {
-                sum += c.Value;
-            }
-            foreach (Building b in player.constructed)
-            {
-                sum += b.Value;
-            }
+            
+            // Let's say that constructed buildings are 10-times more "valuable" than cards:
+            sum += player.cards.Count;
+            sum += 10 * player.constructed.Count;
+
+            int reward = sum - lastReward;
+            lastReward = reward;
             return sum;
         }
 

@@ -61,9 +61,9 @@ def run_ddpg():
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         episodes=1000000,
-        test_size=100)
+        test_size=10)
 
-    RL = DDPGReinforcement(game="2048", parameters=ddpg_parameters, logs_every=100)
+    RL = DDPGReinforcement(game="alhambra", parameters=ddpg_parameters, logs_every=10)
     RL.run()
 
 
