@@ -40,7 +40,7 @@ class GreedyPolicyReinforcement(Reinforcement):
             data["model_name"] = "reinforcement_learning_greedy_policy"
             data["game"] = self.game
             data["q-network"] = self.q_network.to_dictionary()
-            data["reinforcement_params"] = self.parameters.to_dictionary()
+            data["parameters"] = self.parameters.to_dictionary()
             f.write(json.dumps(data))
 
     def run(self):

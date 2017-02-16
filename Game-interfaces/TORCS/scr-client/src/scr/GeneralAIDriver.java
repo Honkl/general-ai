@@ -127,7 +127,13 @@ public class GeneralAIDriver extends Controller {
 
             lastSensor = sensors;
             if (lastSensor.getDamage() == 0) {
-                score = lastSensor.getDistanceRaced();
+                double lapTime = lastSensor.getCurrentLapTime();
+                double distance = lastSensor.getDistanceRaced();
+                if (lapTime > 0) {
+                    score = distance / lapTime;
+                } else {
+                    score = 0;
+                }
             }
 
             return act;

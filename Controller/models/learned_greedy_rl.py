@@ -44,7 +44,7 @@ class LearnedGreedyRL(Model):
         :param current_phase: Current game phase.
         :return: Action.
         """
-        action, estimated_reward = self.rl.agent.play(input, None)
+        action, estimated_reward = self.rl.agent.play(input)
         action_string = ""
         for a in action:
             action_string += str(a) + " "
