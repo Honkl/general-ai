@@ -120,7 +120,7 @@ def put_new_cell(grid, rng):
                 j_s[n] = j
                 n += 1
     if n > 0:
-        r = rng.randint(0, n - 1)
+        r = rng.randint(0, n)
         grid[i_s[r], j_s[r]] = 2 if rng.random_sample() < 0.9 else 4
     return n
 
@@ -141,12 +141,12 @@ def any_possible_moves(grid):
     return False
 
 
-def prepare_next_turn(grid):
+def prepare_next_turn(grid, rng):
     """
     Spawn a new number on the grid; then return the result of
     any_possible_moves after this change has been made.
     """
-    empties = put_new_cell(grid)
+    empties = put_new_cell(grid, rng)
     return empties > 1 or any_possible_moves(grid)
 
 
@@ -162,7 +162,7 @@ def print_grid(grid_array):
 
 
 class Game:
-    def __init__(self, cols=4, rows=4, seed=42):
+    def __init__(self, seed, cols=4, rows=4):
         self.rng = np.random.RandomState(seed)
         self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
         self.grid = self.grid_array
@@ -203,7 +203,7 @@ class Game:
             return 0, None
         reward = score
         self.score += score
-        if not prepare_next_turn(self.grid):
+        if not prepare_next_turn(self.grid, self.rng):
             self.end = True
         return 1, reward
 

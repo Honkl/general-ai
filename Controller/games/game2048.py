@@ -31,7 +31,7 @@ class Game2048(Game):
         spec = importlib.util.spec_from_file_location("Game", GAME2048_PY_PATH)
         game_2048 = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(game_2048)
-        self.game = game_2048.Game()
+        self.game = game_2048.Game(self.seed)
         state = self.game.get_state()
         return state, self.phase
 
