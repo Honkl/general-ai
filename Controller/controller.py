@@ -38,7 +38,7 @@ def run_eva():
     mlp = MLP(hidden_layers=[256, 256], activation="relu")
     # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=50,
-                                      max_workers=50)
+                                      max_workers=10)
     evolution.run()
 
 

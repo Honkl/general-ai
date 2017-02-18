@@ -156,21 +156,21 @@ class Evolution():
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-        with open((dir + "\\pop.json"), "w") as f:
+        with open((dir + "/pop.json"), "w") as f:
             data = {}
             data["population"] = pop
             f.write(json.dumps(data))
 
-        with open((dir + "\\logbook.txt"), "w") as f:
+        with open((dir + "/logbook.txt"), "w") as f:
             f.write(str(log))
 
-        with open((dir + "\\settings.json"), "w") as f:
+        with open((dir + "/settings.json"), "w") as f:
             data = {}
             data["evolution_params"] = self.evolution_params.to_dictionary()
             data["model_params"] = self.model.to_dictionary()
             f.write(json.dumps(data))
 
-        with open((dir + "\\runtime.txt"), "w") as f:
+        with open((dir + "/runtime.txt"), "w") as f:
             f.write("{}".format(elapsed_time))
 
         gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
@@ -187,14 +187,14 @@ class Evolution():
         plt.legend(loc="lower right")
         plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(),
                                             self.model.to_string()), fontsize=10)
-        plt.savefig(dir + "\\plot.jpg")
+        plt.savefig(dir + "/plot.jpg")
 
     def init_directories(self):
         """
         Initializes directories where logs will be stored.
         :return: Newly created log folder (with date and time).
         """
-        self.dir = constants.loc + "\\logs\\" + self.current_game + "\\" + self.model.get_name()
+        self.dir = constants.loc + "/logs/" + self.current_game + "/" + self.model.get_name()
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
         # create name for directory to store logs
@@ -206,7 +206,7 @@ class Evolution():
                                               str(current.tm_min).zfill(2),
                                               str(current.tm_sec).zfill(2))
 
-        return self.dir + "\\logs_" + t_string
+        return self.dir + "/logs_" + t_string
 
     def log_all(self, logs_dir, population, hof, logbook, start_time):
         """
@@ -236,14 +236,15 @@ class Evolution():
 
         number_to_log = max(self.evolution_params.hof_size, self.evolution_params.elite)
         for i in range(number_to_log):
-            self.write_to_file(population[i], last_dir + "\\last_" + str(i) + ".json")
+            self.write_to_file(population[i], last_dir + "/last_" + str(i) + ".json")
             self.all_time_best.append(population[i])
 
         self.all_time_best.sort(key=lambda ind: ind.fitness.values, reverse=True)
         self.all_time_best = self.all_time_best[:number_to_log]
 
         for i in range(number_to_log):
-            self.write_to_file(self.all_time_best[i], best_dir + "\\best_" + str(i) + ".json")
+            self.write_to_file(self.all_time_best[i], best_dir + "/best_" + str(i) + ".json")
+            self.write_to_file(self.all_time_best[i], best_dir + "/best_" + str(i) + ".json")
 
     def run(self, file_name=None):
         """
