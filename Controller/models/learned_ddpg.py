@@ -39,10 +39,7 @@ class LearnedDDPG(Model):
         :return: Action.
         """
         action = self.ddpg.agent.play(input)
-        action_string = ""
-        for a in action:
-            action_string += str(a) + " "
-        return action_string
+        return action
 
     def get_name(self):
         """

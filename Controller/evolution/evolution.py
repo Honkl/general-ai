@@ -9,6 +9,8 @@ import concurrent.futures
 
 import constants
 import time
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from deap import creator, base, tools

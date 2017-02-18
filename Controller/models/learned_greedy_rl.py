@@ -45,10 +45,7 @@ class LearnedGreedyRL(Model):
         :return: Action.
         """
         action, estimated_reward = self.rl.agent.play(input)
-        action_string = ""
-        for a in action:
-            action_string += str(a) + " "
-        return action_string
+        return action
 
     def get_name(self):
         """

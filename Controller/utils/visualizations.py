@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -37,7 +39,6 @@ def bar_plot(values, evals, game):
 
     plt.tight_layout()
     plt.savefig('comparison.jpg')
-    plt.show()
 
 
 def get_y_lim_for_game(game):
@@ -127,7 +128,6 @@ def run_random_model(game, evals):
     plt.title("Random - game: {} - avg: {}".format(game, np.mean(results)))
     plt.ylim(0, get_y_lim_for_game(game))
     plt.savefig("random_model_{}.jpg".format(game))
-    plt.show()
 
 
 def eval_alhambra_winrate(model, evals):
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     np.random.seed(930615)
     game = "torcs"
     evals = 250
-
+    run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
     # file_name = "../../Controller/logs/torcs/echo_state/logs_2017-02-16_02-37-04/best/best_0.json"

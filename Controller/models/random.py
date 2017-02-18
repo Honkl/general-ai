@@ -26,14 +26,7 @@ class Random(Model):
         output_sizes = list(map(int, self.game_config["output_sizes"]))
 
         assert (input_sizes[current_phase] == len(input))
-
-        result = ""
-        for i in range(output_sizes[current_phase]):
-            result += str(np.random.random())
-            if (i < output_sizes[current_phase] - 1):
-                result += " "
-
-        return result
+        return [np.random.random() for _ in range(output_sizes[current_phase])]
 
     def get_name(self):
         """
