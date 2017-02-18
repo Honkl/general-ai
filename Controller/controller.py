@@ -3,7 +3,8 @@ from __future__ import division
 from __future__ import print_function
 
 import random
-
+import sys
+import os
 import numpy as np
 
 from evolution.differential_evolution import DifferentialEvolution
@@ -17,6 +18,10 @@ from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicy
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters
+from reinforcement.keras_rl.dqn import DQN
+from constants import GAME2048_PY_PATH
+import importlib.util
+
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
@@ -25,7 +30,7 @@ np.random.seed(MASTER_SEED)
 
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=15,
+        pop_size=1,
         cxpb=0.8,
         mut=("uniform", 0.1, 0.1),
         ngen=2000,
@@ -35,10 +40,10 @@ def run_eva():
         elite=2,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[256, 256], activation="relu")
-    # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="torcs", evolution_params=eva_parameters, model=mlp, logs_every=10,
-                                      max_workers=5)
+    # mlp = MLP(hidden_layers=[256, 256], activation="relu")
+    esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="mario", evolution_params=eva_parameters, model=esn, logs_every=10,
+                                      max_workers=10)
     evolution.run()
 
 
@@ -46,14 +51,14 @@ def run_greedy():
     greedy_policy_params = GreedyPolicyParameters(
         batch_size=100,
         episodes=1000000,
-        gamma=0.1,
+        gamma=0.01,
         optimizer="adam",
         epsilon=0.1,
         test_size = 100,
-        learning_rate=0.0001)
+        learning_rate=0.001)
 
-    q_net = QNetwork(hidden_layers=[256, 256, 256, 256, 256, 256], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=20)
+    q_net = QNetwork(hidden_layers=[300, 600, 900], activation="relu", dropout_keep=None)
+    RL = GreedyPolicyReinforcement(game="mario", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
     RL.run()
 
 
@@ -61,9 +66,9 @@ def run_ddpg():
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         episodes=1000000,
-        test_size=10)
+        test_size=1)
 
-    RL = DDPGReinforcement(game="alhambra", parameters=ddpg_parameters, logs_every=10)
+    RL = DDPGReinforcement(game="torcs", parameters=ddpg_parameters, logs_every=5)
     RL.run()
 
 
@@ -95,10 +100,25 @@ def run_de():
     diff = DifferentialEvolution("alhambra", diff_evolution_parameters, mlp, max_workers=3, logs_every=10)
     diff.run()
 
+def run_keras():
+    RL = DQN(game="2048", batch_size=100, steps=1000000)
+    RL.run()
+
+
+def tests():
+    spec = importlib.util.spec_from_file_location("Game", GAME2048_PY_PATH)
+    game_2048 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(game_2048)
+    for i in range(2):
+        game = game_2048.Game()
+        game.display()
+
 
 if __name__ == '__main__':
+    # run_keras()
     # run_greedy()
-    run_ddpg()
+    # run_ddpg()
     # run_es()
-    # run_eva()
+    # tests()
+    run_eva()
     # run_de()

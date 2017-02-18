@@ -1,10 +1,7 @@
 from games.game import Game
 from constants import *
-import json
-import subprocess
-import platform
-import socket
-import time
+import importlib.util
+import numpy as np
 
 
 class Game2048(Game):
@@ -12,7 +9,7 @@ class Game2048(Game):
     Represents a single 2048 game.
     """
 
-    def __init__(self, model, game_batch_size, seed, use_advanced_tool=False):
+    def __init__(self, model, game_batch_size, seed):
         """
         Initializes a new instance of 2048 game.
         :param model: Model which will be playing this game.
@@ -25,80 +22,59 @@ class Game2048(Game):
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
-
-        self.use_advanced_tool = use_advanced_tool
+        self.phase = 0
 
     def init_process(self):
         """
-        Initializes a subprocess with the game and returns first state of the game.
+        Initializes a new 2048 game.
         """
-        windows = platform.system() == "Windows"
-        if self.use_advanced_tool:
-            params = [GAME2048_ADVANCED_TOOL, str(self.seed), str(self.game_batch_size)]
-            if windows:
-                command = "{} {} {}".format(*params)
-            else:
-                command = ["mono"] + params
-        else:
-            params = [GAME2048, str(self.seed), str(self.game_batch_size)]
-            if windows:
-                command = "{} {} {}".format(*params)
-            else:
-                command = ["mono"] + params
+        spec = importlib.util.spec_from_file_location("Game", GAME2048_PY_PATH)
+        game_2048 = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(game_2048)
+        self.game = game_2048.Game()
+        state = self.game.get_state()
+        return state, self.phase
 
-        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        bufsize=-1)  # Using PIPEs is not the best solution...
-
-        data = self.get_process_data()
-        return data["state"], data["current_phase"]
-
-    def get_process_data(self):
-        """
-        Gets a subprocess next data (line).
-        :return: a subprocess next data (line).
-        """
-        line = self.process.stdout.readline().decode('ascii')
-        return json.loads(line)
-
-    """
-    #==== VERSION USING SOCKETS INSTEAD OF PIPELINES
     def run(self, advanced_results=False):
-        sock = socket.socket()
-        sock.bind(("localhost", 0))  # let OS determine free port
-        port = sock.getsockname()[1]
-        sock.listen(1)
+        """
+        Runs a whole game and returns result.
+        :return: Game result.
+        """
+        score_total = 0
+        for _ in range(self.game_batch_size):
+            state, phase = self.init_process()
+            while not self.game.end:
+                result = self.model.evaluate(state, phase)
+                result = np.argsort(np.array(result))[::-1]
+                for a in result:
+                    moved, _ = self.game.move(a)
+                    if moved:
+                        break
 
-        command = "{} {} {} {}".format(GAME2048, str(self.seed), str(self.game_batch_size), str(port))
-        subprocess.Popen(command)
+                state = self.game.get_state()
+            score_total += self.game.score
+        return score_total / self.game_batch_size
 
-        connection, _ = sock.accept()
-
-        score = None
-
-        while (True):
-            line = self.receive(connection)
-
-            if ("SCORE" in line):
-                score = line.split(' ')[1]
+    def step(self, action):
+        """
+        Performs a single step within the game.
+        :param action: Action to make.
+        :return: New state, current phase, reward, done
+        """
+        reward = None
+        result = np.argsort(np.array(action))[::-1]
+        assert(len(result) == 4) # TODO
+        for a in result:
+            moved, reward = self.game.move(a)
+            if moved:
                 break
+        new_state = self.game.get_state()
+        self.score = self.game.score
 
-            result = self.model.evaluate(json.loads(line))
-            result = "{}{}".format(result, os.linesep)
+        if self.game.end:
+            return new_state, self.phase, reward, True
 
-            connection.sendall(bytearray(result.encode('ascii')))
+        return new_state, self.phase, reward, False
 
-        connection.close()
-        sock.close()
-        return float(score)
-
-    def receive(self, connection):
-        BUFF_SIZE = 4096  # 4 KiB
-        data = ""
-        while True:
-            part = connection.recv(BUFF_SIZE)
-            data += part.decode('ascii')
-            if len(part) < BUFF_SIZE:
-                # either 0 or end of data
-                break
-        return data
-    """
+    def finalize(self):
+        pass

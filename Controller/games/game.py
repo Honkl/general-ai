@@ -12,6 +12,8 @@ class Game():
     def run(self, advanced_results=False):
         """
         Runs a whole game and returns result.
+        :param advanced_results: If true, returns a list of results (if available).
+        For example, returns scores of all players within the single game.
         :return: Game result.
         """
         state, current_phase = self.init_process()
@@ -60,11 +62,14 @@ class Game():
         """
         raise NotImplementedError
 
-    def send_to_process(self, data):
+    def send_to_process(self, input):
         """
         Sends the specified data to subprocess with the game.
         :param data: Data to be send.
         """
+        data = ""
+        for x in input:
+            data += str(x) + " "
         data = "{}{}".format(data, os.linesep)
         self.process.stdin.write(bytearray(data.encode('ascii')))
         self.process.stdin.flush()

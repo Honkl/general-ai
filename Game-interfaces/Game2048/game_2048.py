@@ -1,6 +1,7 @@
 # modified version of https://github.com/Mekire/console-2048/blob/master/console2048.py
 # and https://github.com/tjwei/2048-NN/blob/master/c2048.py
-from random import random, randint
+# some small modifications were made (reward).
+
 import numpy as np
 
 
@@ -107,7 +108,7 @@ def push(grid, direction):
     return score
 
 
-def put_new_cell(grid):
+def put_new_cell(grid, rng):
     n = 0
     r = 0
     i_s = [0] * 16
@@ -119,8 +120,8 @@ def put_new_cell(grid):
                 j_s[n] = j
                 n += 1
     if n > 0:
-        r = randint(0, n - 1)
-        grid[i_s[r], j_s[r]] = 2 if random() < 0.9 else 4
+        r = rng.randint(0, n - 1)
+        grid[i_s[r], j_s[r]] = 2 if rng.random_sample() < 0.9 else 4
     return n
 
 
@@ -161,11 +162,12 @@ def print_grid(grid_array):
 
 
 class Game:
-    def __init__(self, cols=4, rows=4):
+    def __init__(self, cols=4, rows=4, seed=42):
+        self.rng = np.random.RandomState(seed)
         self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
         self.grid = self.grid_array
         for i in range(2):
-            put_new_cell(self.grid)
+            put_new_cell(self.grid, self.rng)
         self.score = 0
         self.end = False
 
@@ -198,19 +200,21 @@ class Game:
             else:
                 score = push_left(self.grid)
         if score == -1:
-            return 0
+            return 0, None
+        reward = score
         self.score += score
         if not prepare_next_turn(self.grid):
             self.end = True
-        return 1
+        return 1, reward
 
     def display(self):
         print_grid(self.grid_array)
 
+    def get_state(self):
+        return np.array([np.log2(x) if x > 0 else .0 for x in self.grid.flatten()])
 
-from random import shuffle
 
-
+"""
 def random_play(game):
     moves = [0, 1, 2, 3]
     while not game.end:
@@ -219,3 +223,4 @@ def random_play(game):
             if game.move(m):
                 break
     return game.score
+"""

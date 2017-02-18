@@ -38,7 +38,7 @@ class LearnedDDPG(Model):
         :param current_phase: Current game phase.
         :return: Action.
         """
-        action = self.ddpg.agent.play(input, None)
+        action = self.ddpg.agent.play(input)
         action_string = ""
         for a in action:
             action_string += str(a) + " "

@@ -66,19 +66,13 @@ class MLP(Model):
             :param input: Input to the neural network.
             :return: Output of the neural network.
             """
-            x = np.array(list(map(float, input)))
+            x = np.array(input)
             for W in self.matrices:
                 x = np.concatenate((x, [1]), axis=0)
                 x = self.activation(np.matmul(x, W))
 
-            result = ""
-            assert (self.layer_sizes[-1] == len(x))
             x = self.normalize(x)
-            for i in range(len(x)):
-                result += str(x[i])
-                if (i < self.layer_sizes[-1] - 1):
-                    result += " "
-            return result
+            return x
 
         def normalize(self, x):
             """

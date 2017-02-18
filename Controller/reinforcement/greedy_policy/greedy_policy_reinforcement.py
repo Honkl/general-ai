@@ -10,6 +10,7 @@ import utils.miscellaneous
 from reinforcement.environment import Environment
 from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
 from reinforcement.reinforcement import Reinforcement
+from copy import deepcopy
 
 
 class GreedyPolicyReinforcement(Reinforcement):
@@ -56,7 +57,8 @@ class GreedyPolicyReinforcement(Reinforcement):
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count)
+                                   actions_in_phases=self.actions_count,
+                                   discrete=True)
 
             epoch_loss = 0.0
             epoch_reward = 0.0
@@ -69,8 +71,8 @@ class GreedyPolicyReinforcement(Reinforcement):
             while game_steps < self.STEP_LIMIT:
                 game_steps += 1
 
-                old_state = self.env.state
-                selected_action, estimated_reward = self.agent.play(self.env.state)
+                old_state = deepcopy(self.env.state)
+                selected_action, estimated_reward = self.agent.play(old_state)
                 epoch_estimated_reward += estimated_reward
 
                 # Perform the action
@@ -84,7 +86,7 @@ class GreedyPolicyReinforcement(Reinforcement):
                     epoch_loss += loss
 
                 if done:
-                    epoch_score = score[0]
+                    epoch_score = score
                     break
 
             episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
@@ -117,7 +119,8 @@ class GreedyPolicyReinforcement(Reinforcement):
             env = Environment(game_class=self.game_class,
                               seed=np.random.randint(0, 2 ** 16),
                               observations_count=self.state_size,
-                              actions_in_phases=self.actions_count)
+                              actions_in_phases=self.actions_count,
+                              discrete=True)
             game_steps = 0
             while game_steps < self.STEP_LIMIT:
                 game_steps += 1

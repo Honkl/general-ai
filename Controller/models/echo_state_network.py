@@ -75,7 +75,7 @@ class EchoState(Model):
             :param input: Input to the network.
             :return:
             """
-            x = np.array(list(map(float, input)))
+            x = np.array(input)
 
             # reservoir ESN assume (n_samples, n_features)
             x = EchoState.library_esn.transform(x.reshape(-1, len(input))).flatten()  # we have only one sample
@@ -83,14 +83,8 @@ class EchoState(Model):
                 x = np.concatenate((x, [1]), axis=0)
                 x = self.activation(np.matmul(x, W))
 
-            result = ""
-            assert (self.layer_sizes[-1] == len(x))
             x = self.normalize(x)
-            for i in range(len(x)):
-                result += str(x[i])
-                if (i < self.layer_sizes[-1] - 1):
-                    result += " "
-            return result
+            return x
 
         def normalize(self, x):
             """
