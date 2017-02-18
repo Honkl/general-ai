@@ -38,7 +38,7 @@ def bar_plot(values, evals, game):
     ax.set_xticklabels([name for (name, _) in values])
 
     plt.tight_layout()
-    plt.savefig('comparison.jpg')
+    plt.savefig('comparison.png')
 
 
 def get_y_lim_for_game(game):
@@ -127,7 +127,7 @@ def run_random_model(game, evals):
     plt.plot(x, results, 'b', x, [np.mean(results) for _ in results], 'r--')
     plt.title("Random - game: {} - avg: {}".format(game, np.mean(results)))
     plt.ylim(0, get_y_lim_for_game(game))
-    plt.savefig("random_model_{}.jpg".format(game))
+    plt.savefig("random_model_{}.png".format(game))
 
 
 def eval_alhambra_winrate(model, evals):

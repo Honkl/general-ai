@@ -189,7 +189,7 @@ class Evolution():
         plt.legend(loc="lower right")
         plt.title("GAME: {}\n{}\n{}".format(self.current_game, self.evolution_params.to_string(),
                                             self.model.to_string()), fontsize=10)
-        plt.savefig(dir + "/plot.jpg")
+        plt.savefig(dir + "/plot.png")
 
     def init_directories(self):
         """
