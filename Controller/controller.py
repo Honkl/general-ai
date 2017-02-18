@@ -92,7 +92,7 @@ def run_de():
         f=1)
 
     mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    diff = DifferentialEvolution("alhambra", diff_evolution_parameters, mlp, max_workers=3, logs_every=10)
+    diff = DifferentialEvolution("2048", diff_evolution_parameters, mlp, max_workers=3, logs_every=3)
     diff.run()
 
 
@@ -108,5 +108,5 @@ if __name__ == '__main__':
     # run_ddpg()
     # run_es()
     # tests()
-    run_eva()
-    # run_de()
+    # run_eva()
+    run_de()

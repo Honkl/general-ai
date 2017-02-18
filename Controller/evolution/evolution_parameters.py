@@ -233,6 +233,7 @@ class DifferentialEvolutionParameters(EvolutionParameters):
         self._hof_size = hof_size
         self._cr = cr
         self._f = f
+        self.elite = 0 # Not currently using elite in diff evolution.
 
     @property
     def pop_size(self):
