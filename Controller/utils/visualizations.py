@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import games
+import time
 import utils.miscellaneous
 from models.mlp import MLP
 from models.echo_state_network import EchoState
@@ -109,15 +110,18 @@ def run_torcs_vis_on(model, evals):
 
 def run_2048_extended(model, evals):
     print("Game 2048 with extended logs started.")
-    game_instance = games.game2048.Game2048(model, evals, np.random.randint(0, 2 ** 16), use_advanced_tool=True)
+    game_instance = games.game2048.Game2048(model, evals, np.random.randint(0, 2 ** 16))
     results = game_instance.run(advanced_results=True)
 
 
 def run_random_model(game, evals):
     print("Generating graph of 'random' model for game {}.".format(game))
     results = []
+    t = time.time()
     for i in range(evals):
-        print("{}/{}".format(i + 1, evals))
+        if time.time() - t > 1 or i == evals - 1:
+            print("{}/{}".format(i + 1, evals))
+            t = time.time()
         parameters = [Random(game), 1, np.random.randint(0, 2 ** 16)]
         game_instance = utils.miscellaneous.get_game_instance(game, parameters)
         result = game_instance.run()
@@ -145,9 +149,9 @@ def eval_alhambra_winrate(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "torcs"
-    evals = 250
-    run_random_model("2048", 1000)
+    game = "2048"
+    evals = 1000
+    # run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
     # file_name = "../../Controller/logs/torcs/echo_state/logs_2017-02-16_02-37-04/best/best_0.json"
@@ -165,11 +169,11 @@ if __name__ == '__main__':
     # mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(esn, evals)
     # q_net = LearnedGreedyRL(logdir)
-    ddpg = LearnedDDPG(logdir)
+    #ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    # run_2048_extended(ddpg, evals)
+    run_2048_extended(Random(game), evals)
 
     # eval_mario_winrate(model=q_net, evals=evals, level="gombas", vis_on=True)
     # compare_models(game, evals, mlp)
-    run_torcs_vis_on(model=ddpg, evals=evals)
+    #run_torcs_vis_on(model=ddpg, evals=evals)

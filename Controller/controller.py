@@ -26,7 +26,7 @@ np.random.seed(MASTER_SEED)
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
         pop_size=50,
-        cxpb=0.5,
+        cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
         ngen=5000,
         game_batch_size=10,
@@ -37,8 +37,8 @@ def run_eva():
 
     mlp = MLP(hidden_layers=[256, 256], activation="relu")
     # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=50,
-                                      max_workers=10)
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=10,
+                                      max_workers=5)
     evolution.run()
 
 
@@ -108,5 +108,5 @@ if __name__ == '__main__':
     # run_ddpg()
     # run_es()
     # tests()
-    # run_eva()
-    run_de()
+    run_eva()
+    # run_de()

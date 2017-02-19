@@ -16,13 +16,13 @@ class Game2048(Game):
         :param game_batch_size: Number of games that will be played immediately (one after one) within the single game
         instance. Result is averaged.
         :param seed: A random seed for random generator within the game.
-        :param use_advanced_tool: True if some advanced results are wanted (using different process).
         """
         super(Game2048, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
         self.phase = 0
+        self.batch_games = []
 
     def init_process(self):
         """
@@ -53,7 +53,42 @@ class Game2048(Game):
 
                 state = self.game.get_state()
             score_total += self.game.score
+
+            if advanced_results:
+                self.batch_games.append(self.game)
+
+        if advanced_results:
+            self.log_statistics()
+
         return score_total / self.game_batch_size
+
+    def log_statistics(self):
+        counts = {}
+        for g in self.batch_games:
+            m = g.max()
+            if m in counts:
+                counts[m] += 1
+            else:
+                counts[m] = 1
+
+        print(counts)
+
+        with open("game2048_statistics.txt", "w") as f:
+            f.write("--GAME 2048 STATISTICS--")
+            f.write(os.linesep)
+            f.write("Model: {}".format(self.model.get_name()))
+            f.write(os.linesep)
+            f.write("Total games: {}, Average score: {}".format(self.game_batch_size,
+                                                                np.mean([s.score for s in self.batch_games])))
+            f.write(os.linesep)
+            f.write("Reached tiles:")
+            f.write(os.linesep)
+
+            width = 5
+            for key in sorted(counts):
+                f.write("{}: {} = {}%".format(str(key).rjust(width), str(counts[key]).rjust(width),
+                                              str(100 * counts[key] / self.game_batch_size).rjust(width)))
+                f.write(os.linesep)
 
     def step(self, action):
         """
@@ -63,7 +98,7 @@ class Game2048(Game):
         """
         reward = None
         result = np.argsort(np.array(action))[::-1]
-        assert(len(result) == 4) # TODO
+        assert (len(result) == 4)  # TODO
         for a in result:
             moved, reward = self.game.move(a)
             if moved:

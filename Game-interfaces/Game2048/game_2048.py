@@ -201,6 +201,7 @@ class Game:
                 score = push_left(self.grid)
         if score == -1:
             return 0, None
+        score *= 2 # We want result as a score (2 + 2 merged should be score "4" not "2")
         reward = score
         self.score += score
         if not prepare_next_turn(self.grid, self.rng):
@@ -213,6 +214,14 @@ class Game:
     def get_state(self):
         return np.array([np.log2(x) if x > 0 else .0 for x in self.grid.flatten()])
 
+
+""" # Debug stuff
+g = Game(seed=0)
+g.display()
+g.move(1)
+g.display()
+print("score: {}, max: {}".format(g.score, g.max()))
+"""
 
 """
 def random_play(game):
