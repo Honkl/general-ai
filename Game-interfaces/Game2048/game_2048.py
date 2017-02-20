@@ -170,6 +170,7 @@ class Game:
             put_new_cell(self.grid, self.rng)
         self.score = 0
         self.end = False
+        self.total_moves = 0
 
     def copy(self):
         rtn = Game(self.grid.shape[0], self.grid.shape[1])
@@ -203,6 +204,7 @@ class Game:
             return 0, None
         score *= 2 # We want result as a score (2 + 2 merged should be score "4" not "2")
         reward = score
+        self.total_moves += 1
         self.score += score
         if not prepare_next_turn(self.grid, self.rng):
             self.end = True

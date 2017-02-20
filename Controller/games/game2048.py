@@ -78,8 +78,11 @@ class Game2048(Game):
             f.write(os.linesep)
             f.write("Model: {}".format(self.model.get_name()))
             f.write(os.linesep)
-            f.write("Total games: {}, Average score: {}".format(self.game_batch_size,
-                                                                np.mean([s.score for s in self.batch_games])))
+            f.write("Total games: {}, Average score: {}, Average moves: {}".format(self.game_batch_size,
+                                                                                   np.mean([s.score for s in
+                                                                                            self.batch_games]),
+                                                                                   np.mean([s.total_moves for s in
+                                                                                            self.batch_games])))
             f.write(os.linesep)
             f.write("Reached tiles:")
             f.write(os.linesep)

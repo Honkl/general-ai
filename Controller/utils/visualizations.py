@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
@@ -127,10 +128,15 @@ def run_random_model(game, evals):
         result = game_instance.run()
         results.append(result)
 
-    x = range(evals)
-    plt.plot(x, results, 'b', x, [np.mean(results) for _ in results], 'r--')
-    plt.title("Random - game: {} - avg: {}".format(game, np.mean(results)))
+    x = range(0, evals)
+    # plt.plot(x, results, 'b', x, [np.mean(results) for _ in results], 'r--')
+    plt.scatter(x, results, cmap='b')
+    plt.plot([np.mean(results) for _ in results], 'r--')
+    plt.title("Random - game: {} - Average score: {}".format(game, np.mean(results)))
     plt.ylim(0, get_y_lim_for_game(game))
+    plt.xlim(0, evals)
+    plt.xlabel("Evals")
+    plt.ylabel("Score")
     plt.savefig("random_model_{}.png".format(game))
 
 
@@ -163,17 +169,16 @@ if __name__ == '__main__':
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
     logdir = "../../Controller/logs/torcs/deep_deterministic_policy_gradient/logs_2017-02-17_00-42-30"
 
-
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(esn, evals)
     # q_net = LearnedGreedyRL(logdir)
-    #ddpg = LearnedDDPG(logdir)
+    # ddpg = LearnedDDPG(logdir)
 
-    # run_random_model(game, evals)
-    run_2048_extended(Random(game), evals)
+    run_random_model(game, evals)
+    # run_2048_extended(Random(game), evals)
 
     # eval_mario_winrate(model=q_net, evals=evals, level="gombas", vis_on=True)
     # compare_models(game, evals, mlp)
-    #run_torcs_vis_on(model=ddpg, evals=evals)
+    # run_torcs_vis_on(model=ddpg, evals=evals)
