@@ -26,14 +26,14 @@ np.random.seed(MASTER_SEED)
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
         pop_size=50,
-        cxpb=0.75,
-        mut=("uniform", 0.1, 0.1),
+        cxpb=0.55,
+        mut=("uniform", 0.01, 0.5),
         ngen=5000,
         game_batch_size=10,
-        cxindpb=0.2,
+        cxindpb=0.5,
         hof_size=0,
         elite=5,
-        selection=("tournament", 3))
+        selection=("tournament", 2))
 
     mlp = MLP(hidden_layers=[256, 256], activation="relu")
     # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")

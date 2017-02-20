@@ -20,7 +20,7 @@ class Game2048(Game):
         super(Game2048, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
-        self.seed = seed
+        self.rng = np.random.RandomState(seed)
         self.phase = 0
         self.batch_games = []
 
@@ -31,7 +31,7 @@ class Game2048(Game):
         spec = importlib.util.spec_from_file_location("Game", GAME2048_PY_PATH)
         game_2048 = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(game_2048)
-        self.game = game_2048.Game(self.seed)
+        self.game = game_2048.Game(self.rng.randint(0, 2 ** 30))
         state = self.game.get_state()
         return state, self.phase
 
@@ -63,6 +63,9 @@ class Game2048(Game):
         return score_total / self.game_batch_size
 
     def log_statistics(self):
+        """
+        Logs statistics of games that have run (statistics of 'game-batch-size' games).
+        """
         counts = {}
         for g in self.batch_games:
             m = g.max()

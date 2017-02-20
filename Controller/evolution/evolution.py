@@ -10,15 +10,11 @@ import concurrent.futures
 import constants
 import time
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from deap import creator, base, tools
-
-from games.alhambra import Alhambra
-from games.torcs import Torcs
-from games.mario import Mario
-from games.game2048 import Game2048
 from utils.miscellaneous import get_game_config, get_game_instance
 
 
@@ -36,6 +32,8 @@ class Evolution():
         self.logs_every = logs_every
 
         self.game_config = get_game_config(game)
+
+        print("Parameters: {}".format(evolution_params.to_string()))
 
     def write_to_file(self, individual, filename):
         """
