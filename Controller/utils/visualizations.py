@@ -48,7 +48,7 @@ def get_y_lim_for_game(game):
     if game == "alhambra":
         ylim = 200
     if game == "torcs":
-        ylim = 10000
+        ylim = 3000
     if game == "mario":
         ylim = 1.2
     if game == "2048":
@@ -155,8 +155,8 @@ def eval_alhambra_winrate(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "2048"
-    evals = 1000
+    game = "torcs"
+    evals = 10
     # run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
-    # eval_alhambra_winrate(esn, evals)
+    # eval_alhambra_winrate(Random(game), evals)
     # q_net = LearnedGreedyRL(logdir)
     # ddpg = LearnedDDPG(logdir)
 
@@ -180,5 +180,5 @@ if __name__ == '__main__':
     # run_2048_extended(Random(game), evals)
 
     # eval_mario_winrate(model=q_net, evals=evals, level="gombas", vis_on=True)
-    # compare_models(game, evals, mlp)
+    # compare_models(game, evals, Random(game))
     # run_torcs_vis_on(model=ddpg, evals=evals)
