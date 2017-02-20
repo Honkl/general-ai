@@ -1,2 +1,0 @@
-runtime: 9h 9m 35.57788896560669s
-input scale: log(x) or zero if zero
