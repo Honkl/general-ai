@@ -26,17 +26,17 @@ np.random.seed(MASTER_SEED)
 
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=25,
+        pop_size=50,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
         ngen=1000,
-        game_batch_size=5,
+        game_batch_size=10,
         cxindpb=0.2,
         hof_size=0,
         elite=5,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[50, 50], activation="relu")
+    mlp = MLP(hidden_layers=[300, 300, 300], activation="relu")
     # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=10,
                                       max_workers=5)
@@ -105,9 +105,9 @@ def run_keras():
 
 if __name__ == '__main__':
     # run_keras()
-    run_greedy()
+    # run_greedy()
     # run_ddpg()
     # run_es()
     # tests()
-    # run_eva()
+    run_eva()
     # run_de()
