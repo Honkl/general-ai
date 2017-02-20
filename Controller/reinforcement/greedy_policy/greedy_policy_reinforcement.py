@@ -50,6 +50,7 @@ class GreedyPolicyReinforcement(AbstractReinforcement):
 
         start = time.time()
         data = []
+        print_timer = time.time()
 
         # One epoch = One episode = One game played
         for i_episode in range(1, episodes + 1):
@@ -94,8 +95,10 @@ class GreedyPolicyReinforcement(AbstractReinforcement):
                                                                                       "{0:.5f}".format(
                                                                                           epoch_loss / game_steps),
                                                                                       episode_time)
-            print(line)
             data.append(line)
+            if time.time() - print_timer > 1 or i_episode == episodes:
+                print(line)
+                print_timer = time.time()
 
             if i_episode % self.logs_every == 0:
                 self.test_and_save(log_data=data, start_time=start, i_episode=i_episode)
@@ -132,7 +135,7 @@ class GreedyPolicyReinforcement(AbstractReinforcement):
                 new_state, reward, done, score = env.step(selected_action)
 
                 if done:
-                    avg_test_score += score[0]
+                    avg_test_score += score
                     break
 
         avg_test_score /= n_iterations

@@ -8,6 +8,7 @@ class AbstractGame():
         self.process = None
         self.model = None
         self.score = None
+        self.score_extended = None
 
     def run(self, advanced_results=False):
         """
@@ -23,9 +24,9 @@ class AbstractGame():
             state, current_phase, _, done = self.step(result)
             if done:
                 if advanced_results:
-                    return self.score
+                    return self.score_extended
                 else:
-                    return self.score[0]
+                    return self.score
 
     def step(self, action):
         """
@@ -41,7 +42,8 @@ class AbstractGame():
         phase = data["current_phase"]
         scores = data["score"]
         done = data["done"]
-        self.score = list(map(float, scores))
+        self.score_extended = list(map(float, scores))
+        self.score = self.score_extended[0]
 
         if int(done) == 1:
             self.finalize()
