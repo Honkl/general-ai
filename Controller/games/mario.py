@@ -1,11 +1,11 @@
-from games.game import Game
+from games.abstract_game import AbstractGame
 import subprocess
 from constants import *
 import json
 import platform
 
 
-class Mario(Game):
+class Mario(AbstractGame):
     """
     Represents a single Mario game.
     """

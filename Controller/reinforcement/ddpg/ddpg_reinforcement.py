@@ -1,7 +1,7 @@
 from  reinforcement.ddpg.filter_env import *
 from reinforcement.ddpg.ddpg_agent import DDPGAgent
 from reinforcement.environment import Environment
-from reinforcement.reinforcement import Reinforcement
+from reinforcement.abstract_reinforcement import AbstractReinforcement
 import utils.miscellaneous
 import tensorflow as tf
 import gc
@@ -14,7 +14,7 @@ import json
 gc.enable()
 
 
-class DDPGReinforcement(Reinforcement):
+class DDPGReinforcement(AbstractReinforcement):
     """
     Represents a DDPG model.
     """

@@ -1,13 +1,13 @@
 import json
 import os
 
-from models.model import Model
+from models.abstract_model import AbstractModel
 from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import GreedyPolicyParameters
 
 
-class LearnedGreedyRL(Model):
+class LearnedGreedyRL(AbstractModel):
     """
     Represents a learned greedy-policy reinforcement learning model. This is only an interface wrapper.
     Uses tensorflow internally.

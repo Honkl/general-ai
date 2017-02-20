@@ -1,4 +1,4 @@
-from games.game import Game
+from games.abstract_game import AbstractGame
 import subprocess
 import json
 import numpy as np
@@ -7,7 +7,7 @@ from constants import *
 import platform
 
 
-class Torcs(Game):
+class Torcs(AbstractGame):
     MAX_NUMBER_OF_TORCS_PORTS = 10
 
     master_lock = Lock()

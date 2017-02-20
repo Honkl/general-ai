@@ -1,12 +1,12 @@
 import json
 import os
 
-from models.model import Model
+from models.abstract_model import AbstractModel
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.reinforcement_parameters import DDPGParameters
 
 
-class LearnedDDPG(Model):
+class LearnedDDPG(AbstractModel):
     """
     Represents a learned DDPG model. This is only an interface wrapper. Uses tensorflow internally.
     """

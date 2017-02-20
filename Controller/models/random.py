@@ -1,9 +1,9 @@
-from models.model import Model
+from models.abstract_model import AbstractModel
 import numpy as np
 import utils.miscellaneous
 
 
-class Random(Model):
+class Random(AbstractModel):
     """
     Represents random model.
     """

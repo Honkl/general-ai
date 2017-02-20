@@ -9,11 +9,11 @@ import constants
 import utils.miscellaneous
 from reinforcement.environment import Environment
 from reinforcement.greedy_policy.greedy_policy_agent import GreedyPolicyAgent
-from reinforcement.reinforcement import Reinforcement
+from reinforcement.abstract_reinforcement import AbstractReinforcement
 from copy import deepcopy
 
 
-class GreedyPolicyReinforcement(Reinforcement):
+class GreedyPolicyReinforcement(AbstractReinforcement):
     def __init__(self, game, parameters, q_network, threads=8, logs_every=10):
         self.game = game
         self.parameters = parameters

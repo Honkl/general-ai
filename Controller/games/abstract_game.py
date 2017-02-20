@@ -1,7 +1,7 @@
 import os
 
 
-class Game():
+class AbstractGame():
     """ Basic wrapper for every game used."""
 
     def __init__(self):

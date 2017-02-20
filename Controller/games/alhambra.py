@@ -1,11 +1,11 @@
-from games.game import Game
+from games.abstract_game import AbstractGame
 import subprocess
 from constants import *
 import platform
 import json
 
 
-class Alhambra(Game):
+class Alhambra(AbstractGame):
     """
     Represents single Alhambra game. Provides communication with internal game process.
     """

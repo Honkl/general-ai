@@ -2,11 +2,11 @@ import numpy as np
 import constants
 import json
 import utils.miscellaneous
-from models.model import Model
+from models.abstract_model import AbstractModel
 from utils import activations
 
 
-class MLP(Model):
+class MLP(AbstractModel):
     """
     Represents a simple feed forward  MLP neural network model.
     Can contain multiple networks, each one for each game phase. Contains instances of 'MLPNetwork'.

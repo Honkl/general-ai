@@ -16,7 +16,8 @@ from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicy
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters
-#from reinforcement.keras_rl.dqn import DQN
+
+# from reinforcement.keras_rl.dqn import DQN
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
@@ -25,17 +26,17 @@ np.random.seed(MASTER_SEED)
 
 def run_eva():
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=50,
-        cxpb=0.55,
-        mut=("uniform", 0.01, 0.5),
-        ngen=5000,
-        game_batch_size=10,
-        cxindpb=0.5,
+        pop_size=25,
+        cxpb=0.75,
+        mut=("uniform", 0.1, 0.1),
+        ngen=1000,
+        game_batch_size=5,
+        cxindpb=0.2,
         hof_size=0,
         elite=5,
-        selection=("tournament", 2))
+        selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[256, 256], activation="relu")
+    mlp = MLP(hidden_layers=[50, 50], activation="relu")
     # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=10,
                                       max_workers=5)
@@ -46,14 +47,14 @@ def run_greedy():
     greedy_policy_params = GreedyPolicyParameters(
         batch_size=100,
         episodes=1000000,
-        gamma=0.01,
+        gamma=0.99,
         optimizer="adam",
         epsilon=0.1,
         test_size=100,
         learning_rate=0.001)
 
-    q_net = QNetwork(hidden_layers=[300, 600, 900], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="mario", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
+    q_net = QNetwork(hidden_layers=[300, 600], activation="relu", dropout_keep=None)
+    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
     RL.run()
 
 
@@ -98,15 +99,15 @@ def run_de():
 
 def run_keras():
     pass
-    #RL = DQN(game="2048", batch_size=100, steps=1000000)
-    #RL.run()
+    # RL = DQN(game="2048", batch_size=100, steps=1000000)
+    # RL.run()
 
 
 if __name__ == '__main__':
     # run_keras()
-    # run_greedy()
+    run_greedy()
     # run_ddpg()
     # run_es()
     # tests()
-    run_eva()
+    # run_eva()
     # run_de()

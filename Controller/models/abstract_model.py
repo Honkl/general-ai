@@ -1,4 +1,4 @@
-class Model():
+class AbstractModel():
     """
     Wrapper for all models for evaluating input from a game.
     """

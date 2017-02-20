@@ -5,10 +5,10 @@ import utils.miscellaneous
 import lib.simple_esn
 from threading import Lock
 
-from models.model import Model
+from models.abstract_model import AbstractModel
 
 
-class EchoState(Model):
+class EchoState(AbstractModel):
     """
     Represents Echo-State Network model. Can contain multiple networks (echo state models).
     """

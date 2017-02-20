@@ -1,10 +1,10 @@
-from games.game import Game
+from games.abstract_game import AbstractGame
 from constants import *
 import importlib.util
 import numpy as np
 
 
-class Game2048(Game):
+class Game2048(AbstractGame):
     """
     Represents a single 2048 game.
     """

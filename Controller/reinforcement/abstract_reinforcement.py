@@ -7,7 +7,7 @@ import constants
 import utils.miscellaneous
 
 
-class Reinforcement():
+class AbstractReinforcement():
     """
     Interface for DDPGReinforcement and GreedyPolicyReinforcement
     """
