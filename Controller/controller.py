@@ -29,17 +29,17 @@ def run_eva():
         pop_size=50,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
-        ngen=1000,
+        ngen=5000,
         game_batch_size=10,
         cxindpb=0.2,
         hof_size=0,
         elite=5,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[300, 300, 300], activation="relu")
-    # esn = EchoState(n_readout=256, n_components=1024, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=mlp, logs_every=10,
-                                      max_workers=5)
+    # mlp = MLP(hidden_layers=[300, 300, 300], activation="relu")
+    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game="mario", evolution_params=eva_parameters, model=esn, logs_every=10,
+                                      max_workers=10)
     evolution.run()
 
 
