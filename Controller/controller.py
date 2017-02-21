@@ -38,7 +38,7 @@ def run_eva():
 
     # mlp = MLP(hidden_layers=[300, 300, 300], activation="relu")
     esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="mario", evolution_params=eva_parameters, model=esn, logs_every=10,
+    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=esn, logs_every=10,
                                       max_workers=10)
     evolution.run()
 
@@ -70,16 +70,16 @@ def run_ddpg():
 
 def run_es():
     strategy_parameters = EvolutionStrategyParameters(
-        pop_size=20,
-        ngen=1000,
-        game_batch_size=5,
+        pop_size=25,
+        ngen=5000,
+        game_batch_size=10,
         hof_size=0,
-        elite=2,
+        elite=5,
         sigma=1.0)
 
-    # mlp = MLP(hidden_layers=[16], activation="relu")
-    esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    strategy = EvolutionStrategy("alhambra", strategy_parameters, esn, logs_every=10, max_workers=5)
+    mlp = MLP(hidden_layers=[16], activation="relu")
+    # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
+    strategy = EvolutionStrategy("2048", strategy_parameters, mlp, logs_every=10, max_workers=5)
     strategy.run()
 
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     # run_keras()
     # run_greedy()
     # run_ddpg()
-    # run_es()
+    run_es()
     # tests()
-    run_eva()
+    # run_eva()
     # run_de()

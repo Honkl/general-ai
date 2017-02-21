@@ -87,7 +87,10 @@ class Environment(gym.Env):
     def save_results(self):
         plt.figure()
         plt.plot(self.results)
+        print(self.results)
+        plt.xlim(20)
         plt.xlabel("Episode")
+        plt.ylim(5000)
         plt.ylabel("Score")
         plt.savefig("score_plot.jpg")
         plt.close()
