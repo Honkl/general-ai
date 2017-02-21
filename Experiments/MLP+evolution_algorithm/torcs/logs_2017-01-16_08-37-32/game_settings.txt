@@ -1,5 +1,0 @@
-track=a-speedway
-type=oval
-nofuel
-nolaptime
-damage
