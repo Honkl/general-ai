@@ -16,8 +16,7 @@ from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicy
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
 from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters
-
-# from reinforcement.keras_rl.dqn import DQN
+from reinforcement.tf_rl.dqn import DQN
 
 MASTER_SEED = 42
 random.seed(MASTER_SEED)
@@ -77,7 +76,7 @@ def run_es():
         elite=5,
         sigma=1.0)
 
-    mlp = MLP(hidden_layers=[16], activation="relu")
+    mlp = MLP(hidden_layers=[16, 16], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
     strategy = EvolutionStrategy("2048", strategy_parameters, mlp, logs_every=10, max_workers=5)
     strategy.run()
@@ -97,17 +96,17 @@ def run_de():
     diff.run()
 
 
-def run_keras():
-    pass
-    # RL = DQN(game="2048", batch_size=100, steps=1000000)
-    # RL.run()
+def run_dqn():
+    RL = DQN(game="2048")
+    RL.run()
 
 
 if __name__ == '__main__':
     # run_keras()
     # run_greedy()
     # run_ddpg()
-    run_es()
+    # run_es()
     # tests()
     # run_eva()
     # run_de()
+    run_dqn()

@@ -1,7 +1,9 @@
+# Implementation from https://github.com/yukezhu/tensorflow-reinforce
+
 import random
 import numpy as np
 import tensorflow as tf
-from replay_buffer import ReplayBuffer
+from reinforcement.replay_buffer import ReplayBuffer
 
 class NeuralQLearner(object):
 
@@ -13,7 +15,7 @@ class NeuralQLearner(object):
                      batch_size=32,
                      init_exp=0.5,       # initial exploration prob
                      final_exp=0.1,      # final exploration prob
-                     anneal_steps=10000, # N steps for annealing exploration 
+                     anneal_steps=10000, # N steps for annealing exploration
                      replay_buffer_size=10000,
                      store_replay_every=5, # how frequent to store experience
                      discount_factor=0.9, # discount future rewards
@@ -176,7 +178,7 @@ class NeuralQLearner(object):
     if self.replay_buffer.count() < self.batch_size:
       return
 
-    batch           = self.replay_buffer.getBatch(self.batch_size)
+    batch           = self.replay_buffer.get_batch(self.batch_size)
     states          = np.zeros((self.batch_size, self.state_dim))
     rewards         = np.zeros((self.batch_size,))
     action_mask     = np.zeros((self.batch_size, self.num_actions))
