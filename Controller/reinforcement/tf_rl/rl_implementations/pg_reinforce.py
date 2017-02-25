@@ -162,7 +162,7 @@ class PolicyGradientREINFORCE(object):
 
     # compute discounted future rewards
     discounted_rewards = np.zeros(N)
-    for t in reversed(xrange(N)):
+    for t in reversed(range(N)):
       # future discounted reward from now on
       r = self.reward_buffer[t] + self.discount_factor * r
       discounted_rewards[t] = r
@@ -177,7 +177,7 @@ class PolicyGradientREINFORCE(object):
     calculate_summaries = self.train_iteration % self.summary_every == 0 and self.summary_writer is not None
 
     # update policy network with the rollout in batches
-    for t in xrange(N-1):
+    for t in range(N-1):
 
       # prepare inputs
       states  = self.state_buffer[t][np.newaxis, :]
