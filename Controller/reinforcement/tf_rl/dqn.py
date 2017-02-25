@@ -26,12 +26,12 @@ class DQN():
         #
         # Set parameters of the model
         #
-        self.q_net_hidden_layers = [500, 500, 500]
+        self.q_net_hidden_layers = [256, 256]
         self.activation_f = "relu"
         self.parameters = DQNParameters(batch_size=100,
                                         init_exp=0.5,
-                                        final_exp=0.1,
-                                        anneal_steps=100000,
+                                        final_exp=0.01,
+                                        anneal_steps=10000,
                                         replay_buffer_size=10000,
                                         store_replay_every=5,
                                         discount_factor=0.9,
@@ -75,25 +75,25 @@ class DQN():
                                             graph=self.sess.graph,
                                             flush_secs=10)
 
-        self.state_dim = 16
-        self.num_actions = 4
+        self.num_actions = self.actions_count_sum
 
         self.q_learner = NeuralQLearner(self.sess,
                                         self.optimizer,
                                         self.q_network,
-                                        self.state_dim,
+                                        self.state_size,
                                         self.num_actions,
                                         summary_writer=self.writer,
-                                        summary_every=100,
-                                        batch_size=100,
-                                        anneal_steps=100000,
-                                        replay_buffer_size=10000,
-                                        target_update_rate=0.1,
-                                        store_replay_every=1,  # how frequent to store experience
-                                        discount_factor=0.9,  # discount future rewards
-                                        reg_param=0.01,  # regularization constants
-                                        max_gradient=5,  # max gradient norms
-                                        double_q_learning=False)
+                                        init_exp=self.parameters.init_exp,
+                                        final_exp=self.parameters.final_exp,
+                                        batch_size=self.parameters.batch_size,
+                                        anneal_steps=self.parameters.anneal_steps,
+                                        replay_buffer_size=self.parameters.replay_buffer_size,
+                                        target_update_rate=self.parameters.target_update_rate,
+                                        store_replay_every=self.parameters.store_replay_every,
+                                        discount_factor=self.parameters.discount_factor,
+                                        reg_param=self.parameters.reg_param,
+                                        max_gradient=self.parameters.max_gradient,
+                                        double_q_learning=self.parameters.double_q_learning)
 
     def create_dirs_and_logs(self):
         dir = constants.loc + "/logs/" + self.game + "/dqn"
@@ -156,7 +156,7 @@ class DQN():
                 next_state, reward, done, info = self.env.step(action)
 
                 total_rewards += reward
-                # reward = -10 if done else 0.1 # normalize reward
+                reward = -10 if done else 0.1  # normalize reward
                 self.q_learner.storeExperience(state, action, reward, next_state, done)
 
                 self.q_learner.updateModel()
