@@ -16,11 +16,11 @@ class Environment(gym.Env):
         self.discrete = discrete
 
         self.actions_total = sum(actions_in_phases)
-        self.observation_space = spaces.Box(low=-np.Inf, high=np.Inf, shape=(observations_count,))
-        if discrete:
-            self.action_space = spaces.Discrete(n=self.actions_total)
-        else:
-            self.action_space = spaces.Box(low=-1, high=1, shape=(self.actions_total,))
+        #self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
+        #if discrete:
+        #    self.action_space = spaces.Discrete(n=self.actions_total)
+        #else:
+        #    self.action_space = spaces.Box(low=-1, high=1, shape=(self.actions_total,))
 
         self._seed(seed)
         self.reset()
@@ -43,15 +43,21 @@ class Environment(gym.Env):
             end = begin + self.actions_in_phases[self.last_phase]
             action = action[begin:end]
             actions_count = end - begin
+        r = []
+        for i in range(actions_count):
+            if i == action:
+                r.append(1)
+            else:
+                r.append(0)
 
-        new_state, self.last_phase, reward, done = self.game_instance.step(action)
+        new_state, self.last_phase, reward, done = self.game_instance.step(r)
         self.state = new_state
         self.done = done
         if done:
             self.results.append(self.game_instance.score)
-            #self.save_results()
+            # self.save_results()
             return self.state, reward, done, int(self.game_instance.score)
-            #return self.state, reward, done,
+            # return self.state, reward, done,
         else:
             return self.state, reward, done, {}
 
@@ -94,4 +100,3 @@ class Environment(gym.Env):
         plt.ylabel("Score")
         plt.savefig("score_plot.jpg")
         plt.close()
-
