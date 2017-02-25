@@ -97,6 +97,7 @@ def run_de():
 
 
 def run_dqn():
+    # Tune parameters inside DQN
     RL = DQN(game="2048")
     RL.run()
 
