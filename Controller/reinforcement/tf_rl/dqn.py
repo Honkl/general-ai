@@ -14,13 +14,14 @@ import os
 import matplotlib.pyplot as plt
 import json
 from reinforcement.reinforcement_parameters import DQNParameters
+from reinforcement.abstract_reinforcement import AbstractReinforcement
 
 STD = 0.01
 MAX_EPISODES = 1000000
 MAX_STEPS = 500000
 
 
-class DQN():
+class DQN(AbstractReinforcement):
     def __init__(self, game):
 
         #
@@ -29,7 +30,7 @@ class DQN():
         self.q_net_hidden_layers = [256, 256]
         self.activation_f = "relu"
         self.parameters = DQNParameters(batch_size=100,
-                                        init_exp=0.5,
+                                        init_exp=0.9,
                                         final_exp=0.01,
                                         anneal_steps=10000,
                                         replay_buffer_size=10000,
@@ -38,7 +39,8 @@ class DQN():
                                         target_update_rate=0.01,
                                         reg_param=0.01,
                                         max_gradient=5,
-                                        double_q_learning=False)
+                                        double_q_learning=False,
+                                        test_size=100)
 
         self.optimizer_params = {}
         self.optimizer_params["name"] = "rmsprop"
@@ -46,6 +48,7 @@ class DQN():
         self.optimizer_params["decay"] = 0.9
         self.optimizer_params["momentum"] = 0.95
 
+        self.checkpoint_name = "dqn.ckpt"
         #
         #
         #
@@ -65,11 +68,12 @@ class DQN():
 
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        self.create_dirs_and_logs()
+        self.init_directories()
 
         self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
                                                      intra_op_parallelism_threads=8,
                                                      allow_soft_placement=True))
+
 
         self.writer = tf.summary.FileWriter(logdir=self.logdir,
                                             graph=self.sess.graph,
@@ -95,7 +99,9 @@ class DQN():
                                         max_gradient=self.parameters.max_gradient,
                                         double_q_learning=self.parameters.double_q_learning)
 
-    def create_dirs_and_logs(self):
+        self.agent = self.q_learner
+
+    def init_directories(self, dir_name=None):
         dir = constants.loc + "/logs/" + self.game + "/dqn"
         current = time.localtime()
         t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2), str(current.tm_mon).zfill(2),
@@ -163,21 +169,40 @@ class DQN():
                 state = next_state
 
                 if done:
-                    data.append(info)
+                    line = "Episode: {}, Steps: {}, Score: {}".format(i_episode, t + 1, info)
+                    data.append(line)
                     break
 
             if i_episode % 100 == 0:
-                with open(self.logdir + "/logbook.txt", "w") as f:
-                    for x in data:
-                        f.write(str(x))
-                        f.write("\n")
-
-                plt.figure()
-                plt.plot(data)
-                plt.savefig(self.logdir + "/plot.png")
+                self.test_and_save(data, start, i_episode)
 
             if time.time() - start > 1:
-                print("Episode: {}, Steps: {}, Score: {}".format(i_episode, t + 1, info))
+                print(line)
                 start = time.time()
 
             self.q_learner.measure_summaries(i_episode, info, t + 1)
+
+    def test(self, n_iterations):
+        avg_test_score = 0
+
+        for i_episode in range(n_iterations):
+
+            self.env = Environment(game_class=self.game_class,
+                                   seed=np.random.randint(0, 2 ** 30),
+                                   observations_count=self.state_size,
+                                   actions_in_phases=self.actions_count,
+                                   discrete=True)
+            # initialize
+            state = self.env.reset()
+
+            for t in range(MAX_STEPS):
+                action = self.q_learner.eGreedyAction(state[np.newaxis, :])
+                next_state, reward, done, info = self.env.step(action)
+                state = next_state
+
+                if done:
+                    avg_test_score += info
+                    break
+
+        avg_test_score /= n_iterations
+        return avg_test_score

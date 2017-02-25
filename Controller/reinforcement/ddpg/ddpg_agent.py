@@ -62,7 +62,6 @@ class DDPGAgent():
         action_batch = np.resize(action_batch, [self.batch_size, self.action_dim])
 
         # Calculate y_batch
-
         next_action_batch = self.actor_network.target_actions(next_state_batch)
         q_value_batch = self.critic_network.target_q(next_state_batch, next_action_batch)
         y_batch = []

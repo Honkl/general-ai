@@ -69,6 +69,9 @@ class NeuralQLearner(object):
             self.summary_writer.add_graph(self.session.graph)
             self.summary_every = summary_every
 
+        self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=None)
+        self.sess = self.session
+
     def create_variables(self):
         # compute action from a state: a* = argmax_a Q(s_t,a)
         with tf.name_scope("predict_actions"):

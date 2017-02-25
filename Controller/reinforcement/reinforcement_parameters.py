@@ -101,7 +101,8 @@ class DQNParameters():
                  target_update_rate=0.01,
                  reg_param=0.01,  # regularization constants
                  max_gradient=5,  # max gradient norms
-                 double_q_learning=False):
+                 double_q_learning=False,
+                 test_size=100):
         self.batch_size = batch_size
         self.init_exp = init_exp
         self.final_exp = final_exp
@@ -113,6 +114,7 @@ class DQNParameters():
         self.reg_param = reg_param
         self.max_gradient = max_gradient
         self.double_q_learning = double_q_learning
+        self.test_size = test_size
 
     def to_dictionary(self):
         data = {}
@@ -127,6 +129,7 @@ class DQNParameters():
         data["reg_param"] = self.reg_param
         data["max_gradient"] = self.max_gradient
         data["double_q_learning"] = self.double_q_learning
+        data["test_size"] = self.test_size
         return data
 
     def to_string(self):
