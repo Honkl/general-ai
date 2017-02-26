@@ -27,15 +27,15 @@ class DQN(AbstractReinforcement):
         #
         # Set parameters of the model
         #
-        self.q_net_hidden_layers = [256, 256, 256, 256]
+        self.q_net_hidden_layers = [32]
         self.activation_f = "relu"
         self.parameters = DQNParameters(batch_size=100,
-                                        init_exp=0.999,
-                                        final_exp=0.001,
-                                        anneal_steps=100000,
-                                        replay_buffer_size=10000,
+                                        init_exp=0.9,
+                                        final_exp=0.1,
+                                        anneal_steps=1000000,
+                                        replay_buffer_size=50000,
                                         store_replay_every=5,
-                                        discount_factor=0.75,
+                                        discount_factor=0.9,
                                         target_update_rate=0.01,
                                         reg_param=0.01,
                                         max_gradient=5,
@@ -44,7 +44,7 @@ class DQN(AbstractReinforcement):
 
         self.optimizer_params = {}
         self.optimizer_params["name"] = "adam"
-        self.optimizer_params["learning_rate"] = 0.01
+        self.optimizer_params["learning_rate"] = 0.001
         #self.optimizer_params["decay"] = 0.9
         #self.optimizer_params["momentum"] = 0.95
 
@@ -70,8 +70,8 @@ class DQN(AbstractReinforcement):
         self.actions_count_sum = sum(self.actions_count)
         self.init_directories()
 
-        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
-                                                     intra_op_parallelism_threads=8,
+        self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=16,
+                                                     intra_op_parallelism_threads=16,
                                                      allow_soft_placement=True))
 
 

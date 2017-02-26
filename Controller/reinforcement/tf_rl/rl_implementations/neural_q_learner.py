@@ -140,6 +140,14 @@ class NeuralQLearner(object):
                 if grad is not None:
                     pass
                     # tf.histogram_summary(var.name + '/gradients', grad)
+
+            # scalar summaries
+            tf.summary.scalar("td_loss", self.td_loss)
+            tf.summary.scalar("reg_loss", self.reg_loss)
+            tf.summary.scalar("total_loss", self.loss)
+            # tf.summary.scalar("exploration", self.exploration)
+            self.summarize = tf.summary.merge_all()
+
             self.train_op = self.optimizer.apply_gradients(gradients)
 
         # update target network with Q network
@@ -155,13 +163,6 @@ class NeuralQLearner(object):
                 self.target_network_update.append(update_op)
             self.target_network_update = tf.group(*self.target_network_update)
 
-        # scalar summaries
-        tf.summary.scalar("td_loss", self.td_loss)
-        tf.summary.scalar("reg_loss", self.reg_loss)
-        tf.summary.scalar("total_loss", self.loss)
-        # tf.summary.scalar("exploration", self.exploration)
-
-        self.summarize = tf.summary.merge_all()
         self.no_op = tf.no_op()
 
     def storeExperience(self, state, action, reward, next_state, done):
@@ -202,9 +203,10 @@ class NeuralQLearner(object):
                 next_state_mask[k] = 1
 
         # perform one update of training
-        cost, _ = self.session.run([
+        cost, _, summary_str = self.session.run([
             self.loss,
             self.train_op,
+            self.summarize
         ], {
             self.states: states,
             self.next_states: next_states,
@@ -215,6 +217,7 @@ class NeuralQLearner(object):
 
         # update target network using Q-network
         self.session.run(self.target_network_update)
+        self.summary_writer.add_summary(summary_str, self.train_iteration)
 
         self.annealExploration()
         self.train_iteration += 1
