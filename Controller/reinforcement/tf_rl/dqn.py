@@ -27,15 +27,15 @@ class DQN(AbstractReinforcement):
         #
         # Set parameters of the model
         #
-        self.q_net_hidden_layers = [256, 256]
+        self.q_net_hidden_layers = [256, 256, 256, 256]
         self.activation_f = "relu"
         self.parameters = DQNParameters(batch_size=100,
-                                        init_exp=0.9,
-                                        final_exp=0.01,
-                                        anneal_steps=10000,
+                                        init_exp=0.999,
+                                        final_exp=0.001,
+                                        anneal_steps=100000,
                                         replay_buffer_size=10000,
                                         store_replay_every=5,
-                                        discount_factor=0.9,
+                                        discount_factor=0.75,
                                         target_update_rate=0.01,
                                         reg_param=0.01,
                                         max_gradient=5,
@@ -43,10 +43,10 @@ class DQN(AbstractReinforcement):
                                         test_size=100)
 
         self.optimizer_params = {}
-        self.optimizer_params["name"] = "rmsprop"
-        self.optimizer_params["learning_rate"] = 0.005
-        self.optimizer_params["decay"] = 0.9
-        self.optimizer_params["momentum"] = 0.95
+        self.optimizer_params["name"] = "adam"
+        self.optimizer_params["learning_rate"] = 0.01
+        #self.optimizer_params["decay"] = 0.9
+        #self.optimizer_params["momentum"] = 0.95
 
         self.checkpoint_name = "dqn.ckpt"
         #
@@ -146,6 +146,8 @@ class DQN(AbstractReinforcement):
     def run(self):
         data = []
         start = time.time()
+        tmp = time.time()
+        line = ""
         for i_episode in range(MAX_EPISODES):
 
             self.env = Environment(game_class=self.game_class,
@@ -176,9 +178,9 @@ class DQN(AbstractReinforcement):
             if i_episode % 100 == 0:
                 self.test_and_save(data, start, i_episode)
 
-            if time.time() - start > 1:
+            if time.time() - tmp > 1:
                 print(line)
-                start = time.time()
+                tmp = time.time()
 
             self.q_learner.measure_summaries(i_episode, info, t + 1)
 
