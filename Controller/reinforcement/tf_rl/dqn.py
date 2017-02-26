@@ -27,13 +27,13 @@ class DQN(AbstractReinforcement):
         #
         # Set parameters of the model
         #
-        self.q_net_hidden_layers = [32]
-        self.activation_f = "relu"
+        self.q_net_hidden_layers = [500, 500, 500, 500, 500, 500]
+        self.activation_f = "tanh"
         self.parameters = DQNParameters(batch_size=100,
                                         init_exp=0.9,
                                         final_exp=0.1,
                                         anneal_steps=1000000,
-                                        replay_buffer_size=50000,
+                                        replay_buffer_size=10000,
                                         store_replay_every=5,
                                         discount_factor=0.9,
                                         target_update_rate=0.01,
