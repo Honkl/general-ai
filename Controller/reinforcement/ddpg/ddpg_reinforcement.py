@@ -69,13 +69,13 @@ class DDPGReinforcement(AbstractReinforcement):
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 16),
                                    observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count)
+                                   actions_in_phases=self.actions_count,
+                                   discrete=False)
 
             state = self.env.state
             for step in range(100000):
                 action = self.agent.play(state)
                 next_state, reward, done, score = self.env.step(action)
-                score = score[0]
                 self.agent.perceive(state, action, reward, next_state, done)
                 state = next_state
                 if done:
@@ -102,7 +102,8 @@ class DDPGReinforcement(AbstractReinforcement):
             env = Environment(game_class=self.game_class,
                               seed=np.random.randint(0, 2 ** 16),
                               observations_count=self.state_size,
-                              actions_in_phases=self.actions_count)
+                              actions_in_phases=self.actions_count,
+                              discrete=False)
             game_steps = 0
             while game_steps < self.STEP_LIMIT:
                 game_steps += 1
@@ -114,7 +115,7 @@ class DDPGReinforcement(AbstractReinforcement):
                 new_state, reward, done, score = env.step(selected_action)
 
                 if done:
-                    avg_test_score += score[0]
+                    avg_test_score += score
                     break
 
         avg_test_score /= n_iterations

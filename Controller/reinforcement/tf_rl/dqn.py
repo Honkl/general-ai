@@ -18,7 +18,7 @@ from reinforcement.abstract_reinforcement import AbstractReinforcement
 
 STD = 0.01
 MAX_EPISODES = 1000000
-MAX_STEPS = 500000
+MAX_STEPS = 50000
 
 
 class DQN(AbstractReinforcement):
@@ -27,12 +27,12 @@ class DQN(AbstractReinforcement):
         #
         # Set parameters of the model
         #
-        self.q_net_hidden_layers = [500, 500, 500, 500, 500, 500]
-        self.activation_f = "tanh"
+        self.q_net_hidden_layers = [300, 300]
+        self.activation_f = "relu"
         self.parameters = DQNParameters(batch_size=100,
                                         init_exp=0.9,
                                         final_exp=0.1,
-                                        anneal_steps=1000000,
+                                        anneal_steps=100000,
                                         replay_buffer_size=10000,
                                         store_replay_every=5,
                                         discount_factor=0.9,
@@ -44,9 +44,9 @@ class DQN(AbstractReinforcement):
 
         self.optimizer_params = {}
         self.optimizer_params["name"] = "adam"
-        self.optimizer_params["learning_rate"] = 0.001
-        #self.optimizer_params["decay"] = 0.9
-        #self.optimizer_params["momentum"] = 0.95
+        self.optimizer_params["learning_rate"] = 0.01
+        # self.optimizer_params["decay"] = 0.9
+        # self.optimizer_params["momentum"] = 0.95
 
         self.checkpoint_name = "dqn.ckpt"
         #
@@ -73,7 +73,6 @@ class DQN(AbstractReinforcement):
         self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=16,
                                                      intra_op_parallelism_threads=16,
                                                      allow_soft_placement=True))
-
 
         self.writer = tf.summary.FileWriter(logdir=self.logdir,
                                             graph=self.sess.graph,
@@ -155,6 +154,9 @@ class DQN(AbstractReinforcement):
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count,
                                    discrete=True)
+
+            self.negative_reward = 0
+
             # initialize
             state = self.env.reset()
             total_rewards = 0
@@ -164,7 +166,8 @@ class DQN(AbstractReinforcement):
                 next_state, reward, done, info = self.env.step(action)
 
                 total_rewards += reward
-                reward = -10 if done else 0.1  # normalize reward
+                if reward < 0:
+                    self.negative_reward += 1
                 self.q_learner.storeExperience(state, action, reward, next_state, done)
 
                 self.q_learner.updateModel()
@@ -182,7 +185,7 @@ class DQN(AbstractReinforcement):
                 print(line)
                 tmp = time.time()
 
-            self.q_learner.measure_summaries(i_episode, info, t + 1)
+            self.q_learner.measure_summaries(i_episode, info, t + 1, self.negative_reward)
 
     def test(self, n_iterations):
         avg_test_score = 0

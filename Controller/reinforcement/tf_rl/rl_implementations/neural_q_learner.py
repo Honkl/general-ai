@@ -134,19 +134,22 @@ class NeuralQLearner(object):
             for i, (grad, var) in enumerate(gradients):
                 if grad is not None:
                     gradients[i] = (tf.clip_by_norm(grad, self.max_gradient), var)
+
+            """
             # add histograms for gradients.
             for grad, var in gradients:
-                # tf.histogram_summary(var.name, var)
+                tf.histogram_summary(var.name, var)
                 if grad is not None:
                     pass
-                    # tf.histogram_summary(var.name + '/gradients', grad)
+                    tf.histogram_summary(var.name + '/gradients', grad)
+            """
 
             # scalar summaries
-            tf.summary.scalar("td_loss", self.td_loss)
-            tf.summary.scalar("reg_loss", self.reg_loss)
-            tf.summary.scalar("total_loss", self.loss)
+            # tf.summary.scalar("td_loss", self.td_loss)
+            # tf.summary.scalar("reg_loss", self.reg_loss)
+            # tf.summary.scalar("total_loss", self.loss)
             # tf.summary.scalar("exploration", self.exploration)
-            self.summarize = tf.summary.merge_all()
+            # self.summarize = tf.summary.merge_all()
 
             self.train_op = self.optimizer.apply_gradients(gradients)
 
@@ -203,10 +206,9 @@ class NeuralQLearner(object):
                 next_state_mask[k] = 1
 
         # perform one update of training
-        cost, _, summary_str = self.session.run([
+        cost, _ = self.session.run([
             self.loss,
             self.train_op,
-            self.summarize
         ], {
             self.states: states,
             self.next_states: next_states,
@@ -217,15 +219,15 @@ class NeuralQLearner(object):
 
         # update target network using Q-network
         self.session.run(self.target_network_update)
-        self.summary_writer.add_summary(summary_str, self.train_iteration)
 
         self.annealExploration()
         self.train_iteration += 1
 
-    def measure_summaries(self, i_episode, score, steps):
+    def measure_summaries(self, i_episode, score, steps, negative_rewards_count):
         # exploration_rate = self.session.run(self.exploration)
 
         report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
                             tf.Summary.Value(tag='exploration_rate', simple_value=self.exploration),
-                            tf.Summary.Value(tag='number_of_steps', simple_value=steps)])
+                            tf.Summary.Value(tag='number_of_steps', simple_value=steps),
+                            tf.Summary.Value(tag='negative_reward', simple_value=negative_rewards_count)])
         self.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
