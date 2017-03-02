@@ -1,5 +1,6 @@
 import json
 import os
+import numpy as np
 
 from models.abstract_model import AbstractModel
 from reinforcement.tf_rl.dqn import DQN
@@ -28,9 +29,8 @@ class LearnedDQN(AbstractModel):
         params = self.metadata["parameters"]
         optimizer_params = self.metadata["optimizer_parameters"]
         self.game = self.metadata["game"]
-        self.rl = DQN(self.game, DQNParameters.from_dict(params), net, optimizer_params)
-
-        self.rl.load_checkpoint(logdir)
+        self.dqn = DQN(self.game, DQNParameters.from_dict(params), net, optimizer_params)
+        self.dqn.load_checkpoint(logdir)
 
     def get_new_instance(self, weights, game_config):
         raise NotImplementedError
@@ -42,19 +42,19 @@ class LearnedDQN(AbstractModel):
         :param current_phase: Current game phase.
         :return: Action.
         """
-        action, estimated_reward = self.rl.agent.play(input)
-        return action
+        action = self.dqn.agent.eGreedyAction(input[np.newaxis, :])
+        return self.dqn.convert_to_sequence(action)
 
     def get_name(self):
         """
         Returns a string representation of the current model.
         :return: a string representation of hte current model.
         """
-        return "Learned Greedy Policy (Reinforcement Learning)"
+        return "Learned Greedy Policy (Reinforcement Learning) [DQN]"
 
     def get_class_name(self):
         """
         Returns a class name of the current model.
         :return: a class name of the current model.
         """
-        return "LearnedGreedyRL"
+        return "LearnedDQN"

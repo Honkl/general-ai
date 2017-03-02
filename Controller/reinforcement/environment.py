@@ -38,8 +38,6 @@ class Environment(gym.Env):
         self.viewer = None
         self._configure()
 
-        self.results = []
-
     def _step(self, action):
         """
         Performs a single step in the game.
@@ -58,13 +56,9 @@ class Environment(gym.Env):
             actions_count = end - begin
 
         new_state, self.last_phase, reward, done = self.game_instance.step(action)
-        self.state = new_state
+        self.state = np.array(new_state)
         self.done = done
-        if done:
-            self.results.append(self.game_instance.score)
-            return self.state, reward, done, int(self.game_instance.score)
-        else:
-            return self.state, reward, done, {}
+        return self.state, reward, done, int(self.game_instance.score)
 
     def _configure(self, display=None):
         self.display = display
@@ -83,6 +77,7 @@ class Environment(gym.Env):
         self.done = False
         self.last_phase = 0
         self.state, _ = self.game_instance.init_process()  # First state of the game
+        self.state = np.array(self.state)
         return self.state
 
     def _render(self, mode='human', close=False):

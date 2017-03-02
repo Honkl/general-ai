@@ -13,6 +13,7 @@ import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import utils.miscellaneous
 
 from deap import creator, base, tools
 from utils.miscellaneous import get_game_config, get_game_instance
@@ -176,8 +177,8 @@ class Evolution():
         gen, avg, min_, max_ = log.select("gen", "avg", "min", "max")
         plt.figure()
         plt.plot(gen, avg, label="avg")
-        #plt.plot(gen, min_, label="min")
-        #plt.plot(gen, max_, label="max")
+        # plt.plot(gen, min_, label="min")
+        # plt.plot(gen, max_, label="max")
         i = np.argmax(avg)
         plt.scatter(gen[i], avg[i])
         plt.text(gen[i], avg[i], "{}".format(round(max(avg), 2)))
@@ -199,13 +200,7 @@ class Evolution():
             os.makedirs(self.dir)
         # create name for directory to store logs
         current = time.localtime()
-        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
-                                              str(current.tm_mon).zfill(2),
-                                              str(current.tm_mday).zfill(2),
-                                              str(current.tm_hour).zfill(2),
-                                              str(current.tm_min).zfill(2),
-                                              str(current.tm_sec).zfill(2))
-
+        t_string = utils.miscellaneous.get_pretty_time()
         return self.dir + "/logs_" + t_string
 
     def log_all(self, logs_dir, population, hof, logbook, start_time):

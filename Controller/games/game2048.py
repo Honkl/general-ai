@@ -1,6 +1,7 @@
 from games.abstract_game import AbstractGame
 from constants import *
 import importlib.util
+import utils.miscellaneous
 import numpy as np
 
 
@@ -76,7 +77,8 @@ class Game2048(AbstractGame):
 
         print(counts)
 
-        with open("game2048_statistics.txt", "w") as f:
+        file_name = "game2048_statistics_{}.txt".format(utils.miscellaneous.get_pretty_time())
+        with open(file_name, "w") as f:
             f.write("--GAME 2048 STATISTICS--")
             f.write(os.linesep)
             f.write("Model: {}".format(self.model.get_name()))

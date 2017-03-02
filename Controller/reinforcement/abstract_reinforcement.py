@@ -34,14 +34,7 @@ class AbstractReinforcement():
         """
         self.dir = constants.loc + "/logs/" + self.game + "/" + dir_name
         # create name for directory to store logs
-        current = time.localtime()
-        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
-                                              str(current.tm_mon).zfill(2),
-                                              str(current.tm_mday).zfill(2),
-                                              str(current.tm_hour).zfill(2),
-                                              str(current.tm_min).zfill(2),
-                                              str(current.tm_sec).zfill(2))
-        logdir = self.dir + "/logs_" + t_string
+        logdir = self.dir + "/logs_" + utils.miscellaneous.get_pretty_time()
         if not os.path.exists(logdir):
             os.makedirs(logdir)
         return logdir

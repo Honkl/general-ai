@@ -167,7 +167,7 @@ if __name__ == '__main__':
     # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
     # file_name = "../../Experiments/MLP+differential_evolution/alhambra/logs_2017-01-23_03-20-57/last/last_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    logdir = "../../Controller/logs/2048/dqn/logs_2017-03-02_13-34-02"
+    logdir = "../../Controller/logs/2048/dqn/logs_2017-03-02_15-06-50"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     # ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    run_2048_extended(Random(game), evals)
+    run_2048_extended(dqn, evals)
 
     # eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
     # compare_models(game, evals, Random(game))

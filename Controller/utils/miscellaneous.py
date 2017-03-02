@@ -67,3 +67,14 @@ def get_elapsed_time(start):
     s = t - (h * 3600) - (m * 60)
     elapsed_time = "{}h {}m {}s".format(int(h), int(m), s)
     return elapsed_time
+
+
+def get_pretty_time():
+    current = time.localtime()
+    t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2),
+                                          str(current.tm_mon).zfill(2),
+                                          str(current.tm_mday).zfill(2),
+                                          str(current.tm_hour).zfill(2),
+                                          str(current.tm_min).zfill(2),
+                                          str(current.tm_sec).zfill(2))
+    return t_string

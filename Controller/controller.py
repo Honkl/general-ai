@@ -15,7 +15,7 @@ from models.mlp import MLP
 from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
 from reinforcement.greedy_policy.q_network import QNetwork
-from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters
+from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters, DQNParameters
 from reinforcement.tf_rl.dqn import DQN
 
 MASTER_SEED = 42
@@ -97,8 +97,30 @@ def run_de():
 
 
 def run_dqn():
-    # Tune parameters inside DQN
-    RL = DQN(game="2048")
+    parameters = DQNParameters(batch_size=100,
+                               init_exp=0.9,
+                               final_exp=0.1,
+                               anneal_steps=1000000,
+                               replay_buffer_size=10000,
+                               store_replay_every=5,
+                               discount_factor=0.9,
+                               target_update_rate=0.01,
+                               reg_param=0.01,
+                               max_gradient=5,
+                               double_q_learning=False,
+                               test_size=100)
+
+    optimizer_params = {}
+    optimizer_params["name"] = "adam"
+    optimizer_params["learning_rate"] = 0.001
+    # self.optimizer_params["decay"] = 0.9
+    # self.optimizer_params["momentum"] = 0.95
+
+    q_network_parameters = {}
+    q_network_parameters["hidden_layers"] = [256, 256]
+    q_network_parameters["activation"] = "relu"
+
+    RL = DQN("2048", parameters, q_network_parameters, optimizer_params)
     RL.run()
 
 

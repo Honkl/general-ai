@@ -11,7 +11,6 @@ import utils.miscellaneous
 import constants
 import os
 import json
-from reinforcement.reinforcement_parameters import DQNParameters
 from reinforcement.abstract_reinforcement import AbstractReinforcement
 
 STD = 0.01
@@ -24,46 +23,11 @@ class DQN(AbstractReinforcement):
     Represents a deep q-network reinforcement learning (epsilon-greedy policy).
     """
 
-    def setup(self):
-        """
-        Setup parameters of the model. Feel free to modify this.
-        """
-        self.q_net_hidden_layers = [256, 256]
-        self.activation_f = "relu"
+    def __init__(self, game, parameters, q_network_parameters, optimizer_parameters):
 
-        self.parameters = DQNParameters(batch_size=100,
-                                        init_exp=0.9,
-                                        final_exp=0.1,
-                                        anneal_steps=1000000,
-                                        replay_buffer_size=10000,
-                                        store_replay_every=5,
-                                        discount_factor=0.9,
-                                        target_update_rate=0.01,
-                                        reg_param=0.01,
-                                        max_gradient=5,
-                                        double_q_learning=False,
-                                        test_size=100)
-
-        self.optimizer_params = {}
-        self.optimizer_params["name"] = "adam"
-        self.optimizer_params["learning_rate"] = 0.001
-        # self.optimizer_params["decay"] = 0.9
-        # self.optimizer_params["momentum"] = 0.95
-
-        self.q_network_parameters = {}
-        self.q_network_parameters["hidden_layers"] = self.q_net_hidden_layers
-        self.q_network_parameters["activation"] = self.activation_f
-
-    def __init__(self, game, parameters=None, q_network_parameters=None, optimizer_parameters=None):
-
-        if parameters and q_network_parameters and optimizer_parameters:
-            print("Using specified parameters")
-            self.parameters = parameters
-            self.q_network_parameters = q_network_parameters
-            self.optimizer_params = optimizer_parameters
-        else:
-            # Set parameters of the model
-            self.setup()
+        self.parameters = parameters
+        self.q_network_parameters = q_network_parameters
+        self.optimizer_params = optimizer_parameters
 
         self.checkpoint_name = "dqn.ckpt"
         lr = self.optimizer_params["learning_rate"]
@@ -164,11 +128,10 @@ class DQN(AbstractReinforcement):
                                    actions_in_phases=self.actions_count,
                                    discrete=True)
 
-            self.negative_reward = 0
-
             # initialize
-            state = self.env.reset()
+            state = self.env.state
             total_rewards = 0
+            self.negative_reward = 0
 
             for t in range(MAX_STEPS):
                 action = self.q_learner.eGreedyAction(state[np.newaxis, :])
@@ -181,13 +144,15 @@ class DQN(AbstractReinforcement):
 
                 self.q_learner.updateModel()
                 state = next_state
-
                 if done:
                     line = "Episode: {}, Steps: {}, Score: {}, Current exploration rate: {}".format(i_episode, t + 1,
                                                                                                     info,
                                                                                                     self.q_learner.exploration)
                     data.append(line)
                     break
+
+            if (t + 1) == MAX_STEPS:
+                print("Maximum number of steps within single game exceeded. ")
 
             if i_episode % 100 == 0:
                 self.test_and_save(data, start, i_episode)
