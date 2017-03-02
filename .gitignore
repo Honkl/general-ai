@@ -36,12 +36,10 @@ hs_err_pid*
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
-[Rr]elease/
 [Rr]eleases/
 x64/
 x86/
 bld/
-[Bb]in/
 [Oo]bj/
 [Ll]og/
 
@@ -274,3 +272,4 @@ paket-files/
 .idea/
 *.sln.iml
 /Game-interfaces/TORCS/DriverProject/nbproject/private/
+!/Game-interfaces/Alhambra/AlhambraInterface/AlhambraInterface/bin/Release/
