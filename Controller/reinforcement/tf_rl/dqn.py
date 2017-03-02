@@ -137,6 +137,7 @@ class DQN(AbstractReinforcement):
         data = []
         data.append("Episode Steps Score Exploration_rate Time")
         start = time.time()
+        tmp = time.time()
         line = ""
         for i_episode in range(MAX_EPISODES):
 
@@ -166,13 +167,15 @@ class DQN(AbstractReinforcement):
                     game_time = time.time() - game_start
                     line = "Episode: {}, Steps: {}, Score: {}, Current exploration rate: {}, Time: {}".format(
                         i_episode, t + 1, info, self.q_learner.exploration, game_time)
-                    print(line)
-
                     data.append("{} {} {} {}".format(i_episode, t + 1, info, self.q_learner.exploration, game_time))
                     break
 
             if (t + 1) == MAX_STEPS:
                 print("Maximum number of steps within single game exceeded. ")
+
+            if time.time() - tmp > 1:
+                print(line)
+                tmp = time.time()
 
             if i_episode % self.test_every == 0:
                 self.test_and_save(data, start, i_episode)
