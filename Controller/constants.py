@@ -1,3 +1,8 @@
+"""
+This file contains important constants. Directories are relative to current master directory. Torcs installation folder
+must be provided in 'install_directory.txt' file.
+"""
+
 import os
 import platform
 
