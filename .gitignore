@@ -15,6 +15,7 @@ Game-interfaces/TORCS/DriverProject/
 *.ear
 
 !Game-interfaces/TORCS/scr-client/lib/*.jar
+!Game-interfaces/TORCS/scr-client/classes/scr/*.class
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
