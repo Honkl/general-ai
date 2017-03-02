@@ -23,11 +23,20 @@ class DQN(AbstractReinforcement):
     Represents a deep q-network reinforcement learning (epsilon-greedy policy).
     """
 
-    def __init__(self, game, parameters, q_network_parameters, optimizer_parameters):
+    def __init__(self, game, parameters, q_network_parameters, optimizer_parameters, test_every=10):
+        """
+        Initializes a new instance of DQN reinforcement learning model.
+        :param game: Game to play.
+        :param parameters: DQNParameters instance.
+        :param q_network_parameters: Dictionary; Q-network parameters.
+        :param optimizer_parameters: Dictionary; Optimizer parameters.
+        :param test_every: Testing every n-th episode.
+        """
 
         self.parameters = parameters
         self.q_network_parameters = q_network_parameters
         self.optimizer_params = optimizer_parameters
+        self.test_every = test_every
 
         self.checkpoint_name = "dqn.ckpt"
         lr = self.optimizer_params["learning_rate"]
@@ -78,6 +87,12 @@ class DQN(AbstractReinforcement):
         self.agent = self.q_learner
 
     def q_network(self, input):
+        """
+        Defines Q-Network. Tensorflow stuff.
+        :param input: Input state
+        :return: Logits.
+        """
+
         # Hidden fully connected layers
         x = None
         for i, dim in enumerate(self.q_network_parameters["hidden_layers"]):
@@ -97,11 +112,14 @@ class DQN(AbstractReinforcement):
         return logits
 
     def init_directories(self, dir_name=None):
+        """
+        Initializes directories used for logging.
+        """
+        self.test_logbook_data.append("Testing every {} episodes".format(self.test_every))
+
         dir = constants.loc + "/logs/" + self.game + "/dqn"
-        current = time.localtime()
-        t_string = "{}-{}-{}_{}-{}-{}".format(str(current.tm_year).zfill(2), str(current.tm_mon).zfill(2),
-                                              str(current.tm_mday).zfill(2), str(current.tm_hour).zfill(2),
-                                              str(current.tm_min).zfill(2), str(current.tm_sec).zfill(2))
+        t_string = utils.miscellaneous.get_pretty_time()
+
         self.logdir = dir + "/logs_" + t_string
         if not os.path.exists(self.logdir):
             os.makedirs(self.logdir)
@@ -117,21 +135,21 @@ class DQN(AbstractReinforcement):
 
     def run(self):
         data = []
+        data.append("Episode Steps Score Exploration_rate Time")
         start = time.time()
-        tmp = time.time()
         line = ""
         for i_episode in range(MAX_EPISODES):
 
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 30),
                                    observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count,
-                                   discrete=True)
+                                   actions_in_phases=self.actions_count)
 
             # initialize
             state = self.env.state
             total_rewards = 0
             self.negative_reward = 0
+            game_start = time.time()
 
             for t in range(MAX_STEPS):
                 action = self.q_learner.eGreedyAction(state[np.newaxis, :])
@@ -145,21 +163,19 @@ class DQN(AbstractReinforcement):
                 self.q_learner.updateModel()
                 state = next_state
                 if done:
-                    line = "Episode: {}, Steps: {}, Score: {}, Current exploration rate: {}".format(i_episode, t + 1,
-                                                                                                    info,
-                                                                                                    self.q_learner.exploration)
-                    data.append(line)
+                    game_time = time.time() - game_start
+                    line = "Episode: {}, Steps: {}, Score: {}, Current exploration rate: {}, Time: {}".format(
+                        i_episode, t + 1, info, self.q_learner.exploration, game_time)
+                    print(line)
+
+                    data.append("{} {} {} {}".format(i_episode, t + 1, info, self.q_learner.exploration, game_time))
                     break
 
             if (t + 1) == MAX_STEPS:
                 print("Maximum number of steps within single game exceeded. ")
 
-            if i_episode % 100 == 0:
+            if i_episode % self.test_every == 0:
                 self.test_and_save(data, start, i_episode)
-
-            if time.time() - tmp > 1:
-                print(line)
-                tmp = time.time()
 
             self.q_learner.measure_summaries(i_episode, info, t + 1, self.negative_reward)
 
@@ -179,10 +195,9 @@ class DQN(AbstractReinforcement):
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 30),
                                    observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count,
-                                   discrete=True)
+                                   actions_in_phases=self.actions_count)
             # initialize
-            state = self.env.reset()
+            state = self.env.state
 
             for t in range(MAX_STEPS):
                 action = self.q_learner.eGreedyAction(state[np.newaxis, :])

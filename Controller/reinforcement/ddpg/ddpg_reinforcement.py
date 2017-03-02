@@ -13,7 +13,6 @@ import json
 
 gc.enable()
 
-
 class DDPGReinforcement(AbstractReinforcement):
     """
     Represents a DDPG model.
@@ -67,13 +66,12 @@ class DDPGReinforcement(AbstractReinforcement):
 
             episode_start_time = time.time()
             self.env = Environment(game_class=self.game_class,
-                                   seed=np.random.randint(0, 2 ** 16),
+                                   seed=np.random.randint(0, 2 ** 30),
                                    observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count,
-                                   discrete=False)
+                                   actions_in_phases=self.actions_count)
 
             state = self.env.state
-            for step in range(100000):
+            for step in range(self.STEP_LIMIT):
                 action = self.agent.play(state)
                 next_state, reward, done, score = self.env.step(action)
                 self.agent.perceive(state, action, reward, next_state, done)
@@ -100,10 +98,9 @@ class DDPGReinforcement(AbstractReinforcement):
         avg_test_score = 0
         for i in range(n_iterations):
             env = Environment(game_class=self.game_class,
-                              seed=np.random.randint(0, 2 ** 16),
+                              seed=np.random.randint(0, 2 ** 30),
                               observations_count=self.state_size,
-                              actions_in_phases=self.actions_count,
-                              discrete=False)
+                              actions_in_phases=self.actions_count)
             game_steps = 0
             while game_steps < self.STEP_LIMIT:
                 game_steps += 1

@@ -120,7 +120,7 @@ def run_dqn():
     q_network_parameters["hidden_layers"] = [256, 256]
     q_network_parameters["activation"] = "relu"
 
-    RL = DQN("2048", parameters, q_network_parameters, optimizer_params)
+    RL = DQN("2048", parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()
 
 

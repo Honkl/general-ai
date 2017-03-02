@@ -12,7 +12,7 @@ class AbstractReinforcement():
     Interface for DDPGReinforcement and GreedyPolicyReinforcement
     """
 
-    STEP_LIMIT = 1000000  # 1M
+    STEP_LIMIT = 50000
 
     """ Overwritten in subclasses """
     game = None
@@ -25,6 +25,8 @@ class AbstractReinforcement():
     logdir = None
 
     best_test_score = -np.Inf
+    test_logbook_data = []
+    test_every = None
 
     def init_directories(self, dir_name):
         """
@@ -32,6 +34,7 @@ class AbstractReinforcement():
         :param dir_name: Name of the directory (usually model name).
         :return: Current logdir.
         """
+
         self.dir = constants.loc + "/logs/" + self.game + "/" + dir_name
         # create name for directory to store logs
         logdir = self.dir + "/logs_" + utils.miscellaneous.get_pretty_time()
@@ -55,11 +58,12 @@ class AbstractReinforcement():
             raise IOError('No model found in {}.'.format(checkpoint))
 
     def test_and_save(self, log_data, start_time, i_episode):
+
         print("Testing model... [{} runs]".format(self.parameters.test_size))
         current_score = self.test(self.parameters.test_size)
         line = "Current score: {}, Best score: {}".format(current_score, self.best_test_score)
         print(line)
-        log_data.append(line)
+        self.test_logbook_data.append(line)
         if (current_score > self.best_test_score):
             print("Saving model...")
             checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
@@ -69,10 +73,15 @@ class AbstractReinforcement():
         elapsed_time = utils.miscellaneous.get_elapsed_time(start_time)
         t = "Total time: {}".format(elapsed_time)
         print(t)
-        log_data.append(t)
+        self.test_logbook_data.append(t)
 
         with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
             for line in log_data:
+                f.write(line)
+                f.write('\n')
+
+        with open(os.path.join(self.logdir, "test_logbook.txt"), "w") as f:
+            for line in self.test_logbook_data:
                 f.write(line)
                 f.write('\n')
 
