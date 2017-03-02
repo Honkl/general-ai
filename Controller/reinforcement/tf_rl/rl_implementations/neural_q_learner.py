@@ -1,5 +1,5 @@
 # Implementation from https://github.com/yukezhu/tensorflow-reinforce
-
+# Updated by Jan Kluj.
 import random
 import numpy as np
 import tensorflow as tf

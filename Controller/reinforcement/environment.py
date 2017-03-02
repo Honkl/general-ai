@@ -1,12 +1,23 @@
 import numpy as np
 import gym
-from gym import spaces
 from gym.utils import seeding
 import matplotlib.pyplot as plt
 
 
 class Environment(gym.Env):
+    """
+    Environment for reinforcement learning algorithms. This single environment is used for all games.
+    """
+
     def __init__(self, game_class, seed, observations_count, actions_in_phases, discrete):
+        """
+        Initializes a new instance of Environment.
+        :param game_class: A game class, implementing games.abstract_game.
+        :param seed: Seed for the environment.
+        :param observations_count: Num of observations.
+        :param actions_in_phases: List of actions for game phases.
+        :param discrete: TODO
+        """
         self.game_class = game_class
         self.game_instance = None
         self.state = None
@@ -16,10 +27,10 @@ class Environment(gym.Env):
         self.discrete = discrete
 
         self.actions_total = sum(actions_in_phases)
-        #self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
-        #if discrete:
+        # self.observation_space = spaces.Box(low=-1, high=1, shape=(observations_count,))
+        # if discrete:
         #    self.action_space = spaces.Discrete(n=self.actions_total)
-        #else:
+        # else:
         #    self.action_space = spaces.Box(low=-1, high=1, shape=(self.actions_total,))
 
         self._seed(seed)
@@ -32,32 +43,26 @@ class Environment(gym.Env):
     def _step(self, action):
         """
         Performs a single step in the game.
-        :param action: Action to make.
+        :param action: Action to make. This is a list of actions (every game defines a number of actions they need
+        in every step).
         :return: By Gym-interface, returns observation (new state), reward, done, info
         """
 
         # Need to determine proper game phase and use only specific action subset
         actions_count = self.actions_total
         if len(self.actions_in_phases) > 1:
+            # Games with multiple phases
             begin = sum(self.actions_in_phases[:self.last_phase])
             end = begin + self.actions_in_phases[self.last_phase]
             action = action[begin:end]
             actions_count = end - begin
-        r = []
-        for i in range(actions_count):
-            if i == action:
-                r.append(1)
-            else:
-                r.append(0)
 
-        new_state, self.last_phase, reward, done = self.game_instance.step(r)
+        new_state, self.last_phase, reward, done = self.game_instance.step(action)
         self.state = new_state
         self.done = done
         if done:
             self.results.append(self.game_instance.score)
-            # self.save_results()
             return self.state, reward, done, int(self.game_instance.score)
-            # return self.state, reward, done,
         else:
             return self.state, reward, done, {}
 
@@ -73,7 +78,7 @@ class Environment(gym.Env):
             self.game_instance.finalize()
         model = None
         game_batch = 1
-        seed = np.random.randint(0, 2 ** 16)
+        seed = np.random.randint(0, 2 ** 30)
         self.game_instance = self.game_class(model, game_batch, seed)
         self.done = False
         self.last_phase = 0
@@ -89,14 +94,3 @@ class Environment(gym.Env):
     def shut_down(self):
         if self.game_instance:
             self.game_instance.finalize()
-
-    def save_results(self):
-        plt.figure()
-        plt.plot(self.results)
-        print(self.results)
-        plt.xlim(20)
-        plt.xlabel("Episode")
-        plt.ylim(5000)
-        plt.ylabel("Score")
-        plt.savefig("score_plot.jpg")
-        plt.close()

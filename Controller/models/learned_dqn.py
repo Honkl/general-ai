@@ -2,12 +2,11 @@ import json
 import os
 
 from models.abstract_model import AbstractModel
-from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
-from reinforcement.greedy_policy.q_network import QNetwork
-from reinforcement.reinforcement_parameters import GreedyPolicyParameters
+from reinforcement.tf_rl.dqn import DQN
+from reinforcement.reinforcement_parameters import DQNParameters
 
 
-class LearnedGreedyRL(AbstractModel):
+class LearnedDQN(AbstractModel):
     """
     Represents a learned greedy-policy reinforcement learning model. This is only an interface wrapper.
     Uses tensorflow internally.
@@ -25,13 +24,12 @@ class LearnedGreedyRL(AbstractModel):
                     self.metadata = json.load(f)
                     break
 
-        q_net_params = self.metadata["q-network"]
-        rl_params = self.metadata["parameters"]
+        net = self.metadata["q_network"]
+        params = self.metadata["parameters"]
+        optimizer_params = self.metadata["optimizer_parameters"]
         self.game = self.metadata["game"]
-        self.q_network = QNetwork(q_net_params["hidden_layers"], q_net_params["activation"])
+        self.rl = DQN(self.game, DQNParameters.from_dict(params), net, optimizer_params)
 
-        self.rl = GreedyPolicyReinforcement(self.game, GreedyPolicyParameters.from_dict(rl_params), self.q_network,
-                                            threads=1)
         self.rl.load_checkpoint(logdir)
 
     def get_new_instance(self, weights, game_config):

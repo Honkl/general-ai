@@ -88,7 +88,20 @@ class DQNParameters():
 
     @staticmethod
     def from_dict(data):
-        raise NotImplementedError("Still not implemented")
+        params = DQNParameters(
+            data["batch_size"],
+            data["init_exp"],
+            data["final_exp"],
+            data["anneal_steps"],
+            data["replay_buffer_size"],
+            data["store_replay_every"],
+            data["discount_factor"],
+            data["target_update_rate"],
+            data["reg_param"],
+            data["max_gradient"],
+            data["double_q_learning"],
+            data["test_size"])
+        return params
 
     def __init__(self,
                  batch_size,

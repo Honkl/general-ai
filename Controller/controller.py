@@ -103,11 +103,9 @@ def run_dqn():
 
 
 if __name__ == '__main__':
-    # run_keras()
     # run_greedy()
     # run_ddpg()
     # run_es()
-    # tests()
     # run_eva()
     # run_de()
     run_dqn()

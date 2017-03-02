@@ -1,5 +1,4 @@
 from __future__ import print_function
-from collections import deque
 
 from reinforcement.tf_rl.rl_implementations.neural_q_learner import NeuralQLearner
 import tensorflow as tf
@@ -11,7 +10,6 @@ from reinforcement.environment import Environment
 import utils.miscellaneous
 import constants
 import os
-import matplotlib.pyplot as plt
 import json
 from reinforcement.reinforcement_parameters import DQNParameters
 from reinforcement.abstract_reinforcement import AbstractReinforcement
@@ -22,17 +20,21 @@ MAX_STEPS = 50000
 
 
 class DQN(AbstractReinforcement):
-    def __init__(self, game):
+    """
+    Represents a deep q-network reinforcement learning (epsilon-greedy policy).
+    """
 
-        #
-        # Set parameters of the model
-        #
-        self.q_net_hidden_layers = [300, 300]
+    def setup(self):
+        """
+        Setup parameters of the model. Feel free to modify this.
+        """
+        self.q_net_hidden_layers = [256, 256]
         self.activation_f = "relu"
+
         self.parameters = DQNParameters(batch_size=100,
                                         init_exp=0.9,
                                         final_exp=0.1,
-                                        anneal_steps=100000,
+                                        anneal_steps=1000000,
                                         replay_buffer_size=10000,
                                         store_replay_every=5,
                                         discount_factor=0.9,
@@ -44,15 +46,26 @@ class DQN(AbstractReinforcement):
 
         self.optimizer_params = {}
         self.optimizer_params["name"] = "adam"
-        self.optimizer_params["learning_rate"] = 0.01
+        self.optimizer_params["learning_rate"] = 0.001
         # self.optimizer_params["decay"] = 0.9
         # self.optimizer_params["momentum"] = 0.95
 
-        self.checkpoint_name = "dqn.ckpt"
-        #
-        #
-        #
+        self.q_network_parameters = {}
+        self.q_network_parameters["hidden_layers"] = self.q_net_hidden_layers
+        self.q_network_parameters["activation"] = self.activation_f
 
+    def __init__(self, game, parameters=None, q_network_parameters=None, optimizer_parameters=None):
+
+        if parameters and q_network_parameters and optimizer_parameters:
+            print("Using specified parameters")
+            self.parameters = parameters
+            self.q_network_parameters = q_network_parameters
+            self.optimizer_params = optimizer_parameters
+        else:
+            # Set parameters of the model
+            self.setup()
+
+        self.checkpoint_name = "dqn.ckpt"
         lr = self.optimizer_params["learning_rate"]
         if self.optimizer_params["name"] == "rmsprop":
             d = self.optimizer_params["decay"]
@@ -100,6 +113,25 @@ class DQN(AbstractReinforcement):
 
         self.agent = self.q_learner
 
+    def q_network(self, input):
+        # Hidden fully connected layers
+        x = None
+        for i, dim in enumerate(self.q_network_parameters["hidden_layers"]):
+            x = tf_layers.fully_connected(inputs=input,
+                                          num_outputs=dim,
+                                          activation_fn=get_activation_tf(self.q_network_parameters["activation"]),
+                                          weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
+                                          scope="fully_connected_{}".format(i))
+
+        # Output logits
+        logits = tf_layers.fully_connected(inputs=x,
+                                           num_outputs=self.num_actions,
+                                           activation_fn=None,
+                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
+                                           scope="output_layer")
+
+        return logits
+
     def init_directories(self, dir_name=None):
         dir = constants.loc + "/logs/" + self.game + "/dqn"
         current = time.localtime()
@@ -114,33 +146,10 @@ class DQN(AbstractReinforcement):
             data = {}
             data["model_name"] = "DQN"
             data["game"] = self.game
-
-            q_net = {}
-            q_net["activation"] = self.activation_f
-            q_net["hidden_layers"] = self.q_net_hidden_layers
-            data["q_network"] = q_net
-
+            data["q_network"] = self.q_network_parameters
             data["parameters"] = self.parameters.to_dictionary()
+            data["optimizer_parameters"] = self.optimizer_params
             f.write(json.dumps(data))
-
-    def q_network(self, input):
-        # Hidden fully connected layers
-        x = None
-        for i, dim in enumerate(self.q_net_hidden_layers):
-            x = tf_layers.fully_connected(inputs=input,
-                                          num_outputs=dim,
-                                          activation_fn=get_activation_tf(self.activation_f),
-                                          weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
-                                          scope="fully_connected_{}".format(i))
-
-        # Output logits
-        logits = tf_layers.fully_connected(inputs=x,
-                                           num_outputs=self.num_actions,
-                                           activation_fn=None,
-                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
-                                           scope="output_layer")
-
-        return logits
 
     def run(self):
         data = []
@@ -163,7 +172,7 @@ class DQN(AbstractReinforcement):
 
             for t in range(MAX_STEPS):
                 action = self.q_learner.eGreedyAction(state[np.newaxis, :])
-                next_state, reward, done, info = self.env.step(action)
+                next_state, reward, done, info = self.env.step(self.convert_to_sequence(action))
 
                 total_rewards += reward
                 if reward < 0:
@@ -174,7 +183,9 @@ class DQN(AbstractReinforcement):
                 state = next_state
 
                 if done:
-                    line = "Episode: {}, Steps: {}, Score: {}".format(i_episode, t + 1, info)
+                    line = "Episode: {}, Steps: {}, Score: {}, Current exploration rate: {}".format(i_episode, t + 1,
+                                                                                                    info,
+                                                                                                    self.q_learner.exploration)
                     data.append(line)
                     break
 
@@ -186,6 +197,14 @@ class DQN(AbstractReinforcement):
                 tmp = time.time()
 
             self.q_learner.measure_summaries(i_episode, info, t + 1, self.negative_reward)
+
+    def convert_to_sequence(self, action):
+        """
+        From specified action, creates a list of n outputs, onehot encoding.
+        """
+        result = np.zeros(self.num_actions)
+        result[action] = 1
+        return result
 
     def test(self, n_iterations):
         avg_test_score = 0
@@ -202,7 +221,7 @@ class DQN(AbstractReinforcement):
 
             for t in range(MAX_STEPS):
                 action = self.q_learner.eGreedyAction(state[np.newaxis, :])
-                next_state, reward, done, info = self.env.step(action)
+                next_state, reward, done, info = self.env.step(self.convert_to_sequence(action))
                 state = next_state
 
                 if done:
