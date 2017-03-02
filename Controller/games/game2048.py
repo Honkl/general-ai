@@ -107,7 +107,7 @@ class Game2048(AbstractGame):
         assert (len(action) == 4)
         moved, reward = self.game.move(np.argmax(action))
         if not moved:
-            reward = 0
+            reward = -1000
         new_state = self.game.get_state()
         self.score = self.game.score
 

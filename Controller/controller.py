@@ -12,10 +12,8 @@ from evolution.evolution_strategy import EvolutionStrategy
 from evolution.evolutionary_algorithm import EvolutionaryAlgorithm
 from models.echo_state_network import EchoState
 from models.mlp import MLP
-from reinforcement.greedy_policy.greedy_policy_reinforcement import GreedyPolicyReinforcement
 from reinforcement.ddpg.ddpg_reinforcement import DDPGReinforcement
-from reinforcement.greedy_policy.q_network import QNetwork
-from reinforcement.reinforcement_parameters import GreedyPolicyParameters, DDPGParameters, DQNParameters
+from reinforcement.reinforcement_parameters import DDPGParameters, DQNParameters
 from reinforcement.tf_rl.dqn import DQN
 
 MASTER_SEED = 42
@@ -23,9 +21,9 @@ random.seed(MASTER_SEED)
 np.random.seed(MASTER_SEED)
 
 
-def run_eva():
+def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=50,
+        pop_size=5,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
         ngen=5000,
@@ -37,11 +35,12 @@ def run_eva():
 
     # mlp = MLP(hidden_layers=[300, 300, 300], activation="relu")
     esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=eva_parameters, model=esn, logs_every=10,
-                                      max_workers=10)
+    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=esn, logs_every=1,
+                                      max_workers=5)
     evolution.run()
 
 
+"""
 def run_greedy():
     greedy_policy_params = GreedyPolicyParameters(
         batch_size=100,
@@ -55,19 +54,20 @@ def run_greedy():
     q_net = QNetwork(hidden_layers=[300, 300, 300], activation="relu", dropout_keep=None)
     RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
     RL.run()
+"""
 
 
-def run_ddpg():
+def run_ddpg(game):
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         episodes=1000000,
         test_size=1)
 
-    RL = DDPGReinforcement(game="torcs", parameters=ddpg_parameters, logs_every=5)
+    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=5)
     RL.run()
 
 
-def run_es():
+def run_es(game):
     strategy_parameters = EvolutionStrategyParameters(
         pop_size=25,
         ngen=5000,
@@ -78,11 +78,11 @@ def run_es():
 
     mlp = MLP(hidden_layers=[16, 16], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    strategy = EvolutionStrategy("2048", strategy_parameters, mlp, logs_every=10, max_workers=5)
+    strategy = EvolutionStrategy(game, strategy_parameters, mlp, logs_every=10, max_workers=5)
     strategy.run()
 
 
-def run_de():
+def run_de(game):
     diff_evolution_parameters = DifferentialEvolutionParameters(
         pop_size=20,
         ngen=1000,
@@ -92,11 +92,11 @@ def run_de():
         f=1)
 
     mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    diff = DifferentialEvolution("2048", diff_evolution_parameters, mlp, max_workers=3, logs_every=3)
+    diff = DifferentialEvolution(game, diff_evolution_parameters, mlp, max_workers=3, logs_every=3)
     diff.run()
 
 
-def run_dqn():
+def run_dqn(game):
     parameters = DQNParameters(batch_size=100,
                                init_exp=0.9,
                                final_exp=0.1,
@@ -108,7 +108,7 @@ def run_dqn():
                                reg_param=0.01,
                                max_gradient=5,
                                double_q_learning=False,
-                               test_size=100)
+                               test_size=10)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
@@ -120,14 +120,16 @@ def run_dqn():
     q_network_parameters["hidden_layers"] = [256, 256]
     q_network_parameters["activation"] = "relu"
 
-    RL = DQN("2048", parameters, q_network_parameters, optimizer_params, test_every=100)
+    RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()
 
 
 if __name__ == '__main__':
-    # run_greedy()
-    # run_ddpg()
-    # run_es()
-    # run_eva()
-    # run_de()
-    run_dqn()
+    game = "2048"
+
+    # run_greedy(game)
+    # run_ddpg(game)
+    # run_es(game)
+    # run_eva(game)
+    # run_de(game)
+    run_dqn(game)

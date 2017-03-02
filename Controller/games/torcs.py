@@ -41,7 +41,7 @@ class Torcs(AbstractGame):
 
                 state, current_phase, _, done = self.step(result)
                 if done:
-                    avg_result += self.score[0] # TODO
+                    avg_result += self.score
                     break
 
         avg_result = avg_result / float(self.game_batch_size)
