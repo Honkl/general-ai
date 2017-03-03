@@ -84,15 +84,15 @@ def run_es(game):
 
 def run_de(game):
     diff_evolution_parameters = DifferentialEvolutionParameters(
-        pop_size=20,
-        ngen=1000,
-        game_batch_size=5,
+        pop_size=25,
+        ngen=5000,
+        game_batch_size=50,
         hof_size=5,
         cr=0.25,
         f=1)
 
-    mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    diff = DifferentialEvolution(game, diff_evolution_parameters, mlp, max_workers=3, logs_every=3)
+    mlp = MLP(hidden_layers=[256, 256], activation="relu")
+    diff = DifferentialEvolution(game, diff_evolution_parameters, mlp, max_workers=5, logs_every=5)
     diff.run()
 
 
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     # run_greedy(game)
     # run_ddpg(game)
-    run_es(game)
+    # run_es(game)
     # run_eva(game)
-    # run_de(game)
+    run_de(game)
     # run_dqn(game)
