@@ -10,51 +10,49 @@ In the project we are currently using following games, models and types of learn
 * Mario (a well known arcade game)
 
 ### Learning techniques
-* Evolutionary algorithms
-* Evolution strategy
-* Differential evolution
+* Evolution - evolving neural networks, namely multi-layer perceptron (MLP) or echo-state networks (ESN), using:
+    * Simple evolutionary algorithm
+    * Evolution strategy
+    * Differential evolution
 * Reinforcement learning
-
-### Models
-* Multilayer perceptron (MLP)
-* Echo-state network (ESN)
-* Q-networks
-
-# Performance and results
-TODO
+    * Deep Q-networks (ε-greedy policy)
+    * DDPG (Deep Deterministic Policy Gradient)
 
 # Example Usage
-Decide which architecture do you need, then create parameters. Let's say we want to use evolution algorithm:
+To start one of the already implemented games, look into a `Controller/controller.py` file. Then start learning
+(using default parameters):
 ```python
-params = EvolutionaryAlgorithmParameters(
-    pop_size=50,
-    cxpb=0.75,
-    mut=("uniform", 0.1, 0.1),
-    ngen=1000,
-    game_batch_size=10,
-    cxindpb=0.2,
-    hof_size=0,
-    elite=5,
-    selection=("tournament", 3))
-```
+game = "2048"
 
-Create model and run:
-```python
-    mlp = MLP(hidden_layers=[256, 256], activation="relu")
-    evolution = EvolutionaryAlgorithm(game="2048", evolution_params=params, model=mlp)
-    evolution.run()
+run_eva(game)
+run_greedy(game)
+run_es(game)
 ```
-We have just learned MLP network for game 2048 using simple evolution algorithm. You can combine different games and different architectures.
+To customize own parameters, simply head into respective function, for example `run_eva(game)`:
+
+```python
+eva_parameters = EvolutionaryAlgorithmParameters(
+        pop_size=50,
+        cxpb=0.75,
+        mut=("uniform", 0.1, 0.1),
+        ngen=1000,
+        game_batch_size=10,
+        cxindpb=0.2,
+        hof_size=0,
+        elite=2,
+        selection=("tournament", 3))
+
+mlp = MLP(hidden_layers=[256, 256], activation="relu")
+evolution = EvolutionaryAlgorithm(game, eva_parameters, mlp, logs_every=100, max_workers=8)
+evolution.run()
+```
 
 # Customize own model, game and architecture
 The project provides a general interface for different AI architectures and games. First, let's take a look for customizing own architecture / model.
 ***
 Your class must extend `Model` class with the most important function `evaluate(self, input, current_phase)` which computes a 'forward' pass through your model with the specified input. You must also provide function `get_number_of_parameters(self, game)` so the architecture (e.q. evolution algorithm, evolution strategy..) will know the length of single individual to evolve. The `get_new_instance(self, weights, game_config)` method initializes a new instance of your model, using specified `weights` = parameters = single individual.
 ***
-Customizing of your own game has a few limits. First of all, the communication between the game and the AI (python) is done via standard I/O amongst processes.
-<p align="center">
-<img src="https://raw.githubusercontent.com/honkl/general-ai/master/communication.png" width="600"/>
-</p>
+Customizing of your own game TODO (communication).
 The AI reads standard output of the game process and expects a string in [json](https://cs.wikipedia.org/wiki/JavaScript_Object_Notation) format which must contain a few things:
 * state: current state of the game, an array of floats
 * current_phase: current phase of the game (games can have multiple phases; we train for each phase a separate network in some of the models); int
@@ -79,6 +77,9 @@ Interfaces for every game used. Either here or in a separate repository.
 - Java
     - TORCS: https://github.com/Honkl/general-ai/tree/master/Game-interfaces/TORCS
     - Mario: https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario
+
+# Performance and Results
+TODO
 
 # Requirements
 Everything runs on Windows (Linux has not been tested yet). For an AI itself, written in python, you will need:
