@@ -13,6 +13,7 @@ import json
 
 gc.enable()
 
+
 class DDPGReinforcement(AbstractReinforcement):
     """
     Represents a DDPG model.
@@ -37,7 +38,7 @@ class DDPGReinforcement(AbstractReinforcement):
 
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        self.logdir = self.init_directories(dir_name="deep_deterministic_policy_gradient")
+        self.logdir = self.init_directories(dir_name="ddpg")
 
         # DDPG (deep deterministic gradient policy)
         self.agent = DDPGAgent(self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
@@ -61,7 +62,7 @@ class DDPGReinforcement(AbstractReinforcement):
 
         start = time.time()
         data = []
-
+        tmp = time.time()
         for i_episode in range(1, self.episodes + 1):
 
             episode_start_time = time.time()
@@ -70,19 +71,27 @@ class DDPGReinforcement(AbstractReinforcement):
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
 
+            same_state_count = 0
             state = self.env.state
             for step in range(self.STEP_LIMIT):
                 action = self.agent.play(state)
                 next_state, reward, done, score = self.env.step(action)
                 self.agent.perceive(state, action, reward, next_state, done)
+
+                if np.array((state == next_state)).all():
+                    same_state_count += 1
+
                 state = next_state
-                if done:
+                if done or same_state_count == self.NON_MOVE_STEP_LIMIT:
                     break
 
             episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
-            line = "Episode {}/{}, Score: {}, Steps: {}, Episode Time: {}".format(i_episode, self.episodes, score, step,
-                                                                                  episode_time)
-            print(line)
+            line = "Episode {}, Score: {}, Steps: {}, Episode Time: {}".format(i_episode, score, step,
+                                                                               episode_time)
+
+            if time.time() - tmp > 1:
+                print(line)
+                tmp = time.time()
             data.append(line)
 
             if i_episode % self.logs_every == 0:

@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import tensorflow as tf
-from replay_buffer import ReplayBuffer
+from reinforcement.replay_buffer import ReplayBuffer
 
 class DeepDeterministicPolicyGradient(object):
 

@@ -60,10 +60,10 @@ def run_greedy():
 def run_ddpg(game):
     ddpg_parameters = DDPGParameters(
         batch_size=100,
-        episodes=1000000,
-        test_size=1)
+        episodes=10000000,
+        test_size=100)
 
-    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=5)
+    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=10)
     RL.run()
 
 
@@ -129,8 +129,8 @@ if __name__ == '__main__':
     game = "2048"
 
     # run_greedy(game)
-    # run_ddpg(game)
+    run_ddpg(game)
     # run_es(game)
     # run_eva(game)
     # run_de(game)
-    run_dqn(game)
+    # run_dqn(game)
