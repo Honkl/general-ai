@@ -103,7 +103,8 @@ class DQN(AbstractReinforcement):
                                           activation_fn=get_activation_tf(self.q_network_parameters["activation"]),
                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
                                           scope="fully_connected_{}".format(i))
-            if self.q_network_parameters["dropout"] != None:
+
+            if not self.is_empty(self.q_network_parameters["dropout"]):
                 x = tf_layers.dropout(x, keep_prob=self.q_network_parameters["dropout"])
 
         # Output logits
@@ -114,6 +115,11 @@ class DQN(AbstractReinforcement):
                                            scope="output_layer")
 
         return logits
+
+    def is_empty(self, value):
+        if value == None or value == "None" or value == "null":
+            return True
+        return False
 
     def init_directories(self, dir_name=None):
         """

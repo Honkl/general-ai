@@ -117,7 +117,7 @@ def run_dqn(game):
     # self.optimizer_params["momentum"] = 0.95
 
     q_network_parameters = {}
-    q_network_parameters["hidden_layers"] = [256, 256]
+    q_network_parameters["hidden_layers"] = [256, 256, 256, 256]
     q_network_parameters["activation"] = "relu"
     q_network_parameters["dropout"] = 0.5
 
