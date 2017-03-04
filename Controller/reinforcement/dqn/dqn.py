@@ -1,17 +1,19 @@
 from __future__ import print_function
 
-from reinforcement.tf_rl.rl_implementations.neural_q_learner import NeuralQLearner
+import json
+import os
+import time
+
+import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as tf_layers
-from utils.activations import get_activation_tf
-import numpy as np
-import time
-from reinforcement.environment import Environment
-import utils.miscellaneous
+
 import constants
-import os
-import json
+import utils.miscellaneous
 from reinforcement.abstract_reinforcement import AbstractReinforcement
+from reinforcement.dqn.neural_q_learner import NeuralQLearner
+from reinforcement.environment import Environment
+from utils.activations import get_activation_tf
 
 STD = 0.01
 MAX_EPISODES = 1000000
@@ -101,6 +103,8 @@ class DQN(AbstractReinforcement):
                                           activation_fn=get_activation_tf(self.q_network_parameters["activation"]),
                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
                                           scope="fully_connected_{}".format(i))
+            if self.q_network_parameters["dropout"] != None:
+                x = tf_layers.dropout(x, keep_prob=self.q_network_parameters["dropout"])
 
         # Output logits
         logits = tf_layers.fully_connected(inputs=x,

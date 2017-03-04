@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 from models.abstract_model import AbstractModel
-from reinforcement.tf_rl.dqn import DQN
+from reinforcement.dqn.dqn import DQN
 from reinforcement.reinforcement_parameters import DQNParameters
 
 
