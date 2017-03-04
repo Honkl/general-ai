@@ -63,7 +63,7 @@ def run_ddpg(game):
         episodes=10000000,
         test_size=100)
 
-    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=10)
+    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=50)
     RL.run()
 
 

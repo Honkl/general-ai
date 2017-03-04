@@ -13,7 +13,6 @@ class AbstractReinforcement():
     """
 
     STEP_LIMIT = 50000
-    NON_MOVE_STEP_LIMIT = 500
 
     """ Overwritten in subclasses """
     game = None

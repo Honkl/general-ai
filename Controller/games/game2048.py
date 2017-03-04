@@ -105,8 +105,12 @@ class Game2048(AbstractGame):
         :return: New state, current phase, reward, done
         """
         assert (len(action) == 4)
-        moved, reward = self.game.move(np.argmax(action))
-        if not moved:
+        result = np.argsort(np.array(action))[::-1]
+        for i, a in enumerate(result):
+            moved, reward = self.game.move(a)
+            if moved:
+                break
+        if i > 0:
             reward = -1000
         new_state = self.game.get_state()
         self.score = self.game.score

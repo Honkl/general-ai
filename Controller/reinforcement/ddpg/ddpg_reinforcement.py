@@ -71,18 +71,14 @@ class DDPGReinforcement(AbstractReinforcement):
                                    observations_count=self.state_size,
                                    actions_in_phases=self.actions_count)
 
-            same_state_count = 0
             state = self.env.state
             for step in range(self.STEP_LIMIT):
                 action = self.agent.play(state)
                 next_state, reward, done, score = self.env.step(action)
                 self.agent.perceive(state, action, reward, next_state, done)
-
-                if np.array((state == next_state)).all():
-                    same_state_count += 1
-
                 state = next_state
-                if done or same_state_count == self.NON_MOVE_STEP_LIMIT:
+
+                if done:
                     break
 
             episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
