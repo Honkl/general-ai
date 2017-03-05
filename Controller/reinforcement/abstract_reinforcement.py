@@ -61,19 +61,29 @@ class AbstractReinforcement():
 
         print("Testing model... [{} runs]".format(self.parameters.test_size))
         current_score = self.test(self.parameters.test_size)
-        line = "Current score: {}, Best score: {}".format(current_score, self.best_test_score)
+
+        elapsed_time = utils.miscellaneous.get_elapsed_time(start_time)
+        line = "Current score: {}, Best score: {}, Total time: {}".format(current_score,
+                                                                          self.best_test_score,
+                                                                          elapsed_time)
         print(line)
         self.test_logbook_data.append(line)
+
+        best_dir = os.path.join(self.logdir, "best")
+        last_dir = os.path.join(self.logdir, "last")
+        if not os.path.exists(best_dir):
+            os.makedirs(best_dir)
+        if not os.path.exists(last_dir):
+            os.makedirs(last_dir)
+
         if (current_score > self.best_test_score):
-            print("Saving model...")
-            checkpoint_path = os.path.join(self.logdir, self.checkpoint_name)
+            checkpoint_path = os.path.join(best_dir, self.checkpoint_name)
             self.agent.saver.save(self.agent.sess, checkpoint_path)
             self.best_test_score = current_score
 
-        elapsed_time = utils.miscellaneous.get_elapsed_time(start_time)
-        t = "Total time: {}".format(elapsed_time)
-        print(t)
-        self.test_logbook_data.append(t)
+        # Saving also last model
+        last_ckpt_path = os.path.join(last_dir, self.checkpoint_name)
+        self.agent.saver.save(self.agent.sess, last_ckpt_path)
 
         with open(os.path.join(self.logdir, "logbook.txt"), "w") as f:
             for line in log_data:
