@@ -23,17 +23,17 @@ np.random.seed(MASTER_SEED)
 
 def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=20,
+        pop_size=25,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
-        ngen=2000,
-        game_batch_size=10,
+        ngen=1000,
+        game_batch_size=5,
         cxindpb=0.2,
         hof_size=0,
-        elite=2,
+        elite=5,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[64, 64, 64], activation="relu")
+    mlp = MLP(hidden_layers=[64, 64], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=5,
                                       max_workers=5)
@@ -60,7 +60,7 @@ def run_greedy():
 def run_ddpg(game):
     ddpg_parameters = DDPGParameters(
         batch_size=100,
-        episodes=10000000,
+        episodes=500,
         test_size=1)
 
     RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=5)
@@ -126,11 +126,11 @@ def run_dqn(game):
 
 
 if __name__ == '__main__':
-    game = "2048"
+    game = "mario"
 
     # run_greedy(game)
-    run_ddpg(game)
+    # run_ddpg(game)
     # run_es(game)
-    # run_eva(game)
+    run_eva(game)
     # run_de(game)
     # run_dqn(game)

@@ -1,5 +1,5 @@
 {
   "game_phases": 1,
-  "input_sizes": [ 464 ],
+  "input_sizes": [ 384 ],
   "output_sizes": [ 5 ]
 }
