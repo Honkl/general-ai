@@ -50,7 +50,7 @@ class Environment(gym.Env):
         new_state, self.last_phase, reward, done = self.game_instance.step(action)
         self.state = np.array(new_state)
         self.done = done
-        return self.state, reward, done, int(self.game_instance.score)
+        return self.state, reward, done, float(self.game_instance.score)
 
     def _configure(self, display=None):
         self.display = display

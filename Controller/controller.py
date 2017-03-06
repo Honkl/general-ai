@@ -100,7 +100,7 @@ def run_dqn(game):
     parameters = DQNParameters(batch_size=100,
                                init_exp=0.9,
                                final_exp=0.1,
-                               anneal_steps=10000000,
+                               anneal_steps=1000000,
                                replay_buffer_size=10000,
                                store_replay_every=1,
                                discount_factor=0.9,
@@ -108,7 +108,7 @@ def run_dqn(game):
                                reg_param=0.01,
                                max_gradient=5,
                                double_q_learning=False,
-                               test_size=100)
+                               test_size=10)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
@@ -117,11 +117,11 @@ def run_dqn(game):
     # self.optimizer_params["momentum"] = 0.95
 
     q_network_parameters = {}
-    q_network_parameters["hidden_layers"] = [256, 256, 256, 256]
+    q_network_parameters["hidden_layers"] = [256, 256]
     q_network_parameters["activation"] = "relu"
     q_network_parameters["dropout"] = 0.5
 
-    RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
+    RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=20)
     RL.run()
 
 
@@ -131,6 +131,6 @@ if __name__ == '__main__':
     # run_greedy(game)
     # run_ddpg(game)
     # run_es(game)
-    run_eva(game)
+    # run_eva(game)
     # run_de(game)
-    # run_dqn(game)
+    run_dqn(game)
