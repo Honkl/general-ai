@@ -70,7 +70,8 @@ class DQN(AbstractReinforcement):
 
         self.q_learner = NeuralQLearner(self.sess,
                                         self.optimizer,
-                                        self.q_network,
+                                        # self.q_network,  # Use self.q_network_conv # if want to test CNN network
+                                        self.q_network_conv,
                                         self.state_size,
                                         self.num_actions,
                                         summary_writer=self.writer,
@@ -115,6 +116,35 @@ class DQN(AbstractReinforcement):
                                            scope="output_layer")
 
         return logits
+
+    def q_network_conv(self, x):
+        """
+        Defines Q-Network. Tensorflow stuff, this is a CNN test (for specific games only).
+        """
+
+        x = tf.reshape(x, shape=[-1, 4, 4, 16])
+        net = tf_layers.conv2d(x, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+                               activation_fn=tf.nn.relu)
+        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+                               activation_fn=tf.nn.relu)
+
+        # net = tf_layers.max_pool2d(net, kernel_size=2)
+
+        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+                               activation_fn=tf.nn.relu)
+        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+                               activation_fn=tf.nn.relu)
+        # net = tf_layers.max_pool2d(net, kernel_size=2)
+
+        net = tf.reshape(net, shape=[-1, 4 * 4 * 1024])
+        # print(net.get_shape())
+        # net = tf_layers.fully_connected(net, num_outputs=512, activation_fn=tf.nn.relu)
+        # print(net.get_shape())
+        net = tf_layers.fully_connected(net, num_outputs=self.num_actions, activation_fn=None)
+        print(net.get_shape())
+        net = tf.reshape(net, shape=[-1, self.num_actions])
+
+        return net
 
     def is_empty(self, value):
         if value == None or value == "None" or value == "null":

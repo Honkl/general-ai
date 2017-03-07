@@ -111,7 +111,7 @@ class Game2048(AbstractGame):
             if moved:
                 break
         if i > 0:
-            reward = -1000
+            reward = -1
         new_state = self.game.get_state()
         self.score = self.game.score
 

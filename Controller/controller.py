@@ -23,11 +23,11 @@ np.random.seed(MASTER_SEED)
 
 def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=25,
+        pop_size=50,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
-        ngen=1000,
-        game_batch_size=5,
+        ngen=2000,
+        game_batch_size=10,
         cxindpb=0.2,
         hof_size=0,
         elite=5,
@@ -35,7 +35,7 @@ def run_eva(game):
 
     mlp = MLP(hidden_layers=[64, 64], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=5,
+    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=100,
                                       max_workers=5)
     evolution.run()
 
@@ -97,18 +97,18 @@ def run_de(game):
 
 
 def run_dqn(game):
-    parameters = DQNParameters(batch_size=100,
-                               init_exp=0.9,
-                               final_exp=0.1,
-                               anneal_steps=1000000,
+    parameters = DQNParameters(batch_size=32,
+                               init_exp=0.5,
+                               final_exp=0.01,
+                               anneal_steps=1000,
                                replay_buffer_size=10000,
                                store_replay_every=1,
-                               discount_factor=0.9,
+                               discount_factor=0.95,
                                target_update_rate=0.01,
                                reg_param=0.01,
                                max_gradient=5,
                                double_q_learning=False,
-                               test_size=10)
+                               test_size=100)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
@@ -117,20 +117,20 @@ def run_dqn(game):
     # self.optimizer_params["momentum"] = 0.95
 
     q_network_parameters = {}
-    q_network_parameters["hidden_layers"] = [256, 256]
+    q_network_parameters["hidden_layers"] = [500, 500, 500]
     q_network_parameters["activation"] = "relu"
     q_network_parameters["dropout"] = 0.5
 
-    RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=20)
+    RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()
 
 
 if __name__ == '__main__':
-    game = "mario"
+    game = "2048"
 
     # run_greedy(game)
     # run_ddpg(game)
     # run_es(game)
-    # run_eva(game)
+    run_eva(game)
     # run_de(game)
-    run_dqn(game)
+    # run_dqn(game)
