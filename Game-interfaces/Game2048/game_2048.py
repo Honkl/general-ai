@@ -163,6 +163,8 @@ def print_grid(grid_array):
 
 class Game:
     def __init__(self, seed, cols=4, rows=4):
+        self.cols = cols
+        self.rows = rows
         self.rng = np.random.RandomState(seed)
         self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
         self.grid = self.grid_array
@@ -202,7 +204,7 @@ class Game:
                 score = push_left(self.grid)
         if score == -1:
             return 0, None
-        score *= 2 # We want result as a score (2 + 2 merged should be score "4" not "2")
+        score *= 2  # We want result as a score (2 + 2 merged should be score "4" not "2")
         reward = score
         self.total_moves += 1
         self.score += score
@@ -214,7 +216,24 @@ class Game:
         print_grid(self.grid_array)
 
     def get_state(self):
+        # FEEL FREE CHANGE THIS ENCODING
+
+        return self.get_state_onehot()
+        # return self.get_state_raw()
+
+    def get_state_raw(self):
         return np.array([np.log2(x) if x > 0 else .0 for x in self.grid.flatten()])
+
+    def get_state_onehot(self):
+        MAX_POWER = 16
+        table = {2 ** (i + 1): i for i in range(MAX_POWER)}
+        x = np.zeros(shape=(self.rows, self.cols, MAX_POWER), dtype=float)
+        for i in range(self.rows):
+            for j in range(self.cols):
+                value = self.grid[i, j]
+                if value > 0:
+                    x[i, j][table[value]] = 1
+        return x.flatten()
 
 
 """ # Debug stuff
