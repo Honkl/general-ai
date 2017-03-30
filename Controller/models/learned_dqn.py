@@ -30,7 +30,7 @@ class LearnedDQN(AbstractModel):
         optimizer_params = self.metadata["optimizer_parameters"]
         self.game = self.metadata["game"]
         self.dqn = DQN(self.game, DQNParameters.from_dict(params), net, optimizer_params)
-        self.dqn.load_checkpoint(logdir)
+        self.dqn.load_checkpoint(os.path.join(logdir, "last"))
 
     def get_new_instance(self, weights, game_config):
         raise NotImplementedError

@@ -155,31 +155,30 @@ def eval_alhambra_winrate(model, evals):
 
 if __name__ == '__main__':
     np.random.seed(930615)
-    game = "torcs"
-    evals = 250
+    game = "2048"
+    evals = 100
     # run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
     # file_name = "C:/Users/Jan/Desktop/lab_logs/master/logs/mario/mario new/mlp/logs_2017-02-20_10-55-14/best/best_0.json"
     # file_name = "../../Experiments/MLP+differential_evolution/mario/logs_2017-02-04_00-30-52/last/last_0.json"
     # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
-    # file_name = "../../Experiments/ESN+evolution_algorithm/torcs/logs_2017-02-01_01-13-38/best/best_0.json"
+    # file_name = "../../Experiments/MLP+evolution_strategy/2048/logs_2017-02-21_17-30-47/best/best_0.json"
     # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
-    file_name = "../../Controller/logs/torcs/mlp/logs_2017-03-03_01-10-32/best/best_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    # logdir = "../../Controller/logs/2048/dqn/logs_2017-03-02_15-06-50"
+    logdir = "../../Controller/logs/2048/dqn/logs_2017-03-08_01-32-38"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
-    mlp = MLP.load_from_file(file_name, game)
+    # mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(Random(game), evals)
-    # dqn = LearnedDQN(logdir)
+    dqn = LearnedDQN(logdir)
 
     # ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    # run_2048_extended(dqn, evals)
+    run_2048_extended(dqn, evals)
 
-    # eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
+    # eval_mario_winrate(model=mlp, evals=evals, level="gombas", vis_on=True)
     # compare_models(game, evals, Random(game))
-    run_torcs_vis_on(model=mlp, evals=evals)
+    # run_torcs_vis_on(model=mlp, evals=evals)

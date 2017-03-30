@@ -70,8 +70,9 @@ class DQN(AbstractReinforcement):
 
         self.q_learner = NeuralQLearner(self.sess,
                                         self.optimizer,
-                                        # self.q_network,  # Use self.q_network_conv # if want to test CNN network
-                                        self.q_network_conv,
+                                        self.q_network,  # Use self.q_network_conv # if want to test CNN network
+                                        # self.q_network_conv,
+                                        # self.q_network_lstm,
                                         self.state_size,
                                         self.num_actions,
                                         summary_writer=self.writer,
@@ -123,27 +124,44 @@ class DQN(AbstractReinforcement):
         """
 
         x = tf.reshape(x, shape=[-1, 4, 4, 16])
-        net = tf_layers.conv2d(x, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(x, num_outputs=256, kernel_size=2, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
-        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(net, num_outputs=256, kernel_size=2, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
 
         # net = tf_layers.max_pool2d(net, kernel_size=2)
+        # net = tf_layers.avg_pool2d(net, kernel_size=2)
 
-        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(net, num_outputs=512, kernel_size=3, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
-        net = tf_layers.conv2d(net, num_outputs=1024, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(net, num_outputs=512, kernel_size=3, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
         # net = tf_layers.max_pool2d(net, kernel_size=2)
+        # net = tf_layers.avg_pool2d(net, kernel_size=2)
 
-        net = tf.reshape(net, shape=[-1, 4 * 4 * 1024])
+        net = tf.reshape(net, shape=[-1, 4 * 4 * 512])
         # print(net.get_shape())
-        # net = tf_layers.fully_connected(net, num_outputs=512, activation_fn=tf.nn.relu)
+        net = tf_layers.fully_connected(net, num_outputs=512, activation_fn=tf.nn.relu)
         # print(net.get_shape())
         net = tf_layers.fully_connected(net, num_outputs=self.num_actions, activation_fn=None)
         print(net.get_shape())
         net = tf.reshape(net, shape=[-1, self.num_actions])
 
+        return net
+
+    rnn_state = None
+    rnn = tf.nn.rnn_cell.BasicLSTMCell(1024)
+
+    def q_network_lstm(self, x):
+
+        # x = tf.reshape(x, shape=[-1, 4, 4, 16])
+        print(x.get_shape())
+        if self.rnn_state == None:
+            self.rnn_state = self.rnn.zero_state(1, dtype=tf.float32)
+
+        net = x
+        net, self.rnn_state = self.rnn(net, self.rnn_state, scope="rnn")
+        net = tf_layers.fully_connected(net, self.num_actions, activation_fn=None, scope="fully_connected_after_rnn")
         return net
 
     def is_empty(self, value):
@@ -233,7 +251,11 @@ class DQN(AbstractReinforcement):
     def test(self, n_iterations):
         avg_test_score = 0
 
+        tmp = time.time()
         for i_episode in range(n_iterations):
+            if time.time() - tmp > 1:
+                print("Test {}/{}".format(i_episode + 1, n_iterations))
+                tmp = time.time()
 
             self.env = Environment(game_class=self.game_class,
                                    seed=np.random.randint(0, 2 ** 30),
