@@ -16,7 +16,7 @@ from reinforcement.environment import Environment
 from utils.activations import get_activation_tf
 
 STD = 0.01
-MAX_EPISODES = 1000000
+MAX_EPISODES = 180000
 MAX_STEPS = 50000
 
 
@@ -42,12 +42,11 @@ class DQN(AbstractReinforcement):
 
         self.checkpoint_name = "dqn.ckpt"
         lr = self.optimizer_params["learning_rate"]
-        if self.optimizer_params["name"] == "rmsprop":
-            d = self.optimizer_params["decay"]
-            m = self.optimizer_params["momentum"]
-            self.optimizer = tf.train.RMSPropOptimizer(learning_rate=lr, decay=d, momentum=m)
+
         if self.optimizer_params["name"] == "adam":
             self.optimizer = tf.train.AdamOptimizer(learning_rate=lr)
+        else:
+            print("Other optimizers beside Adam are not implemented.")
 
         self.game = game
         self.game_config = utils.miscellaneous.get_game_config(game)
@@ -83,6 +82,7 @@ class DQN(AbstractReinforcement):
                                         replay_buffer_size=self.parameters.replay_buffer_size,
                                         target_update_rate=self.parameters.target_update_rate,
                                         store_replay_every=self.parameters.store_replay_every,
+                                        target_update_frequency=self.parameters.target_update_frequency,
                                         discount_factor=self.parameters.discount_factor,
                                         reg_param=self.parameters.reg_param,
                                         max_gradient=self.parameters.max_gradient,
@@ -98,9 +98,9 @@ class DQN(AbstractReinforcement):
         """
 
         # Hidden fully connected layers
-        x = None
+        x = input
         for i, dim in enumerate(self.q_network_parameters["hidden_layers"]):
-            x = tf_layers.fully_connected(inputs=input,
+            x = tf_layers.fully_connected(inputs=x,
                                           num_outputs=dim,
                                           activation_fn=get_activation_tf(self.q_network_parameters["activation"]),
                                           weights_initializer=tf.random_normal_initializer(mean=0, stddev=STD),
@@ -192,6 +192,10 @@ class DQN(AbstractReinforcement):
             f.write(json.dumps(data))
 
     def run(self):
+        """
+        Runs the evaluation of current model.
+        """
+
         data = []
         data.append("Episode Steps Score Exploration_rate Time")
         start = time.time()
@@ -228,7 +232,7 @@ class DQN(AbstractReinforcement):
                     data.append("{} {} {} {}".format(i_episode, t + 1, info, self.q_learner.exploration, game_time))
                     break
 
-            if (t + 1) == MAX_STEPS:
+            if t == MAX_STEPS:
                 print("Maximum number of steps within single game exceeded. ")
 
             if time.time() - tmp > 1:

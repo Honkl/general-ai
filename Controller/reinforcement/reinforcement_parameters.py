@@ -97,6 +97,7 @@ class DQNParameters():
             data["store_replay_every"],
             data["discount_factor"],
             data["target_update_rate"],
+            data["target_update_frequency"],
             data["reg_param"],
             data["max_gradient"],
             data["double_q_learning"],
@@ -112,6 +113,7 @@ class DQNParameters():
                  store_replay_every=5,  # how frequent to store experience
                  discount_factor=0.9,  # discount future rewards
                  target_update_rate=0.01,
+                 target_update_frequency=100,
                  reg_param=0.01,  # regularization constants
                  max_gradient=5,  # max gradient norms
                  double_q_learning=False,
@@ -124,6 +126,7 @@ class DQNParameters():
         self.store_replay_every = store_replay_every
         self.discount_factor = discount_factor
         self.target_update_rate = target_update_rate
+        self.target_update_frequency = target_update_frequency
         self.reg_param = reg_param
         self.max_gradient = max_gradient
         self.double_q_learning = double_q_learning
@@ -139,6 +142,7 @@ class DQNParameters():
         data["store_replay_every"] = self.store_replay_every
         data["discount_factor"] = self.discount_factor
         data["target_update_rate"] = self.target_update_rate
+        data["target_update_frequency"] = self.target_update_frequency
         data["reg_param"] = self.reg_param
         data["max_gradient"] = self.max_gradient
         data["double_q_learning"] = self.double_q_learning
@@ -147,9 +151,10 @@ class DQNParameters():
 
     def to_string(self):
         return "batch_size: {}, init_exp: {}, final_exp: {}, final_exp: {}, replay_buffer_size: {}, " \
-               "store_replay_every: {}. discount_factor: {}, target_update_rate: {}, reg_param: {}, " \
-               "max_gradient: {}, double_q_learning: {}".format(self.batch_size, self.init_exp, self.final_exp,
-                                                                self.final_exp, self.replay_buffer_size,
-                                                                self.store_replay_every, self.discount_factor,
-                                                                self.target_update_rate, self.reg_param,
-                                                                self.max_gradient, self.double_q_learning)
+               "store_replay_every: {}. discount_factor: {}, target_update_rate: {}, target_update_frequency: {}, " \
+               "reg_param: {}, max_gradient: {}, double_q_learning: {}".format(
+            self.batch_size, self.init_exp, self.final_exp,
+            self.final_exp, self.replay_buffer_size,
+            self.store_replay_every, self.discount_factor,
+            self.target_update_rate, self.target_update_frequency,
+            self.reg_param, self.max_gradient, self.double_q_learning)
