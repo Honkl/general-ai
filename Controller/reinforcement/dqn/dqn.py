@@ -16,7 +16,7 @@ from reinforcement.environment import Environment
 from utils.activations import get_activation_tf
 
 STD = 0.01
-MAX_EPISODES = 180000
+MAX_EPISODES = 100000
 MAX_STEPS = 50000
 
 
@@ -85,7 +85,6 @@ class DQN(AbstractReinforcement):
                                         target_update_frequency=self.parameters.target_update_frequency,
                                         discount_factor=self.parameters.discount_factor,
                                         reg_param=self.parameters.reg_param,
-                                        max_gradient=self.parameters.max_gradient,
                                         double_q_learning=self.parameters.double_q_learning)
 
         self.agent = self.q_learner

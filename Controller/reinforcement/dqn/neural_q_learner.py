@@ -1,5 +1,6 @@
 # Implementation from https://github.com/yukezhu/tensorflow-reinforce
 # Updated by Jan Kluj.
+
 import random
 import numpy as np
 import tensorflow as tf
@@ -22,7 +23,6 @@ class NeuralQLearner(object):
                  target_update_rate=0.01,
                  target_update_frequency=100,
                  reg_param=0.01,  # regularization constants
-                 max_gradient=5,  # max gradient norms
                  double_q_learning=False,
                  summary_writer=None,
                  summary_every=100):
@@ -50,7 +50,6 @@ class NeuralQLearner(object):
         self.target_update_frequency = target_update_frequency
 
         # training parameters
-        self.max_gradient = max_gradient
         self.reg_param = reg_param
 
         # counters
@@ -127,39 +126,18 @@ class NeuralQLearner(object):
             self.temp_diff = self.future_rewards - self.masked_action_scores
             self.td_loss = tf.reduce_mean(tf.square(self.temp_diff))
 
-            self.loss = self.td_loss
+            if self.reg_param == None:
+                # Not using regularization loss
+                print("In case of evaluate without regularization")
+                self.loss = self.td_loss
+            else:
+                # L2 regularization loss
+                print("reg loss")
+                q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
+                self.reg_loss = self.reg_param * tf.reduce_sum([tf.reduce_sum(tf.square(x)) for x in q_network_variables])
+                self.loss = self.td_loss + self.reg_loss
+
             self.train_op = self.optimizer.minimize(self.loss)
-
-            # regularization loss
-            """
-            q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
-            self.reg_loss = self.reg_param * tf.reduce_sum([tf.reduce_sum(tf.square(x)) for x in q_network_variables])
-            # compute total loss and gradients
-            self.loss = self.td_loss + self.reg_loss
-            gradients = self.optimizer.compute_gradients(self.loss)
-            # clip gradients by norm
-            for i, (grad, var) in enumerate(gradients):
-                if grad is not None:
-                    gradients[i] = (tf.clip_by_norm(grad, self.max_gradient), var)
-
-
-            # add histograms for gradients.
-            # for grad, var in gradients:
-            #    tf.histogram_summary(var.name, var)
-            #    if grad is not None:
-            #        pass
-            #        tf.histogram_summary(var.name + '/gradients', grad)
-
-
-            # scalar summaries
-            # tf.summary.scalar("td_loss", self.td_loss)
-            # tf.summary.scalar("reg_loss", self.reg_loss)
-            # tf.summary.scalar("total_loss", self.loss)
-            # tf.summary.scalar("exploration", self.exploration)
-            # self.summarize = tf.summary.merge_all()
-
-            self.train_op = self.optimizer.apply_gradients(gradients)
-            """
 
         # update target network with Q network
         with tf.name_scope("update_target_network"):
@@ -168,10 +146,6 @@ class NeuralQLearner(object):
             q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
             target_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="target_network")
             for v_source, v_target in zip(q_network_variables, target_network_variables):
-                # this is equivalent to target = (1-alpha) * target + alpha * source
-                #  T = (1-alpha)*T + alpha*T # Slow update
-                # update_op = v_target.assign_sub(self.target_update_rate * (v_target - v_source))
-
                 # update via assign x' <- x
                 update_op = v_target.assign(v_source)
                 self.target_network_update.append(update_op)
@@ -180,11 +154,6 @@ class NeuralQLearner(object):
         self.no_op = tf.no_op()
 
     def storeExperience(self, state, action, reward, next_state, done):
-        # TODO
-        if reward < 0:
-            # Do not store invalid move experiences
-            return
-
         # always store end states
         if self.store_experience_cnt % self.store_replay_every == 0 or done:
             self.replay_buffer.add(state, action, reward, next_state, done)
