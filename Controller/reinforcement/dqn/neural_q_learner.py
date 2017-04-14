@@ -20,7 +20,6 @@ class NeuralQLearner(object):
                  replay_buffer_size=10000,
                  store_replay_every=5,  # how frequent to store experience
                  discount_factor=0.9,  # discount future rewards
-                 target_update_rate=0.01,
                  target_update_frequency=100,
                  reg_param=0.01,  # regularization constants
                  double_q_learning=False,
@@ -45,7 +44,6 @@ class NeuralQLearner(object):
         self.final_exp = final_exp
         self.anneal_steps = anneal_steps
         self.discount_factor = discount_factor
-        self.target_update_rate = target_update_rate
         self.double_q_learning = double_q_learning
         self.target_update_frequency = target_update_frequency
 
@@ -128,11 +126,9 @@ class NeuralQLearner(object):
 
             if self.reg_param == None:
                 # Not using regularization loss
-                print("In case of evaluate without regularization")
                 self.loss = self.td_loss
             else:
                 # L2 regularization loss
-                print("reg loss")
                 q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
                 self.reg_loss = self.reg_param * tf.reduce_sum([tf.reduce_sum(tf.square(x)) for x in q_network_variables])
                 self.loss = self.td_loss + self.reg_loss

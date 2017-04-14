@@ -80,7 +80,6 @@ class DQN(AbstractReinforcement):
                                         batch_size=self.parameters.batch_size,
                                         anneal_steps=self.parameters.anneal_steps,
                                         replay_buffer_size=self.parameters.replay_buffer_size,
-                                        target_update_rate=self.parameters.target_update_rate,
                                         store_replay_every=self.parameters.store_replay_every,
                                         target_update_frequency=self.parameters.target_update_frequency,
                                         discount_factor=self.parameters.discount_factor,
