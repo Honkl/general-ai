@@ -92,6 +92,7 @@ class DifferentialEvolution(Evolution):
                     population[k] = y
 
             """
+            # In case we want evaluate fitness of all individuals (and not only new modified)
             seeds = [np.random.randint(0, 2 ** 16) for _ in range(len(population))]
             fitnesses = toolbox.map(toolbox.evaluate, population, seeds)
             for ind, fit in zip(population, fitnesses):

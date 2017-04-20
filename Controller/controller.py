@@ -23,10 +23,10 @@ np.random.seed(MASTER_SEED)
 
 def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=50,
+        pop_size=25,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
-        ngen=2000,
+        ngen=1000,
         game_batch_size=10,
         cxindpb=0.2,
         hof_size=0,
@@ -38,23 +38,6 @@ def run_eva(game):
     evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=100,
                                       max_workers=5)
     evolution.run()
-
-
-"""
-def run_greedy():
-    greedy_policy_params = GreedyPolicyParameters(
-        batch_size=100,
-        episodes=1000000,
-        gamma=0.9,
-        optimizer="adam",
-        epsilon=0.1,
-        test_size=100,
-        learning_rate=0.001)
-
-    q_net = QNetwork(hidden_layers=[300, 300, 300], activation="relu", dropout_keep=None)
-    RL = GreedyPolicyReinforcement(game="2048", parameters=greedy_policy_params, q_network=q_net, logs_every=100)
-    RL.run()
-"""
 
 
 def run_ddpg(game):
@@ -104,20 +87,19 @@ def run_dqn(game):
                                replay_buffer_size=10000,
                                store_replay_every=1,
                                discount_factor=0.9,
-                               target_update_frequency=100,
+                               target_update_frequency=500,
                                reg_param=0.01,
                                double_q_learning=False,
                                test_size=100)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
-    optimizer_params["learning_rate"] = 0.001
-
+    optimizer_params["learning_rate"] = 0.01
 
     q_network_parameters = {}
     q_network_parameters["hidden_layers"] = [500, 500]
     q_network_parameters["activation"] = "relu"
-    q_network_parameters["dropout"] = 0.5
+    q_network_parameters["dropout"] = None
 
     RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()

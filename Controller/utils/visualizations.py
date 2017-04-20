@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import os, json
 
 import games
 import time
@@ -153,10 +154,15 @@ def eval_alhambra_winrate(model, evals):
     print("Alhambra winrate: {} ({}/{})".format(wins / evals, wins, evals))
 
 
-if __name__ == '__main__':
+def run_model_evaluator():
+    """
+    Used for evaluating learned models, to benchmark them and get avg results.
+    For example, to run 1000 games and plot results.
+    """
+
     np.random.seed(930615)
     game = "2048"
-    evals = 100
+    evals = 1000
     # run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
     # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
@@ -166,7 +172,8 @@ if __name__ == '__main__':
     # file_name = "../../Experiments/MLP+evolution_strategy/2048/logs_2017-02-21_17-30-47/best/best_0.json"
     # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    logdir = "../../Controller/logs/2048/dqn/logs_2017-03-08_01-32-38"
+    logdir = "D:/Github/general-ai/Experiments/reinforcement_learning/2048/logs_2017-04-18_18-25-40"
+    # logdir = "D:/Github/general-ai/Controller/logs/mario/dqn/logs_2017-04-19_16-26-07"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
@@ -179,6 +186,37 @@ if __name__ == '__main__':
     # run_random_model(game, evals)
     run_2048_extended(dqn, evals)
 
-    # eval_mario_winrate(model=mlp, evals=evals, level="gombas", vis_on=True)
+    # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=True)
     # compare_models(game, evals, Random(game))
     # run_torcs_vis_on(model=mlp, evals=evals)
+
+
+def run_plot_creator():
+    """
+    Used for creating some graphs, plots, etc...
+    """
+
+    dir_name = "..."
+    game = "2048"
+
+    with open(os.path.join(dir_name, "metadata.json"), "r") as f:
+        metadata = json.load(f)
+
+    data = np.loadtxt(os.path.join(dir_name, "logbook.txt"), skiprows=1)
+    episodes = data[:, 0]
+    scores = data[:, 2]
+
+    plt.figure()
+    plt.plot(episodes, scores, label="score")
+
+    plt.xlabel("Episode")
+    plt.ylabel("Score")
+    plt.xlim([0, len(episodes)])
+    plt.legend(loc="lower right")
+    plt.title("GAME: {}\n{}".format(game, metadata, fontsize=10))
+    plt.savefig("plot.png")
+
+
+if __name__ == '__main__':
+    run_model_evaluator()
+    # run_plot_creator()

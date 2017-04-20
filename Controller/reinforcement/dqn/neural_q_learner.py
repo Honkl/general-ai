@@ -130,7 +130,8 @@ class NeuralQLearner(object):
             else:
                 # L2 regularization loss
                 q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
-                self.reg_loss = self.reg_param * tf.reduce_sum([tf.reduce_sum(tf.square(x)) for x in q_network_variables])
+                self.reg_loss = self.reg_param * tf.reduce_sum(
+                    [tf.reduce_sum(tf.square(x)) for x in q_network_variables])
                 self.loss = self.td_loss + self.reg_loss
 
             self.train_op = self.optimizer.minimize(self.loss)
@@ -210,6 +211,5 @@ class NeuralQLearner(object):
 
         report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
                             tf.Summary.Value(tag='exploration_rate', simple_value=self.exploration),
-                            tf.Summary.Value(tag='number_of_steps', simple_value=steps),
-                            tf.Summary.Value(tag='negative_reward', simple_value=negative_rewards_count)])
+                            tf.Summary.Value(tag='number_of_steps', simple_value=steps)])
         self.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)

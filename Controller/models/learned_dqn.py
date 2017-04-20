@@ -29,8 +29,14 @@ class LearnedDQN(AbstractModel):
         params = self.metadata["parameters"]
         optimizer_params = self.metadata["optimizer_parameters"]
         self.game = self.metadata["game"]
+
+        print("DQN Metadata: {}".format(self.game))
+        print("Q-Network:  {}".format(net))
+        print("Optimizer:  {}".format(optimizer_params))
+        print("Parameters: {}".format(params))
+
         self.dqn = DQN(self.game, DQNParameters.from_dict(params), net, optimizer_params)
-        self.dqn.load_checkpoint(os.path.join(logdir, "last"))
+        self.dqn.load_checkpoint(os.path.join(logdir, "best"))
 
     def get_new_instance(self, weights, game_config):
         raise NotImplementedError
@@ -42,7 +48,7 @@ class LearnedDQN(AbstractModel):
         :param current_phase: Current game phase.
         :return: Action.
         """
-        action = self.dqn.agent.eGreedyAction(input[np.newaxis, :])
+        action = self.dqn.agent.eGreedyAction(np.array(input)[np.newaxis, :], explore=False)
         return self.dqn.convert_to_sequence(action)
 
     def get_name(self):

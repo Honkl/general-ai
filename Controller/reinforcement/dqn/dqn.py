@@ -267,7 +267,7 @@ class DQN(AbstractReinforcement):
             state = self.env.state
 
             for t in range(MAX_STEPS):
-                action = self.q_learner.eGreedyAction(state[np.newaxis, :])
+                action = self.q_learner.eGreedyAction(state[np.newaxis, :], explore=False)
                 next_state, reward, done, info = self.env.step(self.convert_to_sequence(action))
                 state = next_state
 
