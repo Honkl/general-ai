@@ -24,11 +24,11 @@ np.random.seed(MASTER_SEED)
 def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
         pop_size=25,
-        cxpb=0.75,
-        mut=("uniform", 0.1, 0.1),
+        cxpb=0.2,
+        mut=("uniform", 0.05, 0.5),
         ngen=1000,
         game_batch_size=10,
-        cxindpb=0.2,
+        cxindpb=0.1,
         hof_size=0,
         elite=5,
         selection=("tournament", 3))

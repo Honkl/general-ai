@@ -35,6 +35,7 @@ class Evolution():
         self.game_config = get_game_config(game)
 
         print("Parameters: {}".format(evolution_params.to_string()))
+        print("Network: {}".format(model.to_string()))
 
     def write_to_file(self, individual, filename):
         """
