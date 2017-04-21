@@ -172,8 +172,8 @@ def run_model_evaluator():
     # file_name = "../../Experiments/MLP+evolution_strategy/2048/logs_2017-02-21_17-30-47/best/best_0.json"
     # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    logdir = "D:/Github/general-ai/Experiments/reinforcement_learning/2048/logs_2017-04-18_18-25-40"
-    # logdir = "D:/Github/general-ai/Controller/logs/mario/dqn/logs_2017-04-19_16-26-07"
+    # logdir = "D:/Github/general-ai/Experiments/reinforcement_learning/2048/logs_2017-04-18_18-25-40"
+    logdir = "D:/Github/general-ai/Controller/logs/2048/dqn/logs_2017-04-20_12-27-42"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)

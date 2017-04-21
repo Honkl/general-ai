@@ -107,14 +107,16 @@ class DDPGReinforcement(AbstractReinforcement):
                               observations_count=self.state_size,
                               actions_in_phases=self.actions_count)
             game_steps = 0
+            state = env.state
             while game_steps < self.STEP_LIMIT:
                 game_steps += 1
 
-                old_state = env.state
-                selected_action = self.agent.play(env.state)
+                # Get the action
+                selected_action = self.agent.play(state)
 
                 # Perform the action
                 new_state, reward, done, score = env.step(selected_action)
+                state = new_state
 
                 if done:
                     avg_test_score += score

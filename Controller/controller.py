@@ -33,10 +33,10 @@ def run_eva(game):
         elite=5,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[64, 64], activation="relu")
+    mlp = MLP(hidden_layers=[100, 100], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
     evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=100,
-                                      max_workers=5)
+                                      max_workers=4)
     evolution.run()
 
 
@@ -106,11 +106,11 @@ def run_dqn(game):
 
 
 if __name__ == '__main__':
-    game = "2048"
+    game = "mario"
 
     # run_greedy(game)
     # run_ddpg(game)
     # run_es(game)
-    # run_eva(game)
+    run_eva(game)
     # run_de(game)
-    run_dqn(game)
+    # run_dqn(game)
