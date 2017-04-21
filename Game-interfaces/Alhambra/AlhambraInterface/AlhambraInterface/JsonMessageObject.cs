@@ -42,7 +42,8 @@ namespace AlhambraInterface
 
         private static List<Card> allCards = null;
         private static List<Building> allBuildings = null;
-        private static int lastReward = 0;
+        private static int lastNumberOfCards = 0;
+        private static int lastNumberOfBuildings = 0;
 
         /// <summary>
         /// Number of card colors.
@@ -116,15 +117,45 @@ namespace AlhambraInterface
         /// <returns>Reward for the specified player.</returns>
         private int EvaluateReward(Player player)
         {
-            int sum = 0;
-            
-            // Let's say that constructed buildings are 10-times more "valuable" than cards:
-            sum += player.cards.Count;
-            sum += 10 * player.constructed.Count;
+            return SimpleReward(player);
+        }
 
-            int reward = sum - lastReward;
-            lastReward = reward;
-            return sum;
+        /// <summary>
+        /// Evaluates immediate reward for AI player. This is simple variant of reward function.
+        /// </summary>
+        private int SimpleReward(Player player)
+        {
+            int alpha = 1;
+            int beta = 10;
+            // Let's say that constructed buildings are 10-times more "valuable" than cards:
+
+            int cardsDiff = player.cards.Count - lastNumberOfCards;
+            int buildingsDiff = player.constructed.Count - lastNumberOfBuildings;
+
+            lastNumberOfCards = player.cards.Count;
+            lastNumberOfBuildings = player.constructed.Count;
+
+            int reward = (alpha * cardsDiff) + (beta * buildingsDiff);
+            return reward;
+        }
+
+        /// <summary>
+        /// Evaluates immediate reward for AI player. This is an advanced variant of reward function.
+        /// </summary>
+        private int AdvancedReward(Player player)
+        {
+            int alpha = 1;
+            int beta = 10;
+            // Let's say that constructed buildings are 10-times more "valuable" than cards:
+
+            int cardsDiff = player.cards.Count - lastNumberOfCards;
+            int buildingsDiff = player.constructed.Count - lastNumberOfBuildings;
+
+            lastNumberOfCards = player.cards.Count;
+            lastNumberOfBuildings = player.constructed.Count;
+
+            int reward = (alpha * cardsDiff) + (beta * buildingsDiff);
+            return reward;
         }
 
         /// <summary>
