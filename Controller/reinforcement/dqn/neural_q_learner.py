@@ -75,9 +75,11 @@ class NeuralQLearner(object):
         with tf.name_scope("predict_actions"):
             # raw state representation
             self.states = tf.placeholder(tf.float32, (None, self.state_dim), name="states")
+            self.is_training = tf.placeholder(tf.bool)
+
             # initialize Q network
             with tf.variable_scope("q_network"):
-                self.q_outputs = self.q_network(self.states)
+                self.q_outputs = self.q_network(self.states, self.is_training)
             # predict actions from Q network
             self.action_scores = tf.identity(self.q_outputs, name="action_scores")
             # tf.histogram_summary("action_scores", self.action_scores)
@@ -105,7 +107,7 @@ class NeuralQLearner(object):
             else:
                 # initialize target network
                 with tf.variable_scope("target_network"):
-                    self.target_outputs = self.q_network(self.next_states)
+                    self.target_outputs = self.q_network(self.next_states, self.is_training)
                 # compute future rewards
                 # self.next_action_scores = tf.stop_gradient(self.target_outputs)
                 self.next_action_scores = self.target_outputs
@@ -139,11 +141,10 @@ class NeuralQLearner(object):
         # update target network with Q network
         with tf.name_scope("update_target_network"):
             self.target_network_update = []
-            # slowly update target network parameters with Q network parameters
             q_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
             target_network_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="target_network")
             for v_source, v_target in zip(q_network_variables, target_network_variables):
-                # update via assign x' <- x
+                # update x' <- x
                 update_op = v_target.assign(v_source)
                 self.target_network_update.append(update_op)
             self.target_network_update = tf.group(*self.target_network_update)
@@ -151,16 +152,20 @@ class NeuralQLearner(object):
         self.no_op = tf.no_op()
 
     def storeExperience(self, state, action, reward, next_state, done):
+        # TODO: only game 2048 tweak -- not store "invalid" moves
+        if reward == -1:
+            return
+
         # always store end states
         if self.store_experience_cnt % self.store_replay_every == 0 or done:
             self.replay_buffer.add(state, action, reward, next_state, done)
         self.store_experience_cnt += 1
 
-    def eGreedyAction(self, states, explore=True):
+    def eGreedyAction(self, states, explore=True, is_training=True):
         if explore and self.exploration > random.random():
             return random.randint(0, self.num_actions - 1)
         else:
-            return self.session.run(self.predicted_actions, {self.states: states})[0]
+            return self.session.run(self.predicted_actions, {self.states: states, self.is_training: is_training})[0]
 
     def annealExploration(self, stategy='linear'):
         ratio = max((self.anneal_steps - self.train_iteration) / float(self.anneal_steps), 0)
@@ -169,6 +174,9 @@ class NeuralQLearner(object):
     def updateModel(self):
         # not enough experiences yet
         if self.replay_buffer.count() < self.batch_size:
+            return
+        # we want at least 1/3 of buffer full
+        if self.replay_buffer.count() < self.replay_buffer.buffer_size / 3:
             return
 
         batch = self.replay_buffer.get_batch(self.batch_size)
@@ -196,7 +204,8 @@ class NeuralQLearner(object):
             self.next_states: next_states,
             self.next_state_mask: next_state_mask,
             self.action_mask: action_mask,
-            self.rewards: rewards
+            self.rewards: rewards,
+            self.is_training: True
         })
 
         # update target network using Q-network

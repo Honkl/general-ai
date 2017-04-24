@@ -88,7 +88,7 @@ class DQN(AbstractReinforcement):
 
         self.agent = self.q_learner
 
-    def q_network(self, input):
+    def q_network(self, input, is_training=True):
         """
         Defines Q-Network. Tensorflow stuff.
         :param input: Input state
@@ -105,7 +105,7 @@ class DQN(AbstractReinforcement):
                                           scope="fully_connected_{}".format(i))
 
             if not self.is_empty(self.q_network_parameters["dropout"]):
-                x = tf_layers.dropout(x, keep_prob=self.q_network_parameters["dropout"])
+                x = tf_layers.dropout(x, keep_prob=self.q_network_parameters["dropout"], is_training=is_training)
 
         # Output logits
         logits = tf_layers.fully_connected(inputs=x,
@@ -267,7 +267,7 @@ class DQN(AbstractReinforcement):
             state = self.env.state
 
             for t in range(MAX_STEPS):
-                action = self.q_learner.eGreedyAction(state[np.newaxis, :], explore=False)
+                action = self.q_learner.eGreedyAction(state[np.newaxis, :], explore=False, is_training=False)
                 next_state, reward, done, info = self.env.step(self.convert_to_sequence(action))
                 state = next_state
 

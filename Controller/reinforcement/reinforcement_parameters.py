@@ -110,7 +110,7 @@ class DQNParameters():
                  replay_buffer_size=10000,
                  store_replay_every=5,  # how frequent to store experience
                  discount_factor=0.9,  # discount future rewards
-                 target_update_frequency=100,
+                 target_update_frequency=1000,
                  reg_param=0.01,  # regularization constants
                  double_q_learning=False,
                  test_size=100):
