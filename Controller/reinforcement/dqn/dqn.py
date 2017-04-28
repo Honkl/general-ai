@@ -16,7 +16,7 @@ from reinforcement.environment import Environment
 from utils.activations import get_activation_tf
 
 STD = 0.01
-MAX_EPISODES = 100000
+MAX_EPISODES = 5500
 MAX_STEPS = 50000
 
 
@@ -116,30 +116,25 @@ class DQN(AbstractReinforcement):
 
         return logits
 
-    def q_network_conv(self, x):
+    def q_network_conv(self, x, is_training=True):
         """
         Defines Q-Network. Tensorflow stuff, this is a CNN test (for specific games only).
         """
 
         x = tf.reshape(x, shape=[-1, 4, 4, 16])
-        net = tf_layers.conv2d(x, num_outputs=256, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(x, num_outputs=1000, kernel_size=2, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
-        net = tf_layers.conv2d(net, num_outputs=256, kernel_size=2, stride=[1, 1], padding='SAME',
+        net = tf_layers.conv2d(net, num_outputs=500, kernel_size=2, stride=[1, 1], padding='SAME',
+                               activation_fn=tf.nn.relu)
+        net = tf_layers.conv2d(net, num_outputs=100, kernel_size=2, stride=[1, 1], padding='SAME',
                                activation_fn=tf.nn.relu)
 
         # net = tf_layers.max_pool2d(net, kernel_size=2)
         # net = tf_layers.avg_pool2d(net, kernel_size=2)
 
-        net = tf_layers.conv2d(net, num_outputs=512, kernel_size=3, stride=[1, 1], padding='SAME',
-                               activation_fn=tf.nn.relu)
-        net = tf_layers.conv2d(net, num_outputs=512, kernel_size=3, stride=[1, 1], padding='SAME',
-                               activation_fn=tf.nn.relu)
-        # net = tf_layers.max_pool2d(net, kernel_size=2)
-        # net = tf_layers.avg_pool2d(net, kernel_size=2)
-
-        net = tf.reshape(net, shape=[-1, 4 * 4 * 512])
+        net = tf.reshape(net, shape=[-1, 4 * 4 * 100])
         # print(net.get_shape())
-        net = tf_layers.fully_connected(net, num_outputs=512, activation_fn=tf.nn.relu)
+        net = tf_layers.fully_connected(net, num_outputs=200, activation_fn=tf.nn.relu)
         # print(net.get_shape())
         net = tf_layers.fully_connected(net, num_outputs=self.num_actions, activation_fn=None)
         print(net.get_shape())

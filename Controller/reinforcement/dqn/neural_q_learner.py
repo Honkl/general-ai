@@ -54,6 +54,7 @@ class NeuralQLearner(object):
         self.store_replay_every = store_replay_every
         self.store_experience_cnt = 0
         self.train_iteration = 0
+        self.last_cost = 1
 
         # create and initialize variables
         self.create_variables()
@@ -152,9 +153,9 @@ class NeuralQLearner(object):
         self.no_op = tf.no_op()
 
     def storeExperience(self, state, action, reward, next_state, done):
-        # TODO: only game 2048 tweak -- not store "invalid" moves
-        if reward == -1:
-            return
+        # TODO: game 2048 tweak:
+        # if reward < 0:
+        #   next_state = state
 
         # always store end states
         if self.store_experience_cnt % self.store_replay_every == 0 or done:
@@ -208,6 +209,8 @@ class NeuralQLearner(object):
             self.is_training: True
         })
 
+        self.last_cost = cost
+
         # update target network using Q-network
         if self.train_iteration % self.target_update_frequency == 0:
             self.session.run(self.target_network_update)
@@ -216,9 +219,8 @@ class NeuralQLearner(object):
         self.train_iteration += 1
 
     def measure_summaries(self, i_episode, score, steps, negative_rewards_count):
-        # exploration_rate = self.session.run(self.exploration)
-
         report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
                             tf.Summary.Value(tag='exploration_rate', simple_value=self.exploration),
-                            tf.Summary.Value(tag='number_of_steps', simple_value=steps)])
+                            tf.Summary.Value(tag='number_of_steps', simple_value=steps),
+                            tf.Summary.Value(tag='loss', simple_value=float(self.last_cost))])
         self.summary_writer.add_summary(tf.Summary(value=report_measures), i_episode)
