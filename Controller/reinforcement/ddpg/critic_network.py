@@ -34,6 +34,14 @@ class CriticNetwork:
 
         self.update_target()
 
+    def get_parameters(self):
+        data = {}
+        data["layers"] = [LAYER1_SIZE, LAYER2_SIZE]
+        data["learning_rate"] = LEARNING_RATE
+        data["tau"] = TAU
+        data["reg_param"] = L2
+        return data
+
     def create_training_method(self):
         # Define training optimizer
         self.y_input = tf.placeholder("float", [None, 1])

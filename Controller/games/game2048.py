@@ -10,13 +10,14 @@ class Game2048(AbstractGame):
     Represents a single 2048 game.
     """
 
-    def __init__(self, model, game_batch_size, seed):
+    def __init__(self, model, game_batch_size, seed, test=False):
         """
         Initializes a new instance of 2048 game.
         :param model: Model which will be playing this game.
         :param game_batch_size: Number of games that will be played immediately (one after one) within the single game
         instance. Result is averaged.
         :param seed: A random seed for random generator within the game.
+        :param test: Indicates whether the game is in testing mode.
         """
         super(Game2048, self).__init__()
         self.model = model

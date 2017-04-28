@@ -9,13 +9,14 @@ class Environment(gym.Env):
     Environment for reinforcement learning algorithms. This single environment is used for all games.
     """
 
-    def __init__(self, game_class, seed, observations_count, actions_in_phases):
+    def __init__(self, game_class, seed, observations_count, actions_in_phases, test=False):
         """
         Initializes a new instance of Environment.
         :param game_class: A game class, implementing games.abstract_game.
         :param seed: Seed for the environment.
         :param observations_count: Num of observations.
         :param actions_in_phases: List of actions for game phases.
+        :param test: Indicates whether this is instance for testing.
         """
         self.game_class = game_class
         self.game_instance = None
@@ -23,6 +24,7 @@ class Environment(gym.Env):
         self.actions_in_phases = actions_in_phases
         self.last_phase = 0
         self.done = False
+        self.test = test
 
         self.actions_total = sum(actions_in_phases)
         self._seed(seed)
@@ -65,7 +67,7 @@ class Environment(gym.Env):
         model = None
         game_batch = 1
         seed = np.random.randint(0, 2 ** 30)
-        self.game_instance = self.game_class(model, game_batch, seed)
+        self.game_instance = self.game_class(model, game_batch, seed, test=self.test)
         self.done = False
         self.last_phase = 0
         self.state, _ = self.game_instance.init_process()  # First state of the game

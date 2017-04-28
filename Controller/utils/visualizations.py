@@ -161,7 +161,7 @@ def run_model_evaluator():
     """
 
     np.random.seed(930615)
-    game = "2048"
+    game = "torcs"
     evals = 1000
     # run_random_model("2048", 1000)
     # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
@@ -173,22 +173,23 @@ def run_model_evaluator():
     # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
     # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
     # logdir = "D:/Github/general-ai/Experiments/reinforcement_learning/2048/logs_2017-04-18_18-25-40"
-    logdir = "D:/Github/general-ai/Controller/logs/2048/dqn/logs_2017-04-20_12-27-42"
+    logdir = "C:/Users/Jan/Documents/Github/general-ai/Controller/logs/torcs/ddpg/logs_2017-03-06_00-54-28"
+    # logdir = "D:/Github/general-ai/Controller/logs/2048/dqn/logs_2017-04-24_23-50-35"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(Random(game), evals)
-    dqn = LearnedDQN(logdir)
+    # dqn = LearnedDQN(logdir)
 
-    # ddpg = LearnedDDPG(logdir)
+    ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    run_2048_extended(dqn, evals)
+    # run_2048_extended(dqn, evals)
 
     # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=True)
     # compare_models(game, evals, Random(game))
-    # run_torcs_vis_on(model=mlp, evals=evals)
+    run_torcs_vis_on(model=ddpg, evals=evals)
 
 
 def run_plot_creator():

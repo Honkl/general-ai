@@ -10,7 +10,7 @@ class Mario(AbstractGame):
     Represents a single Mario game.
     """
 
-    def __init__(self, model, game_batch_size, seed, level=None, vis_on=False, use_visualization_tool=False):
+    def __init__(self, model, game_batch_size, seed, level=None, vis_on=False, use_visualization_tool=False, test=False):
         """
         Initializes a new instance of Mario game.
         :param model: Model which will be playing this game.
@@ -22,6 +22,7 @@ class Mario(AbstractGame):
         :param vis_on: Determines whether the Mario will has a visual output. Used in combination with
         use_visualization_tool set to true.
         :param use_visualization_tool: Determines whether use specific visualization tool. Starts different subprocess.
+        :param test: Indicates whether the game is in testing mode.
         """
         super(Mario, self).__init__()
         self.model = model
@@ -40,7 +41,8 @@ class Mario(AbstractGame):
         """
         windows = platform.system() == "Windows"
         if self.use_visualization_tool:
-            params = ["java", "-cp", MARIO_CP, MARIO_VISUALISATION_CLASS, str(self.game_batch_size), str(self.level), str(self.vis_on)]
+            params = ["java", "-cp", MARIO_CP, MARIO_VISUALISATION_CLASS, str(self.game_batch_size), str(self.level),
+                      str(self.vis_on)]
             if windows:
                 command = "{} {} {} {} {} {} {}".format(*params)
             else:

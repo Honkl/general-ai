@@ -13,7 +13,7 @@ class Torcs(AbstractGame):
     master_lock = Lock()
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
 
-    def __init__(self, model, game_batch_size, seed, vis_on=False):
+    def __init__(self, model, game_batch_size, seed, vis_on=False, test=False):
         """
         Initializes a new instance of TORCS game.
         :param model: Model which will be playing this game.
@@ -21,11 +21,13 @@ class Torcs(AbstractGame):
         instance. Result is averaged.
         :param seed: A random seed for random generator within the game.
         :param vis_on: Determines whether TORCS will run with visual output. If True, different subprocess will be used.
+        :param test: Indicates whether the game is in testing mode. Using different track.
         """
         super(Torcs, self).__init__()
         self.model = model
         self.game_batch_size = game_batch_size
         self.seed = seed
+        self.test = test
         self.vis_on = vis_on
 
     def run(self, advanced_results=False):
@@ -68,7 +70,13 @@ class Torcs(AbstractGame):
         Torcs.master_lock.release()
 
         port_num = 3001 + index
-        xml = " \"" + prefix + "general-ai/Game-interfaces/TORCS//race_config_" + str(port_num) + ".xml\""
+        xml = " \"" + prefix + "general-ai/Game-interfaces/TORCS/race_config_" + str(port_num) + ".xml\""
+
+        if self.test:
+            # For testing purposes, we use different track:
+            port_num = 3010
+            xml = " \"" + prefix + "general-ai/Game-interfaces/TORCS/race_config_3010_test.xml\""
+
         port = " \"" + str(port_num) + "\""
 
         with open(TORCS_INSTALL_DIRECTORY_REF, "r") as f:

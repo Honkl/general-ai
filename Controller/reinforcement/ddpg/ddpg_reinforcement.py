@@ -41,7 +41,8 @@ class DDPGReinforcement(AbstractReinforcement):
         self.logdir = self.init_directories(dir_name="ddpg")
 
         # DDPG (deep deterministic gradient policy)
-        self.agent = DDPGAgent(self.batch_size, self.state_size, self.actions_count_sum, self.logdir)
+        self.agent = DDPGAgent(parameters.replay_buffer_size, parameters.discount_factor, self.batch_size,
+                               self.state_size, self.actions_count_sum, self.logdir)
 
     def log_metadata(self):
         """
@@ -52,6 +53,8 @@ class DDPGReinforcement(AbstractReinforcement):
             data["model_name"] = "reinforcement_learning_ddpg"
             data["game"] = self.game
             data["parameters"] = self.parameters.to_dictionary()
+            data["actor_network"] = self.agent.actor_parameters
+            data["critic_network"] = self.agent.critic_parameters
             f.write(json.dumps(data))
 
     def run(self):
@@ -105,7 +108,8 @@ class DDPGReinforcement(AbstractReinforcement):
             env = Environment(game_class=self.game_class,
                               seed=np.random.randint(0, 2 ** 30),
                               observations_count=self.state_size,
-                              actions_in_phases=self.actions_count)
+                              actions_in_phases=self.actions_count,
+                              test=True)
             game_steps = 0
             state = env.state
             while game_steps < self.STEP_LIMIT:

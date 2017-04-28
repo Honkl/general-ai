@@ -58,27 +58,38 @@ class DDPGParameters():
     def from_dict(data):
         params = DDPGParameters(
             data["batch_size"],
+            data["replay_buffer_size"],
+            data["discount_factor"],
             data["episodes"],
             data["test_size"])
         return params
 
     def __init__(self,
                  batch_size,
+                 replay_buffer_size,
+                 discount_factor,
                  episodes,
                  test_size):
         self.batch_size = batch_size
         self.episodes = episodes
+        self.replay_buffer_size = replay_buffer_size
+        self.discount_factor = discount_factor
         self.test_size = test_size
 
     def to_dictionary(self):
         data = {}
         data["batch_size"] = self.batch_size
+        data["replay_buffer_size"] = self.replay_buffer_size
+        data["discount_factor"] = self.discount_factor
         data["episodes"] = self.episodes
         data["test_size"] = self.test_size
         return data
 
     def to_string(self):
-        return "batch_size: {}, episodes: {}, test_size: {}".format(self.batch_size, self.episodes, self.test_size)
+        return "batch_size: {}, replay_buffer_size: {}, discount_factor: {}, test_size: {}".format(self.batch_size,
+                                                                                                   self.replay_buffer_size,
+                                                                                                   self.discount_factor,
+                                                                                                   self.test_size)
 
 
 class DQNParameters():

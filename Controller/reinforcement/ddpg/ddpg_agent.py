@@ -11,24 +11,20 @@ from reinforcement.ddpg.critic_network import CriticNetwork
 from reinforcement.ddpg.ou_noise import OUNoise
 from reinforcement.replay_buffer import ReplayBuffer
 
-# Hyper Parameters:
-
-REPLAY_BUFFER_SIZE = 100000
-GAMMA = 0.99
-
 
 class DDPGAgent():
     """
     DDPG Agent.
     """
 
-    def __init__(self, batch_size, state_size, actions_count, logdir):
+    def __init__(self, replay_buffer_size, gamma, batch_size, state_size, actions_count, logdir):
         self.name = 'DDPG'  # name for uploading results
         # Randomly initialize actor network and critic network
         # with both their target networks
         self.state_dim = state_size
         self.action_dim = actions_count
         self.batch_size = batch_size
+        self.gamma = gamma
 
         self.sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=8,
                                                      intra_op_parallelism_threads=8,
@@ -38,7 +34,7 @@ class DDPGAgent():
             self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim)
 
             # initialize replay buffer
-            self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
+            self.replay_buffer = ReplayBuffer(replay_buffer_size)
 
             # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
             self.exploration_noise = OUNoise(self.action_dim)
@@ -47,6 +43,9 @@ class DDPGAgent():
             self.summary_writer = tf.summary.FileWriter(logdir,
                                                         graph=self.sess.graph,
                                                         flush_secs=10)
+
+            self.actor_parameters = self.actor_network.get_parameters()
+            self.critic_parameters = self.critic_network.get_parameters()
 
     def train(self):
         # print "train step",self.time_step
@@ -69,7 +68,7 @@ class DDPGAgent():
             if done_batch[i]:
                 y_batch.append(reward_batch[i])
             else:
-                y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
+                y_batch.append(reward_batch[i] + self.gamma * q_value_batch[i])
         y_batch = np.resize(y_batch, [self.batch_size, 1])
         # Update critic by minimizing the loss L
         self.critic_network.train(y_batch, state_batch, action_batch)
