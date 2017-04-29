@@ -34,8 +34,10 @@ class AbstractReinforcement():
         :param dir_name: Name of the directory (usually model name).
         :return: Current logdir.
         """
+        # TODO: temporary cache (D:)
+        self.dir = "D:/general-ai-cache" + "/logs/" + self.game + "/" + dir_name
 
-        self.dir = constants.loc + "/logs/" + self.game + "/" + dir_name
+        # self.dir = constants.loc + "/logs/" + self.game + "/" + dir_name
         # create name for directory to store logs
         logdir = self.dir + "/logs_" + utils.miscellaneous.get_pretty_time()
         if not os.path.exists(logdir):
