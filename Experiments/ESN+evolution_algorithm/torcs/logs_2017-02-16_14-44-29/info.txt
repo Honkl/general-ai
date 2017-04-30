@@ -1,2 +1,0 @@
-Race config: 1 lap, Alalborg, Score: distance_raced / lap_time
-runtime: 3h 10m 46.78829479217529s
