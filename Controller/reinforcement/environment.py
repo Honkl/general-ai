@@ -80,6 +80,10 @@ class Environment(gym.Env):
     def _close(self):
         self.shut_down()
 
-    def shut_down(self):
+    def shut_down(self, internal_error=False):
+        """
+        Shuts down the subprocess.
+        :param internal_error: Indicates whether the subprocess has failed.
+        """
         if self.game_instance:
-            self.game_instance.finalize()
+            self.game_instance.finalize(internal_error)

@@ -8,6 +8,7 @@ import gc
 import os
 import numpy as np
 import constants
+import concurrent.futures
 import time
 import json
 
@@ -68,21 +69,34 @@ class DDPGReinforcement(AbstractReinforcement):
         tmp = time.time()
         for i_episode in range(1, self.episodes + 1):
 
-            episode_start_time = time.time()
-            self.env = Environment(game_class=self.game_class,
-                                   seed=np.random.randint(0, 2 ** 30),
-                                   observations_count=self.state_size,
-                                   actions_in_phases=self.actions_count)
+            success = False
+            # Avoiding game internal error (subprocess fail etc.)
+            while not success:
+                episode_start_time = time.time()
+                self.env = Environment(game_class=self.game_class,
+                                       seed=np.random.randint(0, 2 ** 30),
+                                       observations_count=self.state_size,
+                                       actions_in_phases=self.actions_count)
 
-            state = self.env.state
-            for step in range(self.STEP_LIMIT):
-                action = self.agent.play(state)
-                next_state, reward, done, score = self.env.step(action)
-                self.agent.perceive(state, action, reward, next_state, done)
-                state = next_state
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    state = self.env.state
+                    for step in range(self.STEP_LIMIT):
+                        action = self.agent.play(state)
+                        future = executor.submit(self.env.step, action)
+                        try:
+                            next_state, reward, done, score = future.result(10) # in sec, time limit.
+                        except concurrent.futures.TimeoutError:
+                            print("Internal game error (episode {}). Re-running the episode.".format(i_episode))
+                            self.env.shut_down(internal_error=True)
+                            time.sleep(3)
+                            break
 
-                if done:
-                    break
+                        self.agent.perceive(state, action, reward, next_state, done)
+                        state = next_state
+
+                        if done:
+                            success = True
+                            break
 
             episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
             line = "Episode {}, Score: {}, Steps: {}, Episode Time: {}".format(i_episode, score, step,

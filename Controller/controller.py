@@ -49,7 +49,7 @@ def run_ddpg(game):
         test_size=1)
 
     print("DDPG algorithm started for game {}".format(game))
-    print("Basic parameters: {}".format(ddpg_parameters))
+    print("Basic parameters: {}".format(ddpg_parameters.to_string()))
     RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=5)
     RL.run()
 

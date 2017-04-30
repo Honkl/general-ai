@@ -65,11 +65,14 @@ class Torcs(AbstractGame):
                 self.my_port_lock = Torcs.port_locks[i]
                 index = i
                 break
-        self.my_port_lock.acquire()
+            if i == len(Torcs.port_locks) - 1:
+                print("All ports have been locked...")
 
+        self.my_port_lock.acquire()
         Torcs.master_lock.release()
 
         port_num = 3001 + index
+        self.current_port = port_num
         xml = " \"" + prefix + "general-ai/Game-interfaces/TORCS/race_config_" + str(port_num) + ".xml\""
 
         if self.test:
@@ -110,13 +113,16 @@ class Torcs(AbstractGame):
 
         return json.loads(line)
 
-    def finalize(self):
+    def finalize(self, internal_error=False):
         """
         Finalizes the game subprocess. Releases used locks and kills the subprocess.
         :return:
         """
         try:
-            self.my_port_lock.release()
+            if internal_error:
+                print("Unreleased port: {}".format(self.current_port))
+            else:
+                self.my_port_lock.release()
         except:
             pass
 

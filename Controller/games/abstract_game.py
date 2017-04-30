@@ -76,8 +76,9 @@ class AbstractGame():
         self.process.stdin.write(bytearray(data.encode('ascii')))
         self.process.stdin.flush()
 
-    def finalize(self):
+    def finalize(self, internal_error=False):
         """
         After game ends, do your stuff here (thread lock unlock for torcs...)
+        :param internal_error: Determines whether the internal error occured.
         """
         self.process.kill()

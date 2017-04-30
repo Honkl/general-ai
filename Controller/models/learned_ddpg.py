@@ -26,7 +26,7 @@ class LearnedDDPG(AbstractModel):
         self.game = self.metadata["game"]
         self.parameters = DDPGParameters.from_dict(self.metadata["parameters"])
         self.ddpg = DDPGReinforcement(self.game, self.parameters)
-        self.ddpg.load_checkpoint(os.path.join(logdir, "best"))
+        self.ddpg.load_checkpoint(os.path.join(logdir, "last"))
 
     def get_new_instance(self, weights, game_config):
         raise NotImplementedError
