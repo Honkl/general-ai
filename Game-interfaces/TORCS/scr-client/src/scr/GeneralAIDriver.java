@@ -159,7 +159,7 @@ public class GeneralAIDriver extends Controller {
         double speed = lastSensor.getSpeed();
         double angle = lastSensor.getAngleToTrackAxis();
         double pos = lastSensor.getTrackPosition();
-        double reward = (speed * Math.cos(angle)) - (speed * Math.sin(angle))/2 - (speed * Math.abs(pos))/2;
+        double reward = (speed * Math.cos(angle)) - (speed * Math.sin(angle)) - (speed * Math.abs(pos));
         // double reward = speed - (speed * Math.abs(lastSensor.getTrackPosition())); // Old reward
         return reward;
     }
