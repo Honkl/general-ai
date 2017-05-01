@@ -1,0 +1,10 @@
+--GAME 2048 STATISTICS--
+Model: mlp
+Total games: 1000, Average score: 4199.8, Average moves: 326.065
+Reached tiles:
+   32:     2 =   0.2%
+   64:    33 =   3.3%
+  128:   178 =  17.8%
+  256:   474 =  47.4%
+  512:   294 =  29.4%
+ 1024:    19 =   1.9%

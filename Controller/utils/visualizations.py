@@ -101,7 +101,7 @@ def eval_mario_winrate(model, evals, level, vis_on):
     game_instance = games.mario.Mario(model, evals, np.random.randint(0, 2 ** 16), level=level, vis_on=vis_on,
                                       use_visualization_tool=True)
     results = game_instance.run(advanced_results=True)
-    print("Mario winrate: {}".format(results))
+    print("Mario winrate (avg dist): {}".format(results))
 
 
 def run_torcs_vis_on(model, evals):
@@ -161,35 +161,25 @@ def run_model_evaluator():
     """
 
     np.random.seed(930615)
-    game = "torcs"
+    game = "2048"
     evals = 1000
-    # run_random_model("2048", 1000)
-    # file_name = "../../Experiments/ESN+evolution_algorithm/2048/logs_2017-01-27_00-31-41/best/best_0.json"
-    # file_name = "../../Controller/logs/2048/mlp/logs_2017-02-04_00-17-33/best/best_0.json"
-    # file_name = "C:/Users/Jan/Desktop/lab_logs/master/logs/mario/mario new/mlp/logs_2017-02-20_10-55-14/best/best_0.json"
-    # file_name = "../../Experiments/MLP+differential_evolution/mario/logs_2017-02-04_00-30-52/last/last_0.json"
-    # file_name = "../../Experiments/MLP+evolution_algorithm/alhambra/logs_2017-01-19_00-32-53/best/best_0.json"
-    # file_name = "../../Experiments/MLP+evolution_strategy/2048/logs_2017-02-21_17-30-47/best/best_0.json"
-    # file_name = "../../Controller/logs/mario/mlp/logs_2017-02-21_00-23-53/best/best_0.json"
-    # logdir = "../../Controller/logs/torcs/deep_deterministic_gradient_policy/logs_2017-02-12_01-22-16"
-    # logdir = "D:/Github/general-ai/Experiments/reinforcement_learning/2048/logs_2017-04-18_18-25-40"
-    logdir = "C:/Users/Jan/Documents/Github/general-ai/Controller/logs/torcs/ddpg/logs_2017-03-06_00-54-28"
-    # logdir = "D:/Github/general-ai/Controller/logs/2048/dqn/logs_2017-04-24_23-50-35"
+    file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+ES/2048/logs_2017-02-21_17-30-47/best/best_0.json"
+    logdir = "D:/general-ai-cache/logs/torcs/ddpg/logs_2017-04-30_18-47-10"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
-    # mlp = MLP.load_from_file(file_name, game)
+    mlp = MLP.load_from_file(file_name, game)
     # eval_alhambra_winrate(Random(game), evals)
     # dqn = LearnedDQN(logdir)
 
-    ddpg = LearnedDDPG(logdir)
+    # ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    # run_2048_extended(dqn, evals)
+    run_2048_extended(mlp, evals)
 
-    # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=True)
+    # eval_mario_winrate(model=esn, evals=evals, level="gombas", vis_on=False)
     # compare_models(game, evals, Random(game))
-    run_torcs_vis_on(model=ddpg, evals=evals)
+    # run_torcs_vis_on(model=ddpg, evals=evals)
 
 
 def run_plot_creator():
