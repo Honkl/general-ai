@@ -187,10 +187,10 @@ def run_plot_creator():
     Used for creating some graphs, plots, etc...
     """
 
-    dir_name = "..."
-    game = "2048"
+    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/mario/logs_2017-04-29_23-39-12"
+    game = "Mario"
 
-    with open(os.path.join(dir_name, "metadata.json"), "r") as f:
+    with open(os.path.join(dir_name, "settings.json"), "r") as f:
         metadata = json.load(f)
 
     data = np.loadtxt(os.path.join(dir_name, "logbook.txt"), skiprows=1)
@@ -198,16 +198,22 @@ def run_plot_creator():
     scores = data[:, 2]
 
     plt.figure()
-    plt.plot(episodes, scores, label="score")
+    plt.plot(episodes, scores, label="avg")
+    i = np.argmax(scores)
+    plt.scatter(i, scores[i])
+    plt.text(i, scores[i], "{}".format(round(max(scores), 2)))
 
-    plt.xlabel("Episode")
-    plt.ylabel("Score")
+    params = "EVA + ESN"
+
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
     plt.xlim([0, len(episodes)])
+    plt.ylim([0, 1])
     plt.legend(loc="lower right")
-    plt.title("GAME: {}\n{}".format(game, metadata, fontsize=10))
-    plt.savefig("plot.png")
+    plt.title("GAME: {}\n{}".format(game, params, fontsize=10))
+    plt.savefig("plot.pdf")
 
 
 if __name__ == '__main__':
-    run_model_evaluator()
-    # run_plot_creator()
+    # run_model_evaluator()
+    run_plot_creator()
