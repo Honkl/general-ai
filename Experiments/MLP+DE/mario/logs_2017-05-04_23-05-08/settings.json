@@ -1,0 +1,1 @@
+{"model_params": {"activation": "relu", "hidden_layers": [200, 200]}, "evolution_params": {"cr": 0.25, "hof_size": 5, "pop_size": 25, "game_batch_size": 15, "ngen": 500, "f": 1}}
