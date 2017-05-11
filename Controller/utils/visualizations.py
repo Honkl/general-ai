@@ -161,10 +161,9 @@ def run_model_evaluator():
     """
 
     np.random.seed(930615)
-    game = "2048"
-    evals = 1000
-    file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+ES/2048/logs_2017-02-21_17-30-47/best/best_0.json"
-    logdir = "D:/general-ai-cache/logs/torcs/ddpg/logs_2017-04-30_18-47-10"
+    game = "mario"
+    evals = 100
+    file_name = "D:/general-ai-cache/LAB_NOVE/mario/mlp/logs_2017-05-04_23-20-38/best/best_0.json"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
@@ -175,9 +174,9 @@ def run_model_evaluator():
     # ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    run_2048_extended(mlp, evals)
+    # run_2048_extended(esn, evals)
 
-    # eval_mario_winrate(model=esn, evals=evals, level="gombas", vis_on=False)
+    eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
     # compare_models(game, evals, Random(game))
     # run_torcs_vis_on(model=ddpg, evals=evals)
 
@@ -215,5 +214,5 @@ def run_plot_creator():
 
 
 if __name__ == '__main__':
-    # run_model_evaluator()
-    run_plot_creator()
+    run_model_evaluator()
+    # run_plot_creator()

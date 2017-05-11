@@ -121,5 +121,5 @@ class Game2048(AbstractGame):
 
         return new_state, self.phase, reward, False
 
-    def finalize(self):
+    def finalize(self, param=False):
         pass

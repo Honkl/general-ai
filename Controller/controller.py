@@ -24,19 +24,19 @@ np.random.seed(MASTER_SEED)
 def run_eva(game):
     eva_parameters = EvolutionaryAlgorithmParameters(
         pop_size=25,
-        cxpb=0.2,
-        mut=("uniform", 0.05, 0.5),
+        cxpb=0.75,
+        mut=("uniform", 0.1, 0.1),
         ngen=1000,
-        game_batch_size=10,
-        cxindpb=0.1,
+        game_batch_size=5,
+        cxindpb=0.25,
         hof_size=0,
         elite=5,
         selection=("tournament", 3))
 
     mlp = MLP(hidden_layers=[100, 100], activation="relu")
     # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=100,
-                                      max_workers=4)
+    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=10,
+                                      max_workers=8)
     evolution.run()
 
 
@@ -90,30 +90,29 @@ def run_dqn(game):
                                anneal_steps=500000,
                                replay_buffer_size=100000,
                                store_replay_every=5,
-                               discount_factor=0.9,
+                               discount_factor=0.99,
                                target_update_frequency=10000,
                                reg_param=0.01,
-                               test_size=50)
+                               test_size=100)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
-    optimizer_params["learning_rate"] = 0.001
+    optimizer_params["learning_rate"] = 0.0005
 
     q_network_parameters = {}
-    q_network_parameters["hidden_layers"] = [100, 100]
+    q_network_parameters["hidden_layers"] = [900, 500, 300, 300, 300, 300, 300, 300]
     q_network_parameters["activation"] = "relu"
-    q_network_parameters["dropout"] = 0.8
+    q_network_parameters["dropout"] = 0.9
 
     RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()
 
 
 if __name__ == '__main__':
-    game = "torcs"
+    game = "alhambra"
 
-    # run_greedy(game)
-    run_ddpg(game)
+    # run_ddpg(game)
     # run_es(game)
-    # run_eva(game)
+    run_eva(game)
     # run_de(game)
     # run_dqn(game)

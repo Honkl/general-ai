@@ -16,7 +16,7 @@ from reinforcement.environment import Environment
 from utils.activations import get_activation_tf
 
 STD = 0.01
-MAX_EPISODES = 5500
+MAX_EPISODES = 100000
 MAX_STEPS = 50000
 
 
@@ -168,7 +168,11 @@ class DQN(AbstractReinforcement):
         """
         self.test_logbook_data.append("Testing every {} episodes".format(self.test_every))
 
-        dir = constants.loc + "/logs/" + self.game + "/dqn"
+        # TODO: temporary cache
+
+        # dir = constants.loc + "/logs/" + self.game + "/dqn"
+
+        dir = "D:/general-ai-cache" + "/logs/" + self.game + "/dqn"
         t_string = utils.miscellaneous.get_pretty_time()
 
         self.logdir = dir + "/logs_" + t_string
