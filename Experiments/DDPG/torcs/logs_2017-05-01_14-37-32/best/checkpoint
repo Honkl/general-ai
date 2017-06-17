@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/general-ai-cache/logs/torcs/ddpg/logs_2017-05-01_14-37-32\\best\\ddpg.ckpt"
+all_model_checkpoint_paths: "D:/general-ai-cache/logs/torcs/ddpg/logs_2017-05-01_14-37-32\\best\\ddpg.ckpt"

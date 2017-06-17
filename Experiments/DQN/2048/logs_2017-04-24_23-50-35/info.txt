@@ -1,0 +1,2 @@
+encoding: long
+reward = 0

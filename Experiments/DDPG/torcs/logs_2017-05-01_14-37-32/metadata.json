@@ -1,0 +1,1 @@
+{"actor_network": {"learning_rate": 0.0001, "tau": 0.001, "layers": [400, 300]}, "critic_network": {"reg_param": 0.01, "learning_rate": 0.001, "tau": 0.001, "layers": [400, 300]}, "game": "torcs", "model_name": "reinforcement_learning_ddpg", "parameters": {"episodes": 500, "batch_size": 100, "discount_factor": 0.85, "test_size": 1, "replay_buffer_size": 100000}}

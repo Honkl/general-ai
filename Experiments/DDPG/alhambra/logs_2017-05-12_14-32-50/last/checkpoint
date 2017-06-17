@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/general-ai-cache/logs/alhambra/ddpg/logs_2017-05-12_14-32-50\\last\\ddpg.ckpt"
+all_model_checkpoint_paths: "D:/general-ai-cache/logs/alhambra/ddpg/logs_2017-05-12_14-32-50\\last\\ddpg.ckpt"

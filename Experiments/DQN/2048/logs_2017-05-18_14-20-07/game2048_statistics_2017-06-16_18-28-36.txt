@@ -1,0 +1,9 @@
+--GAME 2048 STATISTICS--
+Model: Learned Greedy Policy (Reinforcement Learning) [DQN]
+Total games: 1000, Average score: 1390.308, Average moves: 139.668
+Reached tiles:
+   32:    30 =   3.0%
+   64:   270 =  27.0%
+  128:   511 =  51.1%
+  256:   188 =  18.8%
+  512:     1 =   0.1%
