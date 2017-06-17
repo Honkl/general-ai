@@ -218,8 +218,8 @@ class Game:
     def get_state(self):
         # FEEL FREE CHANGE THIS ENCODING
 
-        return self.get_state_onehot()
-        # return self.get_state_raw()
+        # return self.get_state_onehot()
+        return self.get_state_raw()
 
     def get_state_raw(self):
         return np.array([np.log2(x) if x > 0 else .0 for x in self.grid.flatten()])
