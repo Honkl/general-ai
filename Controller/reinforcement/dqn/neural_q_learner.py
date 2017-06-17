@@ -154,8 +154,8 @@ class NeuralQLearner(object):
 
     def storeExperience(self, state, action, reward, next_state, done):
         # TODO: game 2048 tweak:
-        # if reward < 0:
-        #   next_state = state
+        if reward < 0:
+            next_state = state
 
         # always store end states
         if self.store_experience_cnt % self.store_replay_every == 0 or done:
@@ -176,8 +176,8 @@ class NeuralQLearner(object):
         # not enough experiences yet
         if self.replay_buffer.count() < self.batch_size:
             return
-        # we want at least 1/3 of buffer full
-        if self.replay_buffer.count() < self.replay_buffer.buffer_size / 3:
+        # we want at least 1/10 of buffer full
+        if self.replay_buffer.count() < self.replay_buffer.buffer_size / 10:
             return
 
         batch = self.replay_buffer.get_batch(self.batch_size)

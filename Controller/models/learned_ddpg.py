@@ -39,6 +39,14 @@ class LearnedDDPG(AbstractModel):
         :return: Action.
         """
         action = self.ddpg.agent.play(input)
+
+
+        if len(self.ddpg.actions_count) > 1:
+            # Games with multiple phases
+            begin = sum(self.ddpg.actions_count[:current_phase])
+            end = begin + self.ddpg.actions_count[current_phase]
+            action = action[begin:end]
+
         return action
 
     def get_name(self):

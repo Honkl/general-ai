@@ -44,13 +44,13 @@ def run_ddpg(game):
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         replay_buffer_size=100000,
-        discount_factor=0.99,
-        episodes=500,
-        test_size=1)
+        discount_factor=0.7,
+        episodes=10000,
+        test_size=25)
 
     print("DDPG algorithm started for game {}".format(game))
     print("Basic parameters: {}".format(ddpg_parameters.to_string()))
-    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=5)
+    RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=25)
     RL.run()
 
 
@@ -85,34 +85,34 @@ def run_de(game):
 
 def run_dqn(game):
     parameters = DQNParameters(batch_size=100,
-                               init_exp=0.5,
-                               final_exp=0.01,
-                               anneal_steps=500000,
+                               init_exp=0.9,
+                               final_exp=0.1,
+                               anneal_steps=1000000,
                                replay_buffer_size=100000,
-                               store_replay_every=5,
-                               discount_factor=0.99,
-                               target_update_frequency=10000,
-                               reg_param=0.01,
+                               store_replay_every=2,
+                               discount_factor=0.9,
+                               target_update_frequency=50000,
+                               reg_param=1,
                                test_size=100)
 
     optimizer_params = {}
     optimizer_params["name"] = "adam"
-    optimizer_params["learning_rate"] = 0.0005
+    optimizer_params["learning_rate"] = 0.001
 
     q_network_parameters = {}
-    q_network_parameters["hidden_layers"] = [900, 500, 300, 300, 300, 300, 300, 300]
+    q_network_parameters["hidden_layers"] = [1000, 1000]
     q_network_parameters["activation"] = "relu"
-    q_network_parameters["dropout"] = 0.9
+    q_network_parameters["dropout"] = 0.8
 
     RL = DQN(game, parameters, q_network_parameters, optimizer_params, test_every=100)
     RL.run()
 
 
 if __name__ == '__main__':
-    game = "alhambra"
+    game = "2048"
 
     # run_ddpg(game)
     # run_es(game)
-    run_eva(game)
+    # run_eva(game)
     # run_de(game)
-    # run_dqn(game)
+    run_dqn(game)

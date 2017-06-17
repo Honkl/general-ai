@@ -161,23 +161,24 @@ def run_model_evaluator():
     """
 
     np.random.seed(930615)
-    game = "mario"
-    evals = 100
-    file_name = "D:/general-ai-cache/LAB_NOVE/mario/mlp/logs_2017-05-04_23-20-38/best/best_0.json"
+    game = "torcs"
+    evals = 1
+    # file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/alhambra/logs_2017-05-13_00-31-08/best/best_0.json"
+    logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DDPG/torcs/logs_2017-04-30_18-47-10"
 
     # esn = EchoState.load_from_file(file_name, game)
     # random = Random(game)
-    mlp = MLP.load_from_file(file_name, game)
-    # eval_alhambra_winrate(Random(game), evals)
+    # mlp = MLP.load_from_file(file_name, game)
+    # eval_alhambra_winrate(mlp, evals)
     # dqn = LearnedDQN(logdir)
 
-    # ddpg = LearnedDDPG(logdir)
+    ddpg = LearnedDDPG(logdir)
 
     # run_random_model(game, evals)
-    # run_2048_extended(esn, evals)
+    # run_2048_extended(dqn, evals)
 
-    eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
-    # compare_models(game, evals, Random(game))
+    # eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
+    compare_models(game, evals, ddpg)
     # run_torcs_vis_on(model=ddpg, evals=evals)
 
 
