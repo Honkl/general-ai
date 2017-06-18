@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:\\Github\\general-ai\\Controller/logs/mario/dqn/logs_2017-04-19_16-26-07\\best\\dqn.ckpt"
+all_model_checkpoint_paths: "D:\\Github\\general-ai\\Controller/logs/mario/dqn/logs_2017-04-19_16-26-07\\best\\dqn.ckpt"

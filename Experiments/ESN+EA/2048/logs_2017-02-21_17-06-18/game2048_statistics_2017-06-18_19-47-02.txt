@@ -1,0 +1,10 @@
+--GAME 2048 STATISTICS--
+Model: echo_state
+Total games: 1000, Average score: 3648.092, Average moves: 290.727
+Reached tiles:
+   32:     3 =   0.3%
+   64:    48 =   4.8%
+  128:   242 =  24.2%
+  256:   473 =  47.3%
+  512:   225 =  22.5%
+ 1024:     9 =   0.9%
