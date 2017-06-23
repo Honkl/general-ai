@@ -26,14 +26,14 @@ def get_game_config(game_name):
     return game_config
 
 
-def get_game_instance(game_name, params):
+def get_game_instance(game_name, params, test=False):
     game_instance = None
     if game_name == "alhambra":
         game_instance = Alhambra(*params)
     if game_name == "2048":
         game_instance = Game2048(*params)
     if game_name == "torcs":
-        game_instance = Torcs(*params)
+        game_instance = Torcs(*params, test=test)
     if game_name == "mario":
         game_instance = Mario(*params)
     return game_instance

@@ -69,7 +69,8 @@ def autolabel(rects, ax):
 def eval(game, evals, model):
     parameters = [model, evals, np.random.randint(0, 2 ** 16)]
     values = []
-    game_instance = utils.miscellaneous.get_game_instance(game, parameters)
+
+    game_instance = utils.miscellaneous.get_game_instance(game, parameters, test=True)
 
     results = game_instance.run(advanced_results=True)
     for i, r in enumerate(results):
@@ -158,37 +159,41 @@ def run_model_evaluator():
     """
     Used for evaluating learned models, to benchmark them and get avg results.
     For example, to run 1000 games and plot results.
+    Set file_name for example as "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/torcs/logs_2017-06-20_19-09-27/best/best_0.json" (the whole path)
+    for evolutionary based experiments. For deep reinforcement (DQN or DDPG) based techniques use logdir, for example as:
+    "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DQN/mario/logs_2017-04-19_16-26-07", where directory stores config files (model settings), model checkpoint etc.
+    Then feel free to use some of the prepared "test functions". Result (if exists) is written to same directory as this file (e.q. /utils).
     """
 
     np.random.seed(930615)
     game = "torcs"
     evals = 1
-    # file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/alhambra/logs_2017-05-13_00-31-08/best/best_0.json"
-    logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DDPG/torcs/logs_2017-04-30_18-47-10"
+    # file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/torcs/logs_2017-06-23_01-34-41/best/best_0.json"
+    logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DDPG/torcs/logs_2017-05-01_14-37-32"
 
     # esn = EchoState.load_from_file(file_name, game)
-    # random = Random(game)
     # mlp = MLP.load_from_file(file_name, game)
-    # eval_alhambra_winrate(mlp, evals)
+    # random = Random(game)
+    ddpg = LearnedDDPG(logdir)
     # dqn = LearnedDQN(logdir)
 
-    ddpg = LearnedDDPG(logdir)
-
+    # eval_alhambra_winrate(mlp, evals)
     # run_random_model(game, evals)
-    # run_2048_extended(dqn, evals)
-
-    # eval_mario_winrate(model=mlp, evals=evals, level="spikes", vis_on=False)
+    # run_2048_extended(esn, evals)
+    # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=False)
     compare_models(game, evals, ddpg)
-    # run_torcs_vis_on(model=ddpg, evals=evals)
+    # run_torcs_vis_on(model=mlp, evals=evals)
 
 
 def run_plot_creator():
     """
     Used for creating some graphs, plots, etc...
+    For evolution-based experiments only. For deep reinforcement learning experiments, please use proper TensorBoard.
     """
 
-    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/mario/logs_2017-04-29_23-39-12"
-    game = "Mario"
+    # Set directory of model (example: C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+DE/mario/logs_2017-05-04_23-08-42):
+    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/mario/logs_2017-05-02_20-15-39"
+    game = "Mario: advanced level"
 
     with open(os.path.join(dir_name, "settings.json"), "r") as f:
         metadata = json.load(f)
@@ -198,7 +203,7 @@ def run_plot_creator():
     scores = data[:, 2]
 
     plt.figure()
-    plt.plot(episodes, scores, label="avg")
+    plt.plot(episodes, scores, label="avg fitness in generation")
     i = np.argmax(scores)
     plt.scatter(i, scores[i])
     plt.text(i, scores[i], "{}".format(round(max(scores), 2)))
