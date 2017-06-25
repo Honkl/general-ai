@@ -23,10 +23,11 @@ To start one of the already implemented games, look into a `Controller/controlle
 (using default parameters):
 ```python
 game = "2048"
-
 run_eva(game)
-run_greedy(game)
 run_es(game)
+run_de(game)
+run_dqn(game)
+run_ddpg(game)
 ```
 To customize own parameters, simply head into respective function, for example `run_eva(game)`:
 
@@ -42,17 +43,18 @@ eva_parameters = EvolutionaryAlgorithmParameters(
         elite=2,
         selection=("tournament", 3))
 
-mlp = MLP(hidden_layers=[256, 256], activation="relu")
-evolution = EvolutionaryAlgorithm(game, eva_parameters, mlp, logs_every=100, max_workers=8)
+mlp = MLP(hidden_layers=[200, 200], activation="relu")
+evolution = EvolutionaryAlgorithm(game, eva_parameters, mlp, logs_every=100, max_workers=4)
 evolution.run()
 ```
 
 # Customize own model, game and architecture
 The project provides a general interface for different AI architectures and games. First, let's take a look for customizing own architecture / model.
 ***
-Your class must extend `Model` class with the most important function `evaluate(self, input, current_phase)` which computes a 'forward' pass through your model with the specified input. You must also provide function `get_number_of_parameters(self, game)` so the architecture (e.q. evolution algorithm, evolution strategy..) will know the length of single individual to evolve. The `get_new_instance(self, weights, game_config)` method initializes a new instance of your model, using specified `weights` = parameters = single individual.
+Your class must extend `Model` class with the most important function `evaluate(self, input, current_phase)` which computes a 'forward' pass through your model with the specified input. You must also provide function `get_number_of_parameters(self, game)` so the architecture (e.q. evolution algorithm, evolution strategy..) knows the length of single individual to evolve. The `get_new_instance(self, weights, game_config)` method initializes a new instance of your model, using specified `weights` = parameters = single individual.
 ***
-Customizing of your own game TODO (communication).
+Every game can be written in its  own language or in general, it can be any executable subprocess. The communication between games and model rely on interface written in `Controller/games` on a side of 'models' (e.q. Python code) and in `Game-interfaces/<game>` on a side of the specified game. In general, the communication works as follows:
+
 The AI reads standard output of the game process and expects a string in [json](https://cs.wikipedia.org/wiki/JavaScript_Object_Notation) format which must contain a few things:
 * state: current state of the game, an array of floats
 * current_phase: current phase of the game (games can have multiple phases; we train for each phase a separate network in some of the models); int
@@ -62,9 +64,11 @@ The AI reads standard output of the game process and expects a string in [json](
  
 Then AI performs an evaluation and writes to game process computed result. The result is simple string with floats separated by whitespace. Described process repeats until game has come to an end.
 
-Game also must provide a configuration file (also written in json) which must contain following three variables: `game_phases` - and integer, says how many phases game has, `input_sizes` - array of integers, saying how big is output from the game (i.e. size of the state of the game) for each phase and `output_sizes` saying how many outputs should AI generate.
+In the case of game 2048, there is not need to run any specific subprocess because the code of 2048 is in Python (included in the project) and the communication is direct.
 
-On the 'python-side' of games, you should extend `Game` class. Take a look on some already implemented classes in [`./Controller/games/`](https://github.com/Honkl/general-ai/tree/master/Controller/games) directory.
+Game also must provide a configuration file (also json structure) which must contain following three variables: `game_phases` - and integer, says how many phases game has, `input_sizes` - array of integers, saying how big is output from the game (i.e. size of the state of the game) for each phase and `output_sizes` saying how many outputs should AI generate. All games that we use, has only one number of inputs (even Alhambra -- has multiple phases but all of them have same number of inputs).
+
+On the 'python-side' of games, you should extend `Game` class. Take a look on some already implemented classes in [`Controller/games/`](https://github.com/Honkl/general-ai/tree/master/Controller/games) directory.
 
 On the 'game-side', there's basically no restriction, if game satisfies the I/O communication interface.
 ***
@@ -82,26 +86,41 @@ Interfaces for every game used. Either here or in a separate repository.
 TODO
 
 # Requirements
-Everything runs on Windows (Linux has not been tested yet). For an AI itself, written in python, you will need:
-* python 3.5
-* numpy
-* deap
-* gym
-* tensorflow (0.12.1)
+* Python 3.5
+* TensorFlow (0.12.1)
+* Deap
+* Gym
+* CUDA
+* cuDNN
 
-Games are written in different languages, so your needs depends on the current game:
-* Alhambra + 2048 - C#
-* Torcs + Mario - Java
+If you want to run all games, you'll need
+* .NET Framework 4.5 (Alhambra)
+* Java 8 (TORCS, Mario)
+* Game 2048 is in Python (so no anorther language needed)
 
 # References
+### Libraries
+* [Echo-State Networks mini-lib](https://github.com/sylvchev/simple_esn/blob/master/simple_esn.py)
+* [TensorFlow-Reinforce](https://github.com/yukezhu/tensorflow-reinforce/tree/master/rl)
+* [DDPG](https://github.com/songrotek/DDPG)
+* [Json.NET](http://www.newtonsoft.com/json)
+* [Gson](http://www.newtonsoft.com/json)
+
+### Games
 - The Open Racing Car Simulator:
-    - Overview: http://torcs.sourceforge.net/index.php
-    - Manual: https://pdfs.semanticscholar.org/9b1d/e5d93854d9dc364a4bc6a462193ccc3ea895.pdf
+    - [Overview](http://torcs.sourceforge.net/index.php)
+    - [Manual](https://pdfs.semanticscholar.org/9b1d/e5d93854d9dc364a4bc6a462193ccc3ea895.pdf)
 - Alhambra:
     - [MFF UK Thesis Repository](https://is.cuni.cz/webapps/zzp/detail/152723/23205131/?q=%7B%22______searchform___search%22%3A%22alhambra%22%2C%22______searchform___butsearch%22%3A%22Vyhledat%22%2C%22PNzzpSearchListbasic%22%3A1%7D&lang=cs)
-- Echo-State Network mini-lib:
-    - https://github.com/sylvchev/simple_esn/blob/master/simple_esn.py
-- Some useful links:
-    - [Deep reinforcement learning](https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf)
-    - [Deep Learning in Neural Networks: An Overview](https://arxiv.org/pdf/1404.7828v4.pdf)
-    - [Covariance Matrix Adaptation Evolution Strategy](https://en.wikipedia.org/wiki/CMA-ES)
+- Mario
+    - [Original project](https://code.google.com/archive/p/marioai)
+    - [Slightly modified version](https://github.com/kefik/MarioAI) (and own fork [here](https://github.com/Honkl/MarioAI))
+- 2048
+    - [Game code](https://github.com/tjwei/2048-NN/blob/master/c2048.py)
+
+### Some useful papers
+- Continuous control with deep reinforcement learning [[pdf](https://arxiv.org/pdf/1509.02971.pdf)]
+- Neural networks and deep learning [[pdf](http://neuralnetworksanddeeplearning.com/)]
+- Adam: A method for stochastic optimization [[pdf](https://arxiv.org/pdf/1412.6980.pdf)]
+- [Deep Learning in Neural Networks: An Overview](https://arxiv.org/pdf/1404.7828v4.pdf)
+- The “echo state” approach to analysing and training recurrent neural networks – with an Erratum [[pdf](http://www.faculty.jacobs-university.de/hjaeger/pubs/EchoStatesTechRep.pdf)]
