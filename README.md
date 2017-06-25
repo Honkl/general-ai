@@ -82,8 +82,8 @@ Interfaces for every game used. Either here or in a separate repository.
     - TORCS: https://github.com/Honkl/general-ai/tree/master/Game-interfaces/TORCS
     - Mario: https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario
 
-# Performance and Results
-TODO
+# Notes
+Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with single GPU. Also, all TORCS experiments were done on Windows.
 
 # Requirements
 * Python 3.5
@@ -122,5 +122,4 @@ If you want to run all games, you'll need
 - Continuous control with deep reinforcement learning [[pdf](https://arxiv.org/pdf/1509.02971.pdf)]
 - Neural networks and deep learning [[pdf](http://neuralnetworksanddeeplearning.com/)]
 - Adam: A method for stochastic optimization [[pdf](https://arxiv.org/pdf/1412.6980.pdf)]
-- [Deep Learning in Neural Networks: An Overview](https://arxiv.org/pdf/1404.7828v4.pdf)
 - The “echo state” approach to analysing and training recurrent neural networks – with an Erratum [[pdf](http://www.faculty.jacobs-university.de/hjaeger/pubs/EchoStatesTechRep.pdf)]
