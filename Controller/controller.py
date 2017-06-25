@@ -1,4 +1,10 @@
-# Basic wrapper to start process with any game that has proper interface.
+"""
+    GENERAL ARTIFICIAL INTELLIGENCE FOR GAME PLAYING
+    JAN KLUJ, 2017.
+    For more information on models or documentation how to use them, please visit:
+    https://github.com/Honkl/general-ai
+"""
+
 from __future__ import division
 from __future__ import print_function
 
@@ -22,25 +28,31 @@ np.random.seed(MASTER_SEED)
 
 
 def run_eva(game):
+    """
+    EVOLUTIONARY ALGORITHM.
+    """
     eva_parameters = EvolutionaryAlgorithmParameters(
-        pop_size=25,
+        pop_size=10,
         cxpb=0.75,
         mut=("uniform", 0.1, 0.1),
-        ngen=1000,
-        game_batch_size=5,
+        ngen=5000,
+        game_batch_size=1,
         cxindpb=0.25,
         hof_size=0,
         elite=5,
         selection=("tournament", 3))
 
-    mlp = MLP(hidden_layers=[100, 100], activation="relu")
-    # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=mlp, logs_every=10,
-                                      max_workers=8)
+    # mlp = MLP(hidden_layers=[100, 100, 100, 100], activation="relu")
+    esn = EchoState(n_readout=200, n_components=1000, output_layers=[], activation="relu")
+    evolution = EvolutionaryAlgorithm(game=game, evolution_params=eva_parameters, model=esn, logs_every=10,
+                                      max_workers=3)
     evolution.run()
 
 
 def run_ddpg(game):
+    """
+    DEEP DETERMINISTIC POLICY GRADIENT (Reinforcement learning for games with continuous action spaces).
+    """
     ddpg_parameters = DDPGParameters(
         batch_size=100,
         replay_buffer_size=100000,
@@ -50,40 +62,52 @@ def run_ddpg(game):
 
     print("DDPG algorithm started for game {}".format(game))
     print("Basic parameters: {}".format(ddpg_parameters.to_string()))
+
+    # Parameters of networks are specified inside the DDPG Model. Using default parameters in most of the time.
     RL = DDPGReinforcement(game=game, parameters=ddpg_parameters, logs_every=25)
     RL.run()
 
 
 def run_es(game):
+    """
+    EVOLUTIONARY STRATEGY (CMA-ES)
+    """
     strategy_parameters = EvolutionStrategyParameters(
-        pop_size=25,
-        ngen=5000,
+        pop_size=10,
+        ngen=1000,
         game_batch_size=10,
         hof_size=0,
-        elite=5,
-        sigma=5.0)
+        elite=3,
+        sigma=1.0)
 
-    mlp = MLP(hidden_layers=[32, 32], activation="relu")
-    # esn = EchoState(n_readout=32, n_components=256, output_layers=[], activation="relu")
-    strategy = EvolutionStrategy(game, strategy_parameters, mlp, logs_every=10, max_workers=5)
+    # mlp = MLP(hidden_layers=[50, 50, 50], activation="relu")
+    esn = EchoState(n_readout=200, n_components=1000, output_layers=[], activation="relu")
+    strategy = EvolutionStrategy(game, strategy_parameters, esn, logs_every=5, max_workers=4)
     strategy.run()
 
 
 def run_de(game):
+    """
+    DIFFERENTIAL EVOLUTION
+    """
     diff_evolution_parameters = DifferentialEvolutionParameters(
-        pop_size=25,
+        pop_size=10,
         ngen=5000,
-        game_batch_size=50,
+        game_batch_size=10,
         hof_size=5,
         cr=0.25,
         f=1)
 
-    mlp = MLP(hidden_layers=[256, 256], activation="relu")
-    diff = DifferentialEvolution(game, diff_evolution_parameters, mlp, max_workers=5, logs_every=5)
+    mlp = MLP(hidden_layers=[200, 200], activation="relu")
+    # esn = EchoState(n_readout=200, n_components=1000, output_layers=[], activation="relu")
+    diff = DifferentialEvolution(game, diff_evolution_parameters, mlp, max_workers=3, logs_every=5)
     diff.run()
 
 
 def run_dqn(game):
+    """
+    DEEP REINFORCEMENT LEARNING (Q-network), epsilon greedy for exploration.
+    """
     parameters = DQNParameters(batch_size=100,
                                init_exp=0.9,
                                final_exp=0.1,
@@ -92,7 +116,7 @@ def run_dqn(game):
                                store_replay_every=2,
                                discount_factor=0.9,
                                target_update_frequency=50000,
-                               reg_param=1,
+                               reg_param=0.01,
                                test_size=100)
 
     optimizer_params = {}
@@ -109,10 +133,13 @@ def run_dqn(game):
 
 
 if __name__ == '__main__':
-    game = "2048"
+    # Select the game: 2048, mario, torcs, alhambra
+    game = "torcs"
 
-    # run_ddpg(game)
-    # run_es(game)
+    # Select learning method
     # run_eva(game)
+    run_es(game)
     # run_de(game)
-    run_dqn(game)
+
+    # run_dqn(game)
+    # run_ddpg(game)

@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#################################
+# This library is used and modified in "General Artificial Intelligence for Game Playing" by Jan Kluj, 2017.
+# See the original licence above.
+#################################
+
+
+
 # TODO: add n_readout = -1 for n_readout = n_components
 
 from __future__ import print_function

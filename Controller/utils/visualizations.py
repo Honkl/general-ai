@@ -155,6 +155,7 @@ def eval_alhambra_winrate(model, evals):
     print("Alhambra winrate: {} ({}/{})".format(wins / evals, wins, evals))
 
 
+# INFERENCE METHOD
 def run_model_evaluator():
     """
     Used for evaluating learned models, to benchmark them and get avg results.
@@ -168,23 +169,34 @@ def run_model_evaluator():
     np.random.seed(930615)
     game = "torcs"
     evals = 1
-    # file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/torcs/logs_2017-06-23_01-34-41/best/best_0.json"
+
+    # SELECT FILE (direct model for evolutionary or directory for reinforcement)
+    file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/torcs/logs_2017-06-23_01-34-41/best/best_0.json"
     logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DDPG/torcs/logs_2017-05-01_14-37-32"
 
-    # esn = EchoState.load_from_file(file_name, game)
+    # SELECT MODEL (trained, based on file selected)
+    esn = EchoState.load_from_file(file_name, game)
     # mlp = MLP.load_from_file(file_name, game)
     # random = Random(game)
-    ddpg = LearnedDDPG(logdir)
+    # ddpg = LearnedDDPG(logdir)
     # dqn = LearnedDQN(logdir)
 
+    # RUN MODEL TEST
     # eval_alhambra_winrate(mlp, evals)
     # run_random_model(game, evals)
     # run_2048_extended(esn, evals)
     # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=False)
-    compare_models(game, evals, ddpg)
     # run_torcs_vis_on(model=mlp, evals=evals)
 
+    # general model comparison (graph of score)
+    compare_models(game, evals, esn)
 
+    """
+    NOTE: Selected file source file, selected model (python object) and the game must be correct (must match). If you save model for
+    game 2048 using ESN, you can't load this model as DDPG for TORCS of course.
+    """
+
+# GRAPH CREATOR
 def run_plot_creator():
     """
     Used for creating some graphs, plots, etc...
@@ -192,8 +204,8 @@ def run_plot_creator():
     """
 
     # Set directory of model (example: C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+DE/mario/logs_2017-05-04_23-08-42):
-    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/mario/logs_2017-05-02_20-15-39"
-    game = "Mario: advanced level"
+    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/torcs/logs_2017-06-20_19-09-27"
+    game = "TORCS"
 
     with open(os.path.join(dir_name, "settings.json"), "r") as f:
         metadata = json.load(f)
@@ -208,17 +220,20 @@ def run_plot_creator():
     plt.scatter(i, scores[i])
     plt.text(i, scores[i], "{}".format(round(max(scores), 2)))
 
+    # Plot the graph, for different game, use different settings
     params = "EVA + ESN"
-
     plt.xlabel("Generation")
     plt.ylabel("Fitness")
     plt.xlim([0, len(episodes)])
-    plt.ylim([0, 1])
+    plt.ylim([0, 1000])
     plt.legend(loc="lower right")
     plt.title("GAME: {}\n{}".format(game, params, fontsize=10))
     plt.savefig("plot.pdf")
 
 
 if __name__ == '__main__':
-    run_model_evaluator()
-    # run_plot_creator()
+    # INFERENCE OF MODELS FUNCTION
+    # run_model_evaluator()
+
+    # RESULT GRAPH GENERATOR
+    run_plot_creator()

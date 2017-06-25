@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 class Environment(gym.Env):
     """
-    Environment for reinforcement learning algorithms. This single environment is used for all games.
+    Environment for reinforcement learning algorithms. This single environment is used for all games. The OpenAI GYM
+    interface is used basically only for syntax (to have proper functions names etc...)
     """
 
     def __init__(self, game_class, seed, observations_count, actions_in_phases, test=False):
