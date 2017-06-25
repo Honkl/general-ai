@@ -115,6 +115,7 @@ def run_2048_extended(model, evals):
     print("Game 2048 with extended logs started.")
     game_instance = games.game2048.Game2048(model, evals, np.random.randint(0, 2 ** 16))
     results = game_instance.run(advanced_results=True)
+    return results
 
 
 def run_random_model(game, evals):
@@ -156,7 +157,7 @@ def eval_alhambra_winrate(model, evals):
 
 
 # INFERENCE METHOD
-def run_model_evaluator():
+def run_model_evaluator(log_name):
     """
     Used for evaluating learned models, to benchmark them and get avg results.
     For example, to run 1000 games and plot results.
@@ -167,8 +168,10 @@ def run_model_evaluator():
     """
 
     np.random.seed(930615)
-    game = "torcs"
-    evals = 1
+
+    # Before using game 2048, check it's encoding
+    game = "2048"
+    evals = 1000
 
     # SELECT FILE (direct model for evolutionary or directory for reinforcement)
     file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/torcs/logs_2017-06-23_01-34-41/best/best_0.json"
@@ -184,17 +187,52 @@ def run_model_evaluator():
     # RUN MODEL TEST
     # eval_alhambra_winrate(mlp, evals)
     # run_random_model(game, evals)
-    # run_2048_extended(esn, evals)
-    # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=False)
+    run_2048_extended(esn, evals)
+    # eval_mario_winrate(model=esn, evals=evals, level="spikes", vis_on=False)
     # run_torcs_vis_on(model=mlp, evals=evals)
 
     # general model comparison (graph of score)
-    compare_models(game, evals, esn)
+    # compare_models(game, evals, esn)
 
     """
     NOTE: Selected file source file, selected model (python object) and the game must be correct (must match). If you save model for
     game 2048 using ESN, you can't load this model as DDPG for TORCS of course.
     """
+
+
+def run_avg_results():
+    items = ["logs_2017-06-23_14-16-00",
+             "logs_2017-06-23_14-16-59",
+             "logs_2017-06-23_14-17-58",
+             "logs_2017-06-23_14-18-48",
+             "logs_2017-06-23_14-19-39"]
+
+    results = []
+    game = "2048"
+    evals = 1000
+    for item in items:
+        prefix = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/best_models_repeats/2048/MLP+ES/"
+        postfix = "/best/best_0.json"
+        file_name = prefix + item + postfix
+
+        model = MLP.load_from_file(file_name, game)
+        result = run_2048_extended(model, evals)
+        results.append(result)
+
+    results = np.array(results)
+    file_name = "game2048_stats_{}.txt".format(utils.miscellaneous.get_pretty_time())
+    with open(file_name, "w") as f:
+        f.write("--GAME 2048 STATISTICS-- {} trainings of same model".format(len(items)))
+        f.write(os.linesep)
+        f.write("Model: {}".format(model.get_name()))
+        f.write(os.linesep)
+        f.write("Total games: {}".format(evals))
+        f.write(os.linesep)
+        f.write("MAX TEST: {}".format(np.max(results)))
+        f.write(os.linesep)
+        f.write("AVG TEST: {}".format(np.mean(results)))
+        f.write(os.linesep)
+        f.write("MIN TEST: {}".format(np.min(results)))
 
 # GRAPH CREATOR
 def run_plot_creator():
@@ -234,6 +272,7 @@ def run_plot_creator():
 if __name__ == '__main__':
     # INFERENCE OF MODELS FUNCTION
     # run_model_evaluator()
+    run_avg_results()
 
     # RESULT GRAPH GENERATOR
-    run_plot_creator()
+    # run_plot_creator()
