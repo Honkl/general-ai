@@ -1,0 +1,6 @@
+--GAME 2048 STATISTICS-- 5 trainings of same model
+Model: mlp
+Total games: 1000
+MAX TEST: 4530.272
+AVG TEST: 4400.2088
+MIN TEST: 4132.316
