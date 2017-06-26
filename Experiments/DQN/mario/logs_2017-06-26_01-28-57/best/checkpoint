@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/general-ai-cache/logs/mario/dqn/logs_2017-06-26_01-28-57\\best\\dqn.ckpt"
+all_model_checkpoint_paths: "D:/general-ai-cache/logs/mario/dqn/logs_2017-06-26_01-28-57\\best\\dqn.ckpt"
