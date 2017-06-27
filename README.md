@@ -18,7 +18,19 @@ In the project we are currently using following games, models and types of learn
     * Deep Q-networks (ε-greedy policy)
     * DDPG (Deep Deterministic Policy Gradient)
 
-# Example Usage
+# Project structure
+The project contains three main directories:
+- `Controller`: all the AI code
+- `Experiments`: evaluated experiments, logs and graphs, including trained models
+- `Game-interfaces`: interfaces on the side of games, configuration files
+
+# How to install
+1) Download this repository
+2) Games Alhambra and 2048 are already included
+3) Game Mario could be found in separate repository ([link](https://github.com/Honkl/MarioAI)) and must be placed in the same directory as this `general-ai` project (otherwise you need to modify `Controller/constants.py` file with paths)
+4) Game TORCS is more complicated, you need to install it from [official website](torcs.org) and look into the [manual](https://arxiv.org/pdf/1304.1672v2.pdf). Also, in `Game-interfaces/TORCS/install_directory.txt` file must be your installation directory of TORCS.
+
+# Example usage
 To start one of the already implemented games, look into a `Controller/controller.py` file. Then start learning
 (using default parameters):
 ```python
