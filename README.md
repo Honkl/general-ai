@@ -21,7 +21,7 @@ In the project we are currently using following games, models and types of learn
 # Project structure
 The project contains three main directories:
 - `Controller`: all the AI code
-- `Experiments`: evaluated experiments, logs and graphs, including trained models
+- `Experiments`: evaluated experiments, logs and graphs, including trained models (only small ones, to keep this repository in reasonable size)
 - `Game-interfaces`: interfaces on the side of games, configuration files
 
 # How to install
