@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/general-ai-cache/logs/2048/dqn/logs_2017-05-19_14-00-35\\best\\dqn.ckpt"
+all_model_checkpoint_paths: "D:/general-ai-cache/logs/2048/dqn/logs_2017-05-19_14-00-35\\best\\dqn.ckpt"
