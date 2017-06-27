@@ -95,7 +95,7 @@ Interfaces for every game used. Either here or in a separate repository.
     - Mario: https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario
 
 # Notes
-Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with single GPU. Also, all TORCS experiments were done on Windows.
+Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
 
 # Requirements
 * Python 3.5
@@ -126,7 +126,7 @@ If you want to run all games, you'll need
     - [MFF UK Thesis Repository](https://is.cuni.cz/webapps/zzp/detail/152723/23205131/?q=%7B%22______searchform___search%22%3A%22alhambra%22%2C%22______searchform___butsearch%22%3A%22Vyhledat%22%2C%22PNzzpSearchListbasic%22%3A1%7D&lang=cs)
 - Mario
     - [Original project](https://code.google.com/archive/p/marioai)
-    - [Slightly modified version](https://github.com/kefik/MarioAI) (and own fork [here](https://github.com/Honkl/MarioAI))
+    - [Modified version with nice interface](https://github.com/kefik/MarioAI) (and own fork [here](https://github.com/Honkl/MarioAI))
 - 2048
     - [Game code](https://github.com/tjwei/2048-NN/blob/master/c2048.py)
 
