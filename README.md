@@ -118,8 +118,11 @@ If you want to run all games, you'll need
 - 2048
     - [Game code](https://github.com/tjwei/2048-NN/blob/master/c2048.py)
 
-### Some useful papers
+### Useful papers
 - Continuous control with deep reinforcement learning [[pdf](https://arxiv.org/pdf/1509.02971.pdf)]
+- Playing Atari with deep reinforcement learning [[pdf](https://arxiv.org/pdf/1312.5602v1.pdf)]
 - Neural networks and deep learning [[pdf](http://neuralnetworksanddeeplearning.com/)]
 - Adam: A method for stochastic optimization [[pdf](https://arxiv.org/pdf/1412.6980.pdf)]
 - The “echo state” approach to analysing and training recurrent neural networks – with an Erratum [[pdf](http://www.faculty.jacobs-university.de/hjaeger/pubs/EchoStatesTechRep.pdf)]
+- The CMA evolution strategy: A tutorial [[pdf](https://arxiv.org/pdf/1604.00772v1.pdf)]
+- Evolution strategies as a scalable alternative to reinforcement learning [[pdf](https://arxiv.org/pdf/1703.03864v1.pdf)]
