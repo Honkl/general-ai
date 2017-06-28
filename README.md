@@ -95,7 +95,8 @@ Interfaces for every game used. Either here or in a separate repository.
     - Mario: https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario
 
 # Notes
-Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
+- Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
+- Default logging directory for new experiments is `Controller/logs`.
 
 # Requirements
 * Python 3.5
