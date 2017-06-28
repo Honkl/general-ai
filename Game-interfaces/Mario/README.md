@@ -1,2 +1,2 @@
 # Mario interface
-General interface for Mario can be found in Mario repository here https://github.com/Honkl/MarioAI/ (direct [link](https://github.com/Honkl/MarioAI/blob/master/MarioAI4J-Playground/src/mario/GeneralAgent.java) to general AI file).
+Mario is a well known arcade game released by Nintento in last millennium. For our purposes, we use reimplemted version by Julian Togelius and Sergey Karakovskiy ([link](https://code.google.com/archive/p/marioai/)), modified by [kefik](https://github.com/kefik/MarioAI). Our own fork is separate directory and contains general-ai interface ([link](https://github.com/Honkl/MarioAI/)).
