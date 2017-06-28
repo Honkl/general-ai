@@ -31,7 +31,7 @@ The project contains three main directories:
 4) Game TORCS is more complicated, you need to install it from [official website](torcs.org) and look into the [manual](https://arxiv.org/pdf/1304.1672v2.pdf). Also, in `Game-interfaces/TORCS/install_directory.txt` file must be your installation directory of TORCS.
 
 # Example usage
-To start one of the already implemented games, look into a `Controller/controller.py` file. Then start learning
+To start one of the already implemented models, look into a `Controller/controller.py` file. Then start learning
 (using default parameters):
 ```python
 game = "2048"
