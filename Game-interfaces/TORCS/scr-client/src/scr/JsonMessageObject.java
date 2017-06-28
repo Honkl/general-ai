@@ -1,3 +1,9 @@
+/**
+ * This is a part of 'General artificial intelligence for game playing' project.
+ * TORCS is open source car simulator, for more information visit
+ * http://torcs.sourceforge.net/
+ *
+ */
 package scr;
 
 import com.google.gson.*;
@@ -5,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * General artificial intelligence for game playing. This class provides an
+ * encapsulation for message object in json, that is always send as an ecoded
+ * state to AI.
  *
  * @author Jan Kluj
  */

@@ -1,7 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * This is a part of 'General artificial intelligence for game playing' project.
+ * TORCS is open source car simulator, for more information visit
+ * http://torcs.sourceforge.net/
+ * 
  */
 package scr;
 
@@ -12,7 +13,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 /**
- *
+ * General artificial interface for game playing project. This is the main file
+ * that contains interafce on the side of TORCS game.
  * @author Jan Kluj
  */
 public class GeneralAIDriver extends Controller {

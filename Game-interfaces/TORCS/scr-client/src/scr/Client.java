@@ -9,7 +9,8 @@ import scr.Controller.Stage;
 
 /**
  * @author Daniele Loiacono
- * Modified by Jan Kluj.
+ * Modified by Jan Kluj. This is an example client driver, that could be found
+ * in TORCS manual (available on ArXiv).
  * 
  */
 public class Client {
