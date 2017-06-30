@@ -27,8 +27,8 @@ The project contains three main directories:
 # How to install
 1) Download this repository
 2) Games Alhambra and 2048 are already included
-3) Game Mario could be found in separate repository ([link](https://github.com/Honkl/MarioAI)) and must be placed in the same directory as this `general-ai` project (otherwise you need to modify `Controller/constants.py` file with paths)
-4) Game TORCS is more complicated, you need to install it from [official website](torcs.org) and look into the [manual](https://arxiv.org/pdf/1304.1672v2.pdf). Also, in `Game-interfaces/TORCS/install_directory.txt` file must be your installation directory of TORCS.
+3) Game Mario can be found in separate repository ([link](https://github.com/Honkl/MarioAI)) and must be placed in the same directory as this `general-ai` project (otherwise you need to modify `Controller/constants.py` file with paths)
+4) Game TORCS is more complicated, you need to install it from [official website](http://torcs.sourceforge.net/) and look into the [manual](https://arxiv.org/pdf/1304.1672v2.pdf). Also, in `Game-interfaces/TORCS/install_directory.txt` file must be your installation directory of TORCS.
 
 # Example usage
 To start one of the already implemented models, look into a `Controller/controller.py` file. Then start learning
@@ -87,12 +87,10 @@ On the 'game-side', there's basically no restriction, if game satisfies the I/O 
 
 # Game interfaces
 Interfaces for every game used. Either here or in a separate repository.
-- C#
-    - Alhambra: https://github.com/Honkl/general-ai/tree/master/Game-interfaces/Alhambra
-    - 2048: https://github.com/Honkl/2048/tree/master/2048
-- Java
-    - TORCS: https://github.com/Honkl/general-ai/tree/master/Game-interfaces/TORCS
-    - Mario: https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario
+- Alhambra: [link](https://github.com/Honkl/general-ai/tree/master/Game-interfaces/Alhambra)
+- 2048: [link](https://github.com/Honkl/general-ai/blob/master/Game-interfaces/Game2048/game_2048.py)
+- TORCS: [link](https://github.com/Honkl/general-ai/tree/master/Game-interfaces/TORCS)
+- Mario: [link](https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario)
 
 # Notes
 - Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
@@ -101,6 +99,9 @@ Interfaces for every game used. Either here or in a separate repository.
 # Requirements
 * Python 3.5
 * TensorFlow (0.12.1)
+* Numpy
+* Scipy
+* Matplotlib
 * Deap
 * Gym
 * CUDA
