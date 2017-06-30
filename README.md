@@ -92,18 +92,15 @@ Interfaces for every game used. Either here or in a separate repository.
 - TORCS: [link](https://github.com/Honkl/general-ai/tree/master/Game-interfaces/TORCS)
 - Mario: [link](https://github.com/Honkl/MarioAI/tree/master/MarioAI4J-Playground/src/mario)
 
-# Notes
-- Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
-- Default logging directory for new experiments is `Controller/logs`.
-
 # Requirements
 * Python 3.5
-* TensorFlow (0.12.1)
 * Numpy
 * Scipy
 * Matplotlib
+* Sklearn
 * Deap
 * Gym
+* TensorFlow (0.12.1)
 * CUDA
 * cuDNN
 
@@ -111,6 +108,12 @@ If you want to run all games, you'll need
 * .NET Framework 4.5 (Alhambra)
 * Java 8 (TORCS, Mario)
 * Game 2048 is in Python (so no anorther language needed)
+
+# Notes
+- Most of the evolutionary experiments were done on Linux. All TensorFlow (reinforcement learning) experiments were done on Windows with GTX 1070. Also, all TORCS experiments were done on Windows.
+- Default logging directory for new experiments is `Controller/logs`.
+- Gym and Sklearn is used for 'interface' purposes (with small changes, it can be run without these libraries).
+- Learning should work without GPU (if you install proper tensorflow-cpu, without need for CUDA and cuDNN).
 
 # References
 ### Libraries
