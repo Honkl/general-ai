@@ -103,6 +103,7 @@ def eval_mario_winrate(model, evals, level, vis_on):
                                       use_visualization_tool=True)
     results = game_instance.run(advanced_results=True)
     print("Mario winrate (avg dist): {}".format(results))
+    return results
 
 
 def run_torcs_vis_on(model, evals):
@@ -156,8 +157,14 @@ def eval_alhambra_winrate(model, evals):
     print("Alhambra winrate: {} ({}/{})".format(wins / evals, wins, evals))
 
 
+def eval_alhambra_avg_score(model, evals):
+    game_instance = games.alhambra.Alhambra(model, evals, np.random.randint(0, 2 ** 16))
+    result = game_instance.run(advanced_results=True)
+    return result
+
+
 # INFERENCE METHOD
-def run_model_evaluator(log_name):
+def run_model_evaluator():
     """
     Used for evaluating learned models, to benchmark them and get avg results.
     For example, to run 1000 games and plot results.
@@ -170,29 +177,30 @@ def run_model_evaluator(log_name):
     np.random.seed(930615)
 
     # Before using game 2048, check it's encoding
-    game = "2048"
-    evals = 1000
+    game = "torcs"
+    evals = 1
 
     # SELECT FILE (direct model for evolutionary or directory for reinforcement)
-    file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+DE/torcs/logs_2017-06-23_01-34-41/best/best_0.json"
-    logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DDPG/torcs/logs_2017-05-01_14-37-32"
+    file_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+ES/torcs/logs_2017-06-25_00-35-00/best/best_0.json"
+    logdir = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/DQN/mario/logs_2017-06-26_01-28-57"
+    logdir = "D:/general-ai-cache/logs/torcs/ddpg/logs_2017-06-27_01-00-45"
 
     # SELECT MODEL (trained, based on file selected)
-    esn = EchoState.load_from_file(file_name, game)
+    # esn = EchoState.load_from_file(file_name, game)
     # mlp = MLP.load_from_file(file_name, game)
     # random = Random(game)
-    # ddpg = LearnedDDPG(logdir)
+    ddpg = LearnedDDPG(logdir)
     # dqn = LearnedDQN(logdir)
 
     # RUN MODEL TEST
     # eval_alhambra_winrate(mlp, evals)
     # run_random_model(game, evals)
-    run_2048_extended(esn, evals)
-    # eval_mario_winrate(model=esn, evals=evals, level="spikes", vis_on=False)
-    # run_torcs_vis_on(model=mlp, evals=evals)
+    # run_2048_extended(esn, evals)
+    # eval_mario_winrate(model=dqn, evals=evals, level="gombas", vis_on=False)
+    # run_torcs_vis_on(model=ddpg, evals=evals)
 
     # general model comparison (graph of score)
-    # compare_models(game, evals, esn)
+    compare_models(game, evals, ddpg)
 
     """
     NOTE: Selected file source file, selected model (python object) and the game must be correct (must match). If you save model for
@@ -201,38 +209,60 @@ def run_model_evaluator(log_name):
 
 
 def run_avg_results():
-    items = ["logs_2017-06-23_14-16-00",
-             "logs_2017-06-23_14-16-59",
-             "logs_2017-06-23_14-17-58",
-             "logs_2017-06-23_14-18-48",
-             "logs_2017-06-23_14-19-39"]
+    """
+    Useful for generating average results for more experiments (logs).
+    """
+
+    # List of logs to be measured (tested)
+    items = ["logs_2017-06-27_14-44-31",
+             "logs_2017-06-27_14-44-52",
+             "logs_2017-06-27_14-46-06",
+             "logs_2017-06-28_13-35-10",
+             "logs_2017-06-28_13-37-13"]
 
     results = []
-    game = "2048"
-    evals = 1000
+    game = "alhambra"
+    evals = 100
     for item in items:
-        prefix = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/best_models_repeats/2048/MLP+ES/"
+        prefix = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/best_models_repeats/alhambra/MLP+EA/"
         postfix = "/best/best_0.json"
         file_name = prefix + item + postfix
 
+        # SELECT PROPER MODEL
         model = MLP.load_from_file(file_name, game)
-        result = run_2048_extended(model, evals)
+        # model = EchoState.load_from_file(file_name, game)
+
+        # RUN MODEL
+        # 2048
+        # result = run_2048_extended(model, evals)
+
+        # MARIO
+        # result = eval_mario_winrate(model=model, evals=evals, level="gombas", vis_on=False)
+
+        # ALHAMBRA
+        # First element is result of our model (rest are original models from previous work)
+        result = eval_alhambra_avg_score(model, evals)[0]
+
+        # TORCS
+
+
         results.append(result)
 
     results = np.array(results)
-    file_name = "game2048_stats_{}.txt".format(utils.miscellaneous.get_pretty_time())
+    file_name = "{}_stats_{}.txt".format(game, utils.miscellaneous.get_pretty_time())
     with open(file_name, "w") as f:
-        f.write("--GAME 2048 STATISTICS-- {} trainings of same model".format(len(items)))
+        f.write("--GAME {} STATISTICS-- {} trainings of the same model".format(game.upper(), len(items)))
         f.write(os.linesep)
         f.write("Model: {}".format(model.get_name()))
         f.write(os.linesep)
-        f.write("Total games: {}".format(evals))
+        f.write("Total games: {} (for each model)".format(evals))
         f.write(os.linesep)
         f.write("MAX TEST: {}".format(np.max(results)))
         f.write(os.linesep)
         f.write("AVG TEST: {}".format(np.mean(results)))
         f.write(os.linesep)
         f.write("MIN TEST: {}".format(np.min(results)))
+
 
 # GRAPH CREATOR
 def run_plot_creator():
@@ -242,8 +272,8 @@ def run_plot_creator():
     """
 
     # Set directory of model (example: C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+DE/mario/logs_2017-05-04_23-08-42):
-    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/ESN+EA/torcs/logs_2017-06-20_19-09-27"
-    game = "TORCS"
+    dir_name = "C:/Users/Jan/Documents/GitHub/general-ai/Experiments/MLP+EA/alhambra/logs_2017-05-11_14-53-41"
+    game = "Alhambra"
 
     with open(os.path.join(dir_name, "settings.json"), "r") as f:
         metadata = json.load(f)
@@ -259,11 +289,11 @@ def run_plot_creator():
     plt.text(i, scores[i], "{}".format(round(max(scores), 2)))
 
     # Plot the graph, for different game, use different settings
-    params = "EVA + ESN"
+    params = "EVA + MLP"
     plt.xlabel("Generation")
     plt.ylabel("Fitness")
-    plt.xlim([0, len(episodes)])
-    plt.ylim([0, 1000])
+    plt.xlim([0, 450])
+    plt.ylim([0, 150])
     plt.legend(loc="lower right")
     plt.title("GAME: {}\n{}".format(game, params, fontsize=10))
     plt.savefig("plot.pdf")
