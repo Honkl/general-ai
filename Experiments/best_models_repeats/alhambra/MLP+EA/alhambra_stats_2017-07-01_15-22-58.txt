@@ -1,0 +1,6 @@
+--GAME ALHAMBRA STATISTICS-- 5 trainings of the same model
+Model: mlp
+Total games: 100 (for each model)
+MAX TEST: 133.65
+AVG TEST: 130.052
+MIN TEST: 128.4
