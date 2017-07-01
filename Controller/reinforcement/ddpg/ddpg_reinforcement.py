@@ -84,6 +84,7 @@ class DDPGReinforcement(AbstractReinforcement):
                         print("Episode limit time limit exceeded ({} sec).".format(EPISODE_TIME_LIMIT_SEC))
                         self.env.shut_down(internal_error=True)
                         time.sleep(3)
+                        print("Starting new game...")
 
             episode_time = utils.miscellaneous.get_elapsed_time(episode_start_time)
             line = "Episode {}, Score: {}, Steps: {}, Episode Time: {}".format(i_episode, score, step,

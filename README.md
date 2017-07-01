@@ -74,7 +74,7 @@ The AI reads standard output of the game process and expects a string in [json](
 * reward: current reward of the AI (used in reinforcement learning); float
 * done: determines whether the game has come to an end; int (1 / 0)
  
-Then AI performs an evaluation and writes to game process computed result. The result is simple string with floats separated by whitespace. Described process repeats until game has come to an end.
+Then AI performs an evaluation and writes to game process computed result. The result is simple string with floats separated by whitespace. Described process repeats until game come to an end.
 
 In the case of game 2048, there is not need to run any specific subprocess because the code of 2048 is in Python (included in the project) and the communication is direct.
 

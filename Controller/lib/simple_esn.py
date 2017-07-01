@@ -18,7 +18,7 @@
 
 #################################
 # This library is used and modified in "General Artificial Intelligence for Game Playing" by Jan Kluj, 2017.
-# See the original licence above.
+# See the original license above.
 #################################
 
 
