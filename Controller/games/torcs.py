@@ -12,6 +12,7 @@ class Torcs(AbstractGame):
 
     master_lock = Lock()
     port_locks = [Lock() for _ in range(MAX_NUMBER_OF_TORCS_PORTS)]
+    ddpg_wrong_ports = []
 
     def __init__(self, model, game_batch_size, seed, vis_on=False, test=False):
         """
@@ -61,6 +62,10 @@ class Torcs(AbstractGame):
         index = np.random.randint(Torcs.MAX_NUMBER_OF_TORCS_PORTS)
         self.my_port_lock = Torcs.port_locks[index]
         for i in range(len(Torcs.port_locks)):
+            port_number = 3001 + i # torcs ports are between 3001 and 3010
+            if port_number in self.ddpg_wrong_ports:
+                print("Using different port...")
+                continue
             if not Torcs.port_locks[i].locked():
                 self.my_port_lock = Torcs.port_locks[i]
                 index = i
@@ -121,6 +126,7 @@ class Torcs(AbstractGame):
         try:
             if internal_error:
                 print("Unreleased port: {}".format(self.current_port))
+                self.ddpg_wrong_ports.append(self.current_port)
             else:
                 self.my_port_lock.release()
         except:
