@@ -19,6 +19,8 @@ Game-interfaces/TORCS/DriverProject/
 !Experiments/ESN+DE/*/*/*/*.json
 !Experiments/ESN+ES/*/*/*/*.json
 !Experiments/MLP+ES/*/*/*/*.json
+!Experiments/best_models_repeats/2048/*/*/*/*.json
+!Experiments/best_models_repeats/mario/*/*/*/*.json
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
