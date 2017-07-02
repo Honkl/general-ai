@@ -22,12 +22,13 @@ class DDPGReinforcement(AbstractReinforcement):
     Represents a DDPG model.
     """
 
-    def __init__(self, game, parameters, logs_every=10):
+    def __init__(self, game, parameters, logs_every=10, checkpoint=None):
         """
         Initializes a new DDPG model using specified parameters.
         :param game: Game that will be played.
         :param parameters: Parameters of the model. (DDPGParameters)
         :param logs_every: At each n-th episode model will be saved.
+        :param checkpoint: Checkpoint to begin with.
         """
         self.game = game
         self.parameters = parameters
@@ -46,6 +47,18 @@ class DDPGReinforcement(AbstractReinforcement):
         # DDPG (deep deterministic gradient policy)
         self.agent = DDPGAgent(parameters.replay_buffer_size, parameters.discount_factor, self.batch_size,
                                self.state_size, self.actions_count_sum, self.logdir)
+
+
+        self.start_episode = 1
+        if checkpoint:
+            print("Train started with checkpoint: {}".format(checkpoint))
+            with open(checkpoint + "logbook.txt", "r") as f:
+                lines = len(f.readlines())
+                print(lines)
+                self.start_episode = lines
+
+            self.logdir = checkpoint
+            self.load_checkpoint(checkpoint + "/last")
 
     def log_metadata(self):
         """
@@ -69,7 +82,7 @@ class DDPGReinforcement(AbstractReinforcement):
         start = time.time()
         data = []
         tmp = time.time()
-        for i_episode in range(1, self.episodes + 1):
+        for i_episode in range(self.start_episode, self.episodes + 1):
 
             success = False
             # Avoiding game internal error (subprocess fail etc.)
