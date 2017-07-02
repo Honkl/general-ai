@@ -42,22 +42,25 @@ class DDPGReinforcement(AbstractReinforcement):
 
         self.actions_count = self.game_config["output_sizes"]
         self.actions_count_sum = sum(self.actions_count)
-        self.logdir = self.init_directories(dir_name="ddpg")
+        if checkpoint:
+            self.logdir = checkpoint
+        else:
+            self.logdir = self.init_directories(dir_name="ddpg")
 
         # DDPG (deep deterministic gradient policy)
         self.agent = DDPGAgent(parameters.replay_buffer_size, parameters.discount_factor, self.batch_size,
                                self.state_size, self.actions_count_sum, self.logdir)
 
-
         self.start_episode = 1
+        self.data = []
         if checkpoint:
             print("Train started with checkpoint: {}".format(checkpoint))
             with open(checkpoint + "logbook.txt", "r") as f:
-                lines = len(f.readlines())
-                print(lines)
-                self.start_episode = lines
+                for line in f.readlines():
+                    self.data.append(line)
+                self.start_episode = len(self.data)
 
-            self.logdir = checkpoint
+
             self.load_checkpoint(checkpoint + "/last")
 
     def log_metadata(self):
@@ -80,13 +83,13 @@ class DDPGReinforcement(AbstractReinforcement):
         self.log_metadata()
 
         start = time.time()
-        data = []
+        self.data = []
         tmp = time.time()
         for i_episode in range(self.start_episode, self.episodes + 1):
 
             success = False
             # Avoiding game internal error (subprocess fail etc.)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 while not success:
                     episode_start_time = time.time()
                     future = executor.submit(self.get_episode_results)
@@ -106,10 +109,10 @@ class DDPGReinforcement(AbstractReinforcement):
             if time.time() - tmp > 1:
                 print(line)
                 tmp = time.time()
-            data.append(line)
+            self.data.append(line)
 
             if i_episode % self.logs_every == 0:
-                self.test_and_save(log_data=data, start_time=start, i_episode=i_episode)
+                self.test_and_save(log_data=self.data, start_time=start, i_episode=i_episode)
 
             report_measures = ([tf.Summary.Value(tag='score', simple_value=score),
                                 tf.Summary.Value(tag='number_of_steps', simple_value=step)])
