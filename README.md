@@ -121,7 +121,7 @@ If you want to run all games, you'll need
 * [TensorFlow-Reinforce](https://github.com/yukezhu/tensorflow-reinforce/tree/master/rl)
 * [DDPG](https://github.com/songrotek/DDPG)
 * [Json.NET](http://www.newtonsoft.com/json)
-* [Gson](http://www.newtonsoft.com/json)
+* [Gson](https://github.com/google/gson)
 
 ### Games
 - The Open Racing Car Simulator:
