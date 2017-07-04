@@ -86,7 +86,7 @@ if __name__ == '__main__':
     end = time.time()
 
     print(counts)
-    file_name = "game2048_MC_depth_{}.txt".format(ITERS_PER_STEP)
+    file_name = "game2048_MC_depth_{}x{}.txt".format(GAMES_TO_PLAY, ITERS_PER_STEP)
     with open(file_name, "w") as f:
         f.write("--GAME 2048 MONTE CARLO STATISTICS--")
         f.write(os.linesep)
