@@ -18,11 +18,11 @@ GAMES_TO_PLAY = 1000
 
 
 def monte_carlo(game_index):
-    print("Starting game: {}".format(game_index))
     game = Game(seed=np.random.randint(low=0, high=2 ** 30))
     while not game.end:
         action = get_best_move(game)
         moved, _ = game.move(action)
+    print("Game: {}: Score: {}, Max: {}".format(game_index, game.score, game.max()))
     return game
 
 
@@ -63,6 +63,7 @@ def get_elapsed_time(start):
 
 
 if __name__ == '__main__':
+    print("Settings: Games: {}, Iterations: {}".format(GAMES_TO_PLAY, ITERS_PER_STEP))
     start = time.time()
     counts = {}
     results = []
@@ -81,7 +82,6 @@ if __name__ == '__main__':
             counts[m] += 1
         else:
             counts[m] = 1
-        print("Iteration: {}: Score: {}, Max: {}".format(i + 1, completed_game.score, completed_game.max()))
 
     end = time.time()
 
@@ -95,7 +95,8 @@ if __name__ == '__main__':
         f.write("Total Runtime: {}, Avg time per game: {}sec".format(get_elapsed_time(start),
                                                                      (end - start) / GAMES_TO_PLAY))
         f.write(os.linesep)
-        f.write("Total Games: {}, Average score: {}".format(GAMES_TO_PLAY, np.mean(scores)))
+        f.write("Total Games: {}, Iterations per move: {}, Average score: {}".format(GAMES_TO_PLAY, ITERS_PER_STEP,
+                                                                                     np.mean(scores)))
         f.write(os.linesep)
         f.write("Reached Tiles:")
         f.write(os.linesep)
