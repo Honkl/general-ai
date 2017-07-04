@@ -12,16 +12,19 @@ from multiprocessing import Pool
 
 np.random.seed(42)
 
-ITERS_PER_STEP = 10
-GAMES_TO_PLAY = 10
+THREADS = 8
+ITERS_PER_STEP = 100
+GAMES_TO_PLAY = 1000
 
 
-def monte_carlo():
+def monte_carlo(game_index):
+    print("Starting game: {}".format(game_index))
     game = Game(seed=np.random.randint(low=0, high=2 ** 30))
     while not game.end:
         action = get_best_move(game)
         moved, _ = game.move(action)
     return game
+
 
 def get_best_move(game):
     results = [0, 0, 0, 0]
@@ -63,17 +66,23 @@ if __name__ == '__main__':
     start = time.time()
     counts = {}
     results = []
+    scores = []
+
+    # Evaluate games
+    p = Pool(THREADS)
+    results = p.map(monte_carlo, range(GAMES_TO_PLAY))
+
+    # Just logging stuff and print results
     for i in range(GAMES_TO_PLAY):
-        game_start = time.time()
-        completed_game = monte_carlo()
-        results.append(completed_game.score)
+        completed_game = results[i]
+        scores.append(completed_game.score)
         m = completed_game.max()
         if m in counts:
             counts[m] += 1
         else:
             counts[m] = 1
-        print("Iteration: {}: Score: {}, Max: {}, Time: {}".format(i + 1, completed_game.score, completed_game.max(),
-                                                                   get_elapsed_time(game_start)))
+        print("Iteration: {}: Score: {}, Max: {}".format(i + 1, completed_game.score, completed_game.max()))
+
     end = time.time()
 
     print(counts)
@@ -83,9 +92,10 @@ if __name__ == '__main__':
         f.write(os.linesep)
         f.write("Model: Monte Carlo (MC) [only for 2048 out of curiosity purposes]")
         f.write(os.linesep)
-        f.write("Total Runtime: {}, Avg time per game: {}sec".format(get_elapsed_time(start), (end - start) / GAMES_TO_PLAY))
+        f.write("Total Runtime: {}, Avg time per game: {}sec".format(get_elapsed_time(start),
+                                                                     (end - start) / GAMES_TO_PLAY))
         f.write(os.linesep)
-        f.write("Total Games: {}, Average score: {}".format(GAMES_TO_PLAY, np.mean(results)))
+        f.write("Total Games: {}, Average score: {}".format(GAMES_TO_PLAY, np.mean(scores)))
         f.write(os.linesep)
         f.write("Reached Tiles:")
         f.write(os.linesep)
