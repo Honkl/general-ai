@@ -1,0 +1,2 @@
+- This experiment was unexpectedly interrupted, so learning started again from last save.
+- This is the reason, why there is more "logs". They should follow each other in the plot.

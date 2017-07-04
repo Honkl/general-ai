@@ -1,0 +1,6 @@
+--GAME TORCS STATISTICS-- 5 trainings of the same model
+Model: ddpg
+Total games: 1 (for each model) [TEST TRACK]
+MAX TEST: 2499.69
+AVG TEST: 1763.10
+MIN TEST: 439.78

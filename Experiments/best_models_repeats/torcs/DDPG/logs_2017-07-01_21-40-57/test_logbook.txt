@@ -1,0 +1,2 @@
+Current score: 2520.6, Best score: -inf, Total time: 0h 23m 19.13269281387329s
+Current score: 994.406, Best score: 2520.6, Total time: 0h 45m 23.855976819992065s

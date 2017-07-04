@@ -1,0 +1,6 @@
+--GAME MARIO STATISTICS-- 5 trainings of the same model
+Model: echo_state
+Total games: 100 (for each model)
+MAX TEST: 0.3403906226158142
+AVG TEST: 0.3162343740463257
+MIN TEST: 0.29402342438697815
