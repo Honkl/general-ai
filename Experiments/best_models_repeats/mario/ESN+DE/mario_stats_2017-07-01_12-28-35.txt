@@ -1,4 +1,5 @@
---GAME MARIO STATISTICS-- 5 trainings of same model
+--GAME MARIO STATISTICS-- 5 trainings of same model
+MARIO - BASIC LEVEL
 Model: echo_state
 Total games: 100 (for each model)
 MAX TEST: 0.9383203387260437

@@ -1,0 +1,1 @@
+{"model_params": {"echo_state_seed": 61223, "activation": "relu", "output_layers": [], "n_readouts": 200, "n_components": 1000}, "evolution_params": {"elite": 5, "hof_size": 0, "pop_size": 25, "game_batch_size": 5, "ngen": 750}}
