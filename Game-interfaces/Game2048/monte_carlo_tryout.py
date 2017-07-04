@@ -10,15 +10,14 @@ import os
 from game_2048 import Game
 from multiprocessing import Pool
 
-np.random.seed(42)
-
 THREADS = 8
 ITERS_PER_STEP = 100
 GAMES_TO_PLAY = 1000
 
+np.random.seed(42)
 
 def monte_carlo(game_index):
-    game = Game(seed=np.random.randint(low=0, high=2 ** 30))
+    game = Game(seed=game_index)
     while not game.end:
         action = get_best_move(game)
         moved, _ = game.move(action)
@@ -106,4 +105,12 @@ if __name__ == '__main__':
             f.write("{}: {} = {}%".format(str(key).rjust(width), str(counts[key]).rjust(width),
                                           str(100 * counts[key] / GAMES_TO_PLAY).rjust(width)))
             f.write(os.linesep)
+
+        f.write(os.linesep)
+        f.write("ALL GAME LOGS")
+        f.write(os.linesep)
+        for i in range(GAMES_TO_PLAY):
+            f.write("Game: {}: Score: {}, Max: {}".format(i, results[i].score, results[i].max()))
+            f.write(os.linesep)
+
     print("Total time: {}".format(get_elapsed_time(start)))

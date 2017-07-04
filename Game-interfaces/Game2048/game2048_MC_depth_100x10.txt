@@ -1,9 +1,0 @@
---GAME 2048 MONTE CARLO STATISTICS--
-Model: Monte Carlo (MC) [only for 2048 out of curiosity purposes]
-Total Runtime: 0h 9m 1.3150198459625244s, Avg time per game: 5.413138747215271sec
-Total Games: 100, Average score: 9853.92
-Reached Tiles:
-  256:    17 =  17.0%
-  512:    43 =  43.0%
- 1024:    32 =  32.0%
- 2048:     8 =   8.0%
