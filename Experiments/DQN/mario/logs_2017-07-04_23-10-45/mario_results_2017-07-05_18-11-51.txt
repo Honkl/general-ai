@@ -1,0 +1,3 @@
+Mario evaluation [100 tests]
+LEVEL_2_GOOMBAS
+WIN RATE (avg dist passed): 0.070703125
