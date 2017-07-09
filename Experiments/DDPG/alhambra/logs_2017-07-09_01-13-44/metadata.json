@@ -1,0 +1,1 @@
+{"critic_network": {"tau": 0.001, "reg_param": 0.01, "learning_rate": 0.001, "layers": [400, 300]}, "model_name": "reinforcement_learning_ddpg", "parameters": {"test_size": 25, "episodes": 10000, "discount_factor": 0.99, "batch_size": 100, "replay_buffer_size": 100000}, "actor_network": {"tau": 0.001, "learning_rate": 0.0001, "layers": [400, 300]}, "game": "alhambra"}

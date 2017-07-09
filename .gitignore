@@ -9,6 +9,7 @@ last_*.json
 
 Game-interfaces/TORCS/DriverProject/
 Experiments/DDPG/alhambra/logs_2017-07-08_01-04-39/*/*
+Experiments/DDPG/alhambra/logs_2017-07-09_01-13-44/*/*
 
 # Package Files #
 *.jar
