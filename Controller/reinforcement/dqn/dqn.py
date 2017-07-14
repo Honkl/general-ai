@@ -169,12 +169,7 @@ class DQN(AbstractReinforcement):
         Initializes directories used for logging.
         """
         self.test_logbook_data.append("Testing every {} episodes".format(self.test_every))
-
-        # TODO: temporary cache
-
-        # dir = constants.loc + "/logs/" + self.game + "/dqn"
-
-        dir = "D:/general-ai-cache" + "/logs/" + self.game + "/dqn"
+        dir = constants.loc + "/logs/" + self.game + "/dqn"
         t_string = utils.miscellaneous.get_pretty_time()
 
         self.logdir = dir + "/logs_" + t_string
