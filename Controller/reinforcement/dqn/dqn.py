@@ -16,7 +16,7 @@ from reinforcement.environment import Environment
 from utils.activations import get_activation_tf
 
 STD = 0.01
-MAX_EPISODES = 100000
+MAX_EPISODES = 50000
 MAX_STEPS = 50000
 
 
@@ -116,10 +116,10 @@ class DQN(AbstractReinforcement):
 
         return logits
 
+
+    """
+    # Some unused testing code... You can just simply ignore this.
     def q_network_conv(self, x, is_training=True):
-        """
-        Defines Q-Network. Tensorflow stuff, this is a CNN test (for specific games only).
-        """
 
         x = tf.reshape(x, shape=[-1, 4, 4, 16])
         net = tf_layers.conv2d(x, num_outputs=1000, kernel_size=2, stride=[1, 1], padding='SAME',
@@ -161,6 +161,8 @@ class DQN(AbstractReinforcement):
         if value == None or value == "None" or value == "null":
             return True
         return False
+
+    """
 
     def init_directories(self, dir_name=None):
         """
