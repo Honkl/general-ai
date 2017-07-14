@@ -1,2 +1,3 @@
 - `simple_esn` is a small Echo-State Network library made by Sylvain Chevallier.
 - Changes made to original code: Init moved to separate method from `_fit_transform(...)`.
+- To see original code, visit https://github.com/sylvchev/simple_esn/blob/master/simple_esn.py
