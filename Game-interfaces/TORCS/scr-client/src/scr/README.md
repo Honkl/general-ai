@@ -1,0 +1,1 @@
+This is modified basic simple driver interface, available in TORCS manual / tutorial. The most important code is in file `GeneralAIDriver.java` which was added to connect TORCS to general AI code.
