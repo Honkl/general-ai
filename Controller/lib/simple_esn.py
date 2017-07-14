@@ -18,7 +18,11 @@
 
 #################################
 # This library is used and modified in "General Artificial Intelligence for Game Playing" by Jan Kluj, 2017.
-# See the original license above.
+# GPU license is attached beside this file.
+
+# CHANGE LOG:
+# Initializing changed - Init moved to separate method from _fit_transform(...).
+#
 #################################
 
 
